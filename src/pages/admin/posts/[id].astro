@@ -1,0 +1,12 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import Editor from '../../../components/admin/Editor';
+import { getPost,listCategories } from '../../../db/queries/blog';
+import { env } from '../../../lib/env';
+import { z } from 'zod';
+const id=z.uuid().safeParse(Astro.params.id);
+const post=id.success?await getPost(id.data,true):null;
+if(!post)Astro.response.status=404;
+const categories=await listCategories();
+---
+<AdminLayout title="Edit article">{post?<><span class="eyebrow">{post.status}</span><h1>Edit article.</h1>{Astro.url.searchParams.has('saved')&&<p role="status" class="notice">Article saved.</p>}<Editor client:load post={post} categories={categories} uploadsEnabled={!!env('BLOB_READ_WRITE_TOKEN')}/></>:<h1>Article not found.</h1>}</AdminLayout>

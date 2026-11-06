@@ -38,6 +38,9 @@ importers:
       '@tailwindcss/vite':
         specifier: ^4.3.4
         version: 4.3.4(vite@8.3.6(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)(yaml@2.9.1))
+      '@tiptap/core':
+        specifier: ^3.32.3
+        version: 3.32.3(@tiptap/pm@3.32.3)
       '@tiptap/extension-image':
         specifier: ^3.32.3
         version: 3.32.3(@tiptap/core@3.32.3(@tiptap/pm@3.32.3))

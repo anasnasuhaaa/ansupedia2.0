@@ -1,4 +1,6 @@
 ---
+import { listPosts } from '../db/queries/blog';
+import PostRow from '../components/blog/PostRow.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ProjectCard from '../components/portfolio/ProjectCard.astro';
 import TechTag from '../components/portfolio/TechTag.astro';
@@ -7,12 +9,15 @@ import { projects } from '../data/projects';
 import { skills } from '../data/skills';
 import { experiences } from '../data/experiences';
 import { certifications } from '../data/certifications';
+let recent: Awaited<ReturnType<typeof listPosts>>['items'] = [];
+let blogError = false;
+try { recent = (await listPosts({limit:3})).items; } catch { console.error('Recent articles unavailable'); blogError=true; }
 ---
 <BaseLayout><div class="portfolio"><aside class="profile"><img class="avatar" src={profile.avatar} width="112" height="112" alt="Anas Nasuha"/><h1>{profile.name}</h1><div class="handle">@anasnasuhaaa</div><p class="headline">Computer Science Student<br/>IPB University</p><p>Building software.<br/>Exploring how it works.</p><div class="profile-links"><a href={profile.github}>GitHub ↗</a><a href={profile.linkedin}>LinkedIn ↗</a></div><div class="actions"><a class="button primary" href="#projects">Explore projects</a><a class="button secondary" href="#contact">Get in touch</a></div><div class="section-links"><a href="#experience">Experience</a><a href="#credentials">Credentials</a></div></aside><div>
 <section id="about" class="section"><span class="eyebrow">A little about me</span><h2 class="intro-heading">Curiosity, turned<br/>into working software.</h2><p class="intro-copy">{profile.introduction}</p><div class="skills-grid">{skills.map(group=><div class="skill-group"><h3>{group.name}</h3><div class="tags">{group.technologies.map(name=><TechTag name={name}/>)}</div></div>)}</div></section>
 <section id="projects" class="section"><div class="section-head"><h2>Selected projects</h2><span class="meta">01 — 06</span></div><p>A selection of things I've been building and exploring.</p><div class="project-grid">{[...projects].sort((a,b)=>a.order-b.order).map(project=><ProjectCard project={project}/>)}</div></section>
 <section id="experience" class="section"><div class="section-head"><h2>Experience</h2><span class="meta">Along the way</span></div>{experiences.length ? experiences.map(item=><article class="post-row"><span class="meta">{item.period}</span><h3>{item.role} · {item.organization}</h3><p>{item.description}</p></article>) : <div class="empty"><p>My work so far is best explored through the projects above. More of the journey will be documented here.</p></div>}</section>
 <section id="credentials" class="section"><div class="section-head"><h2>Certifications & achievements</h2></div>{certifications.length ? certifications.map(item=><article class="post-row"><span class="meta">{item.date} · {item.type}</span><h3>{item.title}</h3><p>{item.issuer} — {item.description}</p>{item.credentialUrl && <a href={item.credentialUrl}>View credential ↗</a>}</article>) : <div class="empty"><p>A space for milestones, as they happen.</p></div>}</section>
-<section id="blog" class="section"><div class="section-head"><h2>Notes from the process</h2><a href="/blog">All writing ↗</a></div><div class="empty"><p>Software, security, and lessons learned while building. Notes will appear here as they're published.</p></div></section>
+<section id="blog" class="section"><div class="section-head"><h2>Notes from the process</h2><a href="/blog">All writing ↗</a></div>{recent.length ? recent.map(post=><PostRow post={post}/>) : <div class="empty"><p>{blogError ? 'Writing is temporarily unavailable. Please try again later.' : 'Software, security, and lessons learned while building. Notes will appear here as they are published.'}</p></div>}</section>
 <section id="contact" class="section"><span class="eyebrow">Keep in touch</span><h2>Good conversations start<br/>with a simple hello.</h2><p>Have a project to discuss or something interesting to share? Find me on GitHub or connect on LinkedIn.</p><div class="actions"><a class="button primary" href={profile.linkedin}>Connect on LinkedIn ↗</a><a class="button secondary" href={profile.github}>Find me on GitHub ↗</a></div></section>
 </div></div><script type="application/ld+json" set:html={JSON.stringify({'@context':'https://schema.org','@type':'Person',name:profile.name,url:import.meta.env.PUBLIC_SITE_URL || 'http://localhost:4321',sameAs:[profile.github,profile.linkedin],affiliation:{'@type':'CollegeOrUniversity',name:'IPB University'}}).replace(/</g,'\\u003c')}/></BaseLayout>

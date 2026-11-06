@@ -1,0 +1,7 @@
+---
+import { readingTime } from '../../lib/blog/content';
+import type { posts } from '../../db/schema';
+interface Props { post: typeof posts.$inferSelect }
+const {post}=Astro.props;
+---
+<article class="post-row"><span class="meta">{post.publishedAt?.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})} · {readingTime(post.contentJson)} min read</span><h2><a href={`/blog/${post.slug}`}>{post.title}</a></h2><p>{post.excerpt}</p></article>
