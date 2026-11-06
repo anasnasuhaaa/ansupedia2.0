@@ -1,0 +1,11 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Button from '../../components/starwind/Button.astro';
+import { databaseConfigured } from '../../lib/env';
+const configured=databaseConfigured();
+---
+<BaseLayout title="Admin sign in — Ansupedia" noindex><div class="page narrow"><span class="eyebrow">Private workspace</span><h1>Welcome back.</h1><p>Sign in to manage your writing.</p>{!configured && <p class="notice">CMS setup is required. Configure PostgreSQL and authentication in .env, apply migrations, then bootstrap your administrator. See README for instructions.</p>}<form id="login"><div class="field"><label for="email">Email</label><input id="email" name="email" type="email" autocomplete="username" required/></div><div class="field"><label for="password">Password</label><input id="password" name="password" type="password" autocomplete="current-password" required/></div><Button type="submit" disabled={!configured}>Sign in</Button><p id="message" role="status" aria-live="polite"></p></form></div></BaseLayout>
+<script>
+const form=document.querySelector<HTMLFormElement>('#login')!;
+form.addEventListener('submit',async event=>{event.preventDefault();const button=form.querySelector('button')!;const message=document.querySelector('#message')!;button.disabled=true;message.textContent='Signing in…';try { const data=new FormData(form);const response=await fetch('/api/auth/sign-in/email',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:data.get('email'),password:data.get('password')})});if(response.ok)location.href='/admin';else message.textContent=response.status===429?'Too many attempts. Please wait a minute.':'Sign-in failed. Check your credentials and server configuration.';}catch{message.textContent='Unable to connect. Try again.';}finally{button.disabled=false;}});
+</script>
