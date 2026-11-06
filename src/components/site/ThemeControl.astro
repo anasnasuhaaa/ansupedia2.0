@@ -1,0 +1,46 @@
+---
+import Dropdown from '../starwind/dropdown';
+import { button } from '../starwind/button/variants';
+import Sun from '@tabler/icons/outline/sun.svg';
+import Moon from '@tabler/icons/outline/moon.svg';
+import Monitor from '@tabler/icons/outline/device-desktop.svg';
+import Check from '@tabler/icons/outline/check.svg';
+---
+
+<Dropdown.Root>
+  <Dropdown.Trigger
+    class={button({ variant: 'ghost', size: 'icon' })}
+    aria-label="Color theme"
+    title="Color theme"
+  >
+    <Sun class="size-4.5 dark:hidden" aria-hidden="true" />
+    <Moon class="hidden size-4.5 dark:block" aria-hidden="true" />
+  </Dropdown.Trigger>
+  <Dropdown.Content align="end" class="min-w-44">
+    <Dropdown.Label>Appearance</Dropdown.Label>
+    {[
+      ['light', 'Light', Sun],
+      ['dark', 'Dark', Moon],
+      ['system', 'System', Monitor],
+    ].map(([value, label, Icon]) => (
+      <Dropdown.Item data-sw-theme-control data-theme-value={value} class="theme-option">
+        <Icon class="size-4" aria-hidden="true" /> {label}
+        <Check class="theme-check ml-auto size-4" aria-hidden="true" />
+      </Dropdown.Item>
+    ))}
+  </Dropdown.Content>
+</Dropdown.Root>
+<script>
+  import { initThemeController } from '@starwind-ui/astro/theme';
+  const controller = initThemeController();
+  function syncTheme() {
+    document.querySelectorAll<HTMLElement>('[data-theme-value]').forEach((item) => {
+      const selected = item.dataset.themeValue === controller.getTheme();
+      item.toggleAttribute('data-theme-selected', selected);
+      if (selected) item.setAttribute('aria-current', 'true');
+      else item.removeAttribute('aria-current');
+    });
+  }
+  controller.subscribe('themeChange', syncTheme);
+  syncTheme();
+</script>

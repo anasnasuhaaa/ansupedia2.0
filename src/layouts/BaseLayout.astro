@@ -4,6 +4,7 @@ import '@fontsource-variable/manrope';
 import '@fontsource-variable/geist-mono';
 import '../styles/starwind.css';
 import '../styles/global.css';
+import SiteHeader from '../components/site/SiteHeader.astro';
 import { ThemeInitScript } from '@starwind-ui/astro/theme';
 interface Props {
   title?: string;
@@ -46,48 +47,23 @@ const canonical = new URL(Astro.url.pathname, site);
     <a class="skip-link" href="#main">
       Skip to content
     </a>
-    <header class="site-header">
-      <div class="header-inner">
-        <a class="brand" href="/">
-          ansu<span>pedia</span>
-          <span class="brand-dot">.</span>
-        </a>
-        <nav aria-label="Main navigation">
-          <a href="/#about">About</a>
-          <a href="/#projects">Projects</a>
-          <a href="/#experience">Experience</a>
-          <a href="/#credentials">Credentials</a>
-          <a href="/blog">Blog</a>
-          <a href="/#contact">Contact</a>
-        </nav>
-        <label class="theme-label">
-          <span class="sr-only">Color theme</span>
-          <select id="theme-select" aria-label="Color theme">
-            <option value="system">System</option>
-            <option value="light">Light</option>
-            <option value="dark">Dark</option>
-          </select>
-        </label>
-      </div>
-    </header>
+    <SiteHeader />
     <main id="main">
       <slot />
     </main>
     <footer class="site-footer">
-      <span>© {new Date().getFullYear()} Anas Nasuha</span>
-      <span>Built with care. Always learning.</span>
-      <a href="/rss.xml">RSS ↗</a>
+      <div class="container footer-inner">
+        <div>
+          <a href="/" class="footer-brand">
+            Ansupedia.
+          </a>
+          <span>© {new Date().getFullYear()} Anas Nasuha</span>
+        </div>
+        <span class="footer-note">Built with care. Always learning.</span>
+        <a href="/rss.xml" class="text-link">
+          RSS feed <span aria-hidden="true">↗</span>
+        </a>
+      </div>
     </footer>
-    <script>
-      import { initThemeController } from '@starwind-ui/astro/theme';
-      const controller = initThemeController();
-      const select = document.querySelector<HTMLSelectElement>('#theme-select');
-      if (select) {
-        select.value = controller.getTheme();
-        select.addEventListener('change', () => {
-          controller.setTheme(select.value as 'light' | 'dark' | 'system');
-        });
-      }
-    </script>
   </body>
 </html>

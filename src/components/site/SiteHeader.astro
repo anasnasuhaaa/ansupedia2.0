@@ -1,0 +1,108 @@
+---
+import NavigationMenu from '../starwind/navigation-menu';
+import Sheet from '../starwind/sheet';
+import ThemeControl from './ThemeControl.astro';
+import { button } from '../starwind/button/variants';
+import Menu from '@tabler/icons/outline/menu-2.svg';
+import Arrow from '@tabler/icons/outline/arrow-up-right.svg';
+const links = [
+  ['About', '/#about'],
+  ['Projects', '/#projects'],
+  ['Experience', '/#experience'],
+  ['Credentials', '/#credentials'],
+  ['Blog', '/blog'],
+  ['Contact', '/#contact'],
+];
+const isBlog = Astro.url.pathname.startsWith('/blog');
+---
+
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="brand" href="/" aria-label="Ansupedia home">
+      ansu<span>pedia</span>
+      <span class="brand-dot">.</span>
+    </a>
+    <NavigationMenu.Root aria-label="Main navigation" class="desktop-nav" size="sm">
+      <NavigationMenu.List>
+        {links.map(([label, href]) => (
+          <NavigationMenu.Item>
+            <NavigationMenu.Link
+              href={href}
+              class="nav-link"
+              active={href === '/blog' && isBlog}
+              aria-current={href === '/blog' && isBlog ? 'page' : undefined}
+              data-section-link={href.startsWith('/#') ? href.slice(2) : undefined}
+            >
+              {label}
+            </NavigationMenu.Link>
+          </NavigationMenu.Item>
+        ))}
+      </NavigationMenu.List>
+    </NavigationMenu.Root>
+    <div class="header-controls">
+      <ThemeControl />
+      <Sheet.Root class="mobile-menu">
+        <Sheet.Trigger
+          class={button({ variant: 'outline', size: 'icon' })}
+          aria-label="Open navigation"
+        >
+          <Menu class="size-5" aria-hidden="true" />
+        </Sheet.Trigger>
+        <Sheet.Content class="mobile-sheet">
+          <Sheet.Header>
+            <Sheet.Title>Explore Ansupedia</Sheet.Title>
+            <Sheet.Description>Software, security, and the things in between.</Sheet.Description>
+          </Sheet.Header>
+          <nav aria-label="Mobile navigation" class="mobile-nav">
+            {links.map(([label, href]) => (
+              <Sheet.Close asChild>
+                <a
+                  href={href}
+                  class="mobile-nav-link"
+                  aria-current={href === '/blog' && isBlog ? 'page' : undefined}
+                  data-section-link={href.startsWith('/#') ? href.slice(2) : undefined}
+                >
+                  {label}
+                  <Arrow class="size-4" aria-hidden="true" />
+                </a>
+              </Sheet.Close>
+            ))}
+          </nav>
+          <Sheet.Footer>
+            <span class="meta">Anas Nasuha · Always learning.</span>
+          </Sheet.Footer>
+        </Sheet.Content>
+      </Sheet.Root>
+    </div>
+  </div>
+</header>
+<script>
+  const links = document.querySelectorAll<HTMLAnchorElement>('[data-section-link]');
+  const sections = Array.from(document.querySelectorAll<HTMLElement>('main section[id]'));
+  if (location.pathname === '/' && sections.length) {
+    let scheduled = false;
+    const update = () => {
+      const active =
+        sections.filter((section) => section.getBoundingClientRect().top <= 150).at(-1)?.id ||
+        'about';
+      links.forEach((link) => {
+        const selected = link.dataset.sectionLink === active;
+        link.toggleAttribute('data-active', selected);
+        if (selected) link.setAttribute('aria-current', 'location');
+        else link.removeAttribute('aria-current');
+      });
+      scheduled = false;
+    };
+    window.addEventListener(
+      'scroll',
+      () => {
+        if (!scheduled) {
+          scheduled = true;
+          requestAnimationFrame(update);
+        }
+      },
+      { passive: true },
+    );
+    update();
+  }
+</script>
