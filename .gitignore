@@ -26,3 +26,6 @@ pnpm-debug.log*
 .env.*
 !.env.example
 .vercel/
+
+test-results/
+playwright-report/

@@ -1,7 +1,30 @@
 ---
 import BaseLayout from './BaseLayout.astro';
 import Button from '../components/starwind/Button.astro';
-const {title='Dashboard'}=Astro.props;
+const { title = 'Dashboard' } = Astro.props;
 ---
-<BaseLayout title={`${title} — Ansupedia Admin`} noindex><div class="page"><nav class="admin-nav" aria-label="Administration"><a href="/admin">Overview</a><a href="/admin/posts">Articles</a><a href="/admin/categories">Categories</a><Button id="logout" variant="secondary">Sign out</Button></nav><slot /></div></BaseLayout>
-<script>document.querySelector('#logout')?.addEventListener('click',async()=>{const result=await fetch('/api/auth/sign-out',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});if(result.ok)location.href='/admin/login';else alert('Sign out failed. Please try again.');});</script>
+
+<BaseLayout title={`${title} — Ansupedia Admin`} noindex>
+  <div class="page">
+    <nav class="admin-nav" aria-label="Administration">
+      <a href="/admin">Overview</a>
+      <a href="/admin/posts">Articles</a>
+      <a href="/admin/categories">Categories</a>
+      <Button id="logout" variant="secondary">
+        Sign out
+      </Button>
+    </nav>
+    <slot />
+  </div>
+</BaseLayout>
+<script>
+  document.querySelector('#logout')?.addEventListener('click', async () => {
+    const result = await fetch('/api/auth/sign-out', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: '{}',
+    });
+    if (result.ok) location.href = '/admin/login';
+    else alert('Sign out failed. Please try again.');
+  });
+</script>

@@ -3,6 +3,11 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
 import Editor from '../../../components/admin/Editor';
 import { listCategories } from '../../../db/queries/blog';
 import { env } from '../../../lib/env';
-const categories=await listCategories();
+const categories = await listCategories();
 ---
-<AdminLayout title="New article"><h1>A new thought.</h1><p>Write, refine, and share when you're ready.</p><Editor client:load categories={categories} uploadsEnabled={!!env('BLOB_READ_WRITE_TOKEN')}/></AdminLayout>
+
+<AdminLayout title="New article">
+  <h1>A new thought.</h1>
+  <p>Write, refine, and share when you're ready.</p>
+  <Editor client:load categories={categories} uploadsEnabled={!!env('BLOB_READ_WRITE_TOKEN')} />
+</AdminLayout>

@@ -1,0 +1,69 @@
+---
+import AlertDialog from '@starwind-ui/astro/alert-dialog';
+import Button from '../starwind/Button.astro';
+interface Props {
+  id: string;
+  title: string;
+  kind: 'posts' | 'categories';
+}
+const { id, title, kind } = Astro.props;
+---
+
+<AlertDialog.Root>
+  <AlertDialog.Trigger class="button secondary">
+    Delete{kind === 'categories' ? ' category' : ''}
+  </AlertDialog.Trigger>
+  <AlertDialog.Backdrop />
+  <AlertDialog.Viewport>
+    <AlertDialog.Popup class="confirm-dialog">
+      <AlertDialog.Title>Delete “{title}”?</AlertDialog.Title>
+      <AlertDialog.Description>
+        {kind === 'posts'
+          ? 'This permanently removes the article. This action cannot be undone.'
+          : 'Articles will be kept and unlinked from this category.'}
+      </AlertDialog.Description>
+      <p role="status" data-delete-feedback></p>
+      <div class="actions">
+        <AlertDialog.Close class="button secondary">Cancel</AlertDialog.Close>
+        <Button data-confirm-delete={id} data-kind={kind}>
+          Confirm deletion
+        </Button>
+      </div>
+    </AlertDialog.Popup>
+  </AlertDialog.Viewport>
+</AlertDialog.Root>
+<style>
+  .confirm-dialog {
+    background: var(--card);
+    color: var(--foreground);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 2rem;
+    margin: auto;
+    max-width: min(480px, calc(100vw - 32px));
+  }
+  .confirm-dialog::backdrop {
+    background: #0009;
+  }
+</style>
+<script>
+  document.querySelectorAll<HTMLButtonElement>('[data-confirm-delete]').forEach((button) =>
+    button.addEventListener('click', async () => {
+      button.disabled = true;
+      const feedback = button.closest('dialog')!.querySelector('[data-delete-feedback]')!;
+      feedback.textContent = 'Deleting…';
+      try {
+        const r = await fetch(`/api/admin/${button.dataset.kind}`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: button.dataset.confirmDelete }),
+        });
+        if (!r.ok) throw Error();
+        location.reload();
+      } catch {
+        feedback.textContent = 'Unable to delete. Please try again.';
+        button.disabled = false;
+      }
+    }),
+  );
+</script>

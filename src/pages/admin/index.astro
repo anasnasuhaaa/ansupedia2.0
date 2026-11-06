@@ -1,0 +1,50 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { listPosts, listCategories } from '../../db/queries/blog';
+const [all, published, drafts, categories] = await Promise.all([
+  listPosts({ admin: true, limit: 5 }),
+  listPosts({ admin: true, status: 'published', limit: 1 }),
+  listPosts({ admin: true, status: 'draft', limit: 1 }),
+  listCategories(),
+]);
+---
+
+<AdminLayout>
+  <div class="section-head">
+    <div>
+      <span class="eyebrow">Your workspace</span>
+      <h1>Overview.</h1>
+    </div>
+    <a class="button primary" href="/admin/posts/new">
+      New article
+    </a>
+  </div>
+  <div class="stats">
+    {[
+      ['Total articles', all.total],
+      ['Published', published.total],
+      ['Drafts', drafts.total],
+      ['Categories', categories.length],
+    ].map(([label, value]) => (
+      <div class="stat">
+        <span class="meta">{label}</span>
+        <strong>{value}</strong>
+      </div>
+    ))}
+  </div>
+  <section style="margin-top:3rem">
+    <h2>Recent articles</h2>
+    {all.items.length ? (
+      all.items.map((p) => (
+        <article class="post-row">
+          <span class="meta">{p.status}</span>
+          <h3>
+            <a href={`/admin/posts/${p.id}`}>{p.title}</a>
+          </h3>
+        </article>
+      ))
+    ) : (
+      <div class="empty">Your notebook is ready. Create your first article.</div>
+    )}
+  </section>
+</AdminLayout>

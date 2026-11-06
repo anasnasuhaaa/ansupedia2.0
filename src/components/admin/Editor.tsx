@@ -1,30 +1,385 @@
-import {useState} from 'react';
-import {useEditor,EditorContent} from '@tiptap/react';
-import type {JSONContent} from '@tiptap/core';
-import {extensions} from '../../lib/blog/extensions';
-type Post={id?:string;title:string;slug:string;excerpt:string;contentJson:JSONContent;coverImageUrl:string|null;coverImageAlt:string|null;status:'draft'|'published';isFeatured:boolean;seoTitle:string|null;seoDescription:string|null;categories:{id:string}[]};
-export default function Editor({post,categories,uploadsEnabled}:{post?:Post;categories:{id:string;name:string}[];uploadsEnabled:boolean}){
- const [message,setMessage]=useState('');const [busy,setBusy]=useState(false);const [preview,setPreview]=useState<string|null>(null);const [cover,setCover]=useState(post?.coverImageUrl||'');const [imageUrl,setImageUrl]=useState('');const [linkUrl,setLinkUrl]=useState('');
- const editor=useEditor({extensions:extensions(),content:post?.contentJson||{type:'doc',content:[{type:'paragraph'}]},immediatelyRender:false,editorProps:{attributes:{class:'prose',role:'textbox','aria-label':'Article content','aria-multiline':'true'}}});
- async function save(form:HTMLFormElement,status:'draft'|'published'){
-  if(!editor||!form.reportValidity())return;setBusy(true);setMessage('Saving…');const data=new FormData(form);
-  const body={id:post?.id,title:data.get('title'),slug:data.get('slug'),excerpt:data.get('excerpt'),coverImageUrl:cover,coverImageAlt:data.get('coverImageAlt'),seoTitle:data.get('seoTitle'),seoDescription:data.get('seoDescription'),isFeatured:data.get('isFeatured')==='on',categoryIds:data.getAll('categoryIds'),status,contentJson:editor.getJSON()};
-  try{const response=await fetch('/api/admin/posts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const result=await response.json();if(!response.ok)throw new Error(result.error);location.href=`/admin/posts/${result.id}?saved=1`;}catch(e){setMessage(e instanceof Error?e.message:'Unable to save.');}finally{setBusy(false);}
- }
- async function showPreview(){if(!editor)return;setBusy(true);try{const r=await fetch('/api/admin/preview',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contentJson:editor.getJSON()})});const data=await r.json();if(!r.ok)throw new Error(data.error);setPreview(data.html);}catch(e){setMessage(e instanceof Error?e.message:'Preview failed.');}finally{setBusy(false);}}
- async function upload(file:File|undefined){if(!file)return;setBusy(true);setMessage('Uploading…');try{const data=new FormData();data.set('file',file);const r=await fetch('/api/admin/upload',{method:'POST',body:data});const result=await r.json();if(!r.ok)throw new Error(result.error);setCover(result.url);setImageUrl(result.url);setMessage('Image uploaded. Use it as the cover or insert it into the article.');}catch(e){setMessage(e instanceof Error?e.message:'Upload failed.');}finally{setBusy(false);}}
- const tool=(label:string,action:()=>void,active=false)=><button type="button" key={label} onClick={action} aria-pressed={active}>{label}</button>;
- return <form onSubmit={e=>{e.preventDefault();save(e.currentTarget,'draft');}}>
- <div className="field"><label htmlFor="title">Title</label><input id="title" name="title" required maxLength={200} defaultValue={post?.title}/></div>
- <div className="field"><label htmlFor="slug">URL slug</label><input id="slug" name="slug" required pattern="[a-z0-9]+(-[a-z0-9]+)*" maxLength={160} defaultValue={post?.slug} placeholder="what-i-learned"/></div>
- <div className="field"><label htmlFor="excerpt">Excerpt</label><textarea id="excerpt" name="excerpt" maxLength={500} rows={3} defaultValue={post?.excerpt}/></div>
- <div className="two-col"><div className="field"><label htmlFor="cover">Cover image URL (HTTPS)</label><input id="cover" type="url" value={cover} onChange={e=>setCover(e.target.value)}/></div><div className="field"><label htmlFor="cover-alt">Cover alternative text</label><input id="cover-alt" name="coverImageAlt" required={!!cover} maxLength={300} defaultValue={post?.coverImageAlt||''}/></div></div>
- <div className="field"><label htmlFor="upload">Upload image</label><input id="upload" type="file" accept="image/png,image/jpeg,image/webp" disabled={!uploadsEnabled||busy} onChange={e=>upload(e.target.files?.[0])}/><small>{uploadsEnabled?'PNG, JPEG or WebP, up to 3 MB.':'Uploads are disabled. You can still use HTTPS image URLs.'}</small></div>
- <fieldset className="field"><legend>Categories</legend><div className="tags">{categories.map(c=><label className="tag" key={c.id}><input type="checkbox" name="categoryIds" value={c.id} defaultChecked={post?.categories.some(p=>p.id===c.id)}/> {c.name}</label>)}</div></fieldset>
- <p className="meta">Article content</p>{editor&&<div className="toolbar" role="group" aria-label="Text formatting">{tool('Paragraph',()=>editor.chain().focus().setParagraph().run())}{([2,3,4] as const).map(level=>tool(`H${level}`,()=>editor.chain().focus().toggleHeading({level}).run(),editor.isActive('heading',{level})))}{tool('Bold',()=>editor.chain().focus().toggleBold().run(),editor.isActive('bold'))}{tool('Italic',()=>editor.chain().focus().toggleItalic().run(),editor.isActive('italic'))}{tool('Strike',()=>editor.chain().focus().toggleStrike().run())}{tool('Code',()=>editor.chain().focus().toggleCode().run())}{tool('Code block',()=>editor.chain().focus().toggleCodeBlock().run())}{tool('Bullets',()=>editor.chain().focus().toggleBulletList().run())}{tool('Numbered list',()=>editor.chain().focus().toggleOrderedList().run())}{tool('Quote',()=>editor.chain().focus().toggleBlockquote().run())}{tool('Divider',()=>editor.chain().focus().setHorizontalRule().run())}{tool('Undo',()=>editor.chain().focus().undo().run())}{tool('Redo',()=>editor.chain().focus().redo().run())}</div>}<EditorContent editor={editor}/>
- <div className="two-col" style={{marginTop:'1rem'}}><div className="field"><label htmlFor="link">Link URL</label><input id="link" type="url" value={linkUrl} onChange={e=>setLinkUrl(e.target.value)} placeholder="https://…"/><div className="actions"><button type="button" className="button secondary" onClick={()=>{if(/^https?:\/\//.test(linkUrl)||/^mailto:/.test(linkUrl))editor?.chain().focus().extendMarkRange('link').setLink({href:linkUrl}).run();else setMessage('Enter a valid HTTP, HTTPS or mailto link.');}}>Apply link to selection</button><button type="button" className="button secondary" onClick={()=>editor?.chain().focus().unsetLink().run()}>Remove link</button></div></div><div className="field"><label htmlFor="inline-image">Inline image URL (HTTPS)</label><input id="inline-image" type="url" value={imageUrl} onChange={e=>setImageUrl(e.target.value)}/><label htmlFor="inline-alt">Image alternative text</label><input id="inline-alt"/><button type="button" className="button secondary" onClick={()=>{if(imageUrl.startsWith('https://'))editor?.chain().focus().setImage({src:imageUrl,alt:(document.querySelector('#inline-alt') as HTMLInputElement).value}).run();else setMessage('Images require an HTTPS URL.');}}>Insert image</button></div></div>
- <div className="two-col"><div className="field"><label htmlFor="seo-title">SEO title (optional)</label><input id="seo-title" name="seoTitle" maxLength={70} defaultValue={post?.seoTitle||''}/></div><div className="field"><label htmlFor="seo-description">SEO description (optional)</label><textarea id="seo-description" name="seoDescription" maxLength={170} defaultValue={post?.seoDescription||''}/></div></div>
- <label><input type="checkbox" name="isFeatured" defaultChecked={post?.isFeatured}/> Feature this article</label><p className="notice" role="status" aria-live="polite">{message||'Changes are saved when you choose Save draft or Publish.'}</p><div className="actions"><button className="button secondary" disabled={busy} type="submit">{post?.status==='published'?'Save as draft / unpublish':'Save draft'}</button><button className="button primary" type="button" disabled={busy} onClick={e=>save(e.currentTarget.form!,'published')}>Publish</button><button className="button secondary" type="button" disabled={busy} onClick={showPreview}>Preview</button></div>
- {preview!==null&&<section aria-label="Article preview" className="notice"><div className="section-head"><h2>Reader preview</h2><button className="button secondary" type="button" onClick={()=>setPreview(null)}>Close preview</button></div><article className="prose" dangerouslySetInnerHTML={{__html:preview}}/></section>}
- </form>;
+import { useState } from 'react';
+import { useEditor, EditorContent } from '@tiptap/react';
+import type { JSONContent } from '@tiptap/core';
+import { extensions } from '../../lib/blog/extensions';
+type Post = {
+  id?: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  contentJson: JSONContent;
+  coverImageUrl: string | null;
+  coverImageAlt: string | null;
+  status: 'draft' | 'published';
+  isFeatured: boolean;
+  seoTitle: string | null;
+  seoDescription: string | null;
+  categories: { id: string }[];
+};
+export default function Editor({
+  post,
+  categories,
+  uploadsEnabled,
+}: {
+  post?: Post;
+  categories: { id: string; name: string }[];
+  uploadsEnabled: boolean;
+}) {
+  const [previewMeta, setPreviewMeta] = useState({ title: '', excerpt: '', alt: '' });
+  const [message, setMessage] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [cover, setCover] = useState(post?.coverImageUrl || '');
+  const [imageUrl, setImageUrl] = useState('');
+  const [linkUrl, setLinkUrl] = useState('');
+  const editor = useEditor({
+    extensions: extensions(),
+    content: post?.contentJson || { type: 'doc', content: [{ type: 'paragraph' }] },
+    immediatelyRender: false,
+    shouldRerenderOnTransaction: true,
+    editorProps: {
+      attributes: {
+        class: 'prose',
+        role: 'textbox',
+        'aria-label': 'Article content',
+        'aria-multiline': 'true',
+      },
+    },
+  });
+  async function save(form: HTMLFormElement, status: 'draft' | 'published') {
+    if (!editor || !form.reportValidity()) return;
+    setBusy(true);
+    setMessage('Saving…');
+    const data = new FormData(form);
+    const body = {
+      id: post?.id,
+      title: data.get('title'),
+      slug: data.get('slug'),
+      excerpt: data.get('excerpt'),
+      coverImageUrl: cover,
+      coverImageAlt: data.get('coverImageAlt'),
+      seoTitle: data.get('seoTitle'),
+      seoDescription: data.get('seoDescription'),
+      isFeatured: data.get('isFeatured') === 'on',
+      categoryIds: data.getAll('categoryIds'),
+      status,
+      contentJson: editor.getJSON(),
+    };
+    try {
+      const response = await fetch('/api/admin/posts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error);
+      location.href = `/admin/posts/${result.id}?saved=1`;
+    } catch (e) {
+      setMessage(e instanceof Error ? e.message : 'Unable to save.');
+    } finally {
+      setBusy(false);
+    }
+  }
+  async function showPreview() {
+    if (!editor) return;
+    setBusy(true);
+    try {
+      const r = await fetch('/api/admin/preview', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contentJson: editor.getJSON() }),
+      });
+      const data = await r.json();
+      if (!r.ok) throw new Error(data.error);
+      setPreviewMeta({
+        title: (document.querySelector('#title') as HTMLInputElement).value,
+        excerpt: (document.querySelector('#excerpt') as HTMLTextAreaElement).value,
+        alt: (document.querySelector('#cover-alt') as HTMLInputElement).value,
+      });
+      setPreview(data.html);
+    } catch (e) {
+      setMessage(e instanceof Error ? e.message : 'Preview failed.');
+    } finally {
+      setBusy(false);
+    }
+  }
+  async function upload(file: File | undefined) {
+    if (!file) return;
+    setBusy(true);
+    setMessage('Uploading…');
+    try {
+      const data = new FormData();
+      data.set('file', file);
+      const r = await fetch('/api/admin/upload', { method: 'POST', body: data });
+      const result = await r.json();
+      if (!r.ok) throw new Error(result.error);
+      setCover(result.url);
+      setImageUrl(result.url);
+      setMessage('Image uploaded. Use it as the cover or insert it into the article.');
+    } catch (e) {
+      setMessage(e instanceof Error ? e.message : 'Upload failed.');
+    } finally {
+      setBusy(false);
+    }
+  }
+  const tool = (label: string, action: () => void, active = false) => (
+    <button type="button" key={label} onClick={action} aria-pressed={active}>
+      {label}
+    </button>
+  );
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        save(e.currentTarget, 'draft');
+      }}
+    >
+      <div className="field">
+        <label htmlFor="title">Title</label>
+        <input id="title" name="title" required maxLength={200} defaultValue={post?.title} />
+      </div>
+      <div className="field">
+        <label htmlFor="slug">URL slug</label>
+        <input
+          id="slug"
+          name="slug"
+          required
+          pattern="[a-z0-9]+(-[a-z0-9]+)*"
+          maxLength={160}
+          defaultValue={post?.slug}
+          placeholder="what-i-learned"
+        />
+      </div>
+      <div className="field">
+        <label htmlFor="excerpt">Excerpt</label>
+        <textarea
+          id="excerpt"
+          name="excerpt"
+          maxLength={500}
+          rows={3}
+          defaultValue={post?.excerpt}
+        />
+      </div>
+      <div className="two-col">
+        <div className="field">
+          <label htmlFor="cover">Cover image URL (HTTPS)</label>
+          <input id="cover" type="url" value={cover} onChange={(e) => setCover(e.target.value)} />
+        </div>
+        <div className="field">
+          <label htmlFor="cover-alt">Cover alternative text</label>
+          <input
+            id="cover-alt"
+            name="coverImageAlt"
+            required={!!cover}
+            maxLength={300}
+            defaultValue={post?.coverImageAlt || ''}
+          />
+        </div>
+      </div>
+      <div className="field">
+        <label htmlFor="upload">Upload image</label>
+        <input
+          id="upload"
+          type="file"
+          accept="image/png,image/jpeg,image/webp"
+          disabled={!uploadsEnabled || busy}
+          onChange={(e) => upload(e.target.files?.[0])}
+        />
+        <small>
+          {uploadsEnabled
+            ? 'PNG, JPEG or WebP, up to 3 MB.'
+            : 'Uploads are disabled. You can still use HTTPS image URLs.'}
+        </small>
+      </div>
+      <fieldset className="field">
+        <legend>Categories</legend>
+        <div className="tags">
+          {categories.map((c) => (
+            <label className="tag" key={c.id}>
+              <input
+                type="checkbox"
+                name="categoryIds"
+                value={c.id}
+                defaultChecked={post?.categories.some((p) => p.id === c.id)}
+              />{' '}
+              {c.name}
+            </label>
+          ))}
+        </div>
+      </fieldset>
+      <p className="meta">Article content</p>
+      {editor && (
+        <div className="toolbar" role="group" aria-label="Text formatting">
+          {tool('Paragraph', () => editor.chain().focus().setParagraph().run())}
+          {([2, 3, 4] as const).map((level) =>
+            tool(
+              `H${level}`,
+              () => editor.chain().focus().toggleHeading({ level }).run(),
+              editor.isActive('heading', { level }),
+            ),
+          )}
+          {tool('Bold', () => editor.chain().focus().toggleBold().run(), editor.isActive('bold'))}
+          {tool(
+            'Italic',
+            () => editor.chain().focus().toggleItalic().run(),
+            editor.isActive('italic'),
+          )}
+          {tool('Strike', () => editor.chain().focus().toggleStrike().run())}
+          {tool('Code', () => editor.chain().focus().toggleCode().run())}
+          {tool('Code block', () => editor.chain().focus().toggleCodeBlock().run())}
+          {tool('Bullets', () => editor.chain().focus().toggleBulletList().run())}
+          {tool('Numbered list', () => editor.chain().focus().toggleOrderedList().run())}
+          {tool('Quote', () => editor.chain().focus().toggleBlockquote().run())}
+          {tool('Divider', () => editor.chain().focus().setHorizontalRule().run())}
+          {tool('Undo', () => editor.chain().focus().undo().run())}
+          {tool('Redo', () => editor.chain().focus().redo().run())}
+        </div>
+      )}
+      <EditorContent editor={editor} />
+      <label className="field" style={{ marginTop: '1rem' }}>
+        Code block language
+        <select
+          defaultValue="plaintext"
+          onChange={(e) => editor?.chain().focus().setCodeBlock({ language: e.target.value }).run()}
+        >
+          {[
+            'plaintext',
+            'javascript',
+            'typescript',
+            'python',
+            'php',
+            'bash',
+            'json',
+            'sql',
+            'css',
+            'html',
+            'cpp',
+            'java',
+          ].map((language) => (
+            <option key={language} value={language}>
+              {language}
+            </option>
+          ))}
+        </select>
+      </label>
+      <div className="two-col" style={{ marginTop: '1rem' }}>
+        <div className="field">
+          <label htmlFor="link">Link URL</label>
+          <input
+            id="link"
+            type="url"
+            value={linkUrl}
+            onChange={(e) => setLinkUrl(e.target.value)}
+            placeholder="https://…"
+          />
+          <div className="actions">
+            <button
+              type="button"
+              className="button secondary"
+              onClick={() => {
+                if (/^https?:\/\//.test(linkUrl) || /^mailto:/.test(linkUrl))
+                  editor?.chain().focus().extendMarkRange('link').setLink({ href: linkUrl }).run();
+                else setMessage('Enter a valid HTTP, HTTPS or mailto link.');
+              }}
+            >
+              Apply link to selection
+            </button>
+            <button
+              type="button"
+              className="button secondary"
+              onClick={() => editor?.chain().focus().unsetLink().run()}
+            >
+              Remove link
+            </button>
+          </div>
+        </div>
+        <div className="field">
+          <label htmlFor="inline-image">Inline image URL (HTTPS)</label>
+          <input
+            id="inline-image"
+            type="url"
+            value={imageUrl}
+            onChange={(e) => setImageUrl(e.target.value)}
+          />
+          <label htmlFor="inline-alt">Image alternative text</label>
+          <input id="inline-alt" />
+          <button
+            type="button"
+            className="button secondary"
+            onClick={() => {
+              if (imageUrl.startsWith('https://'))
+                editor
+                  ?.chain()
+                  .focus()
+                  .setImage({
+                    src: imageUrl,
+                    alt: (document.querySelector('#inline-alt') as HTMLInputElement).value,
+                  })
+                  .run();
+              else setMessage('Images require an HTTPS URL.');
+            }}
+          >
+            Insert image
+          </button>
+        </div>
+      </div>
+      <div className="two-col">
+        <div className="field">
+          <label htmlFor="seo-title">SEO title (optional)</label>
+          <input
+            id="seo-title"
+            name="seoTitle"
+            maxLength={70}
+            defaultValue={post?.seoTitle || ''}
+          />
+        </div>
+        <div className="field">
+          <label htmlFor="seo-description">SEO description (optional)</label>
+          <textarea
+            id="seo-description"
+            name="seoDescription"
+            maxLength={170}
+            defaultValue={post?.seoDescription || ''}
+          />
+        </div>
+      </div>
+      <label>
+        <input type="checkbox" name="isFeatured" defaultChecked={post?.isFeatured} /> Feature this
+        article
+      </label>
+      <p className="notice" role="status" aria-live="polite">
+        {message || 'Changes are saved when you choose Save draft or Publish.'}
+      </p>
+      <div className="actions">
+        <button className="button secondary" disabled={busy} type="submit">
+          {post?.status === 'published' ? 'Save as draft / unpublish' : 'Save draft'}
+        </button>
+        <button
+          className="button primary"
+          type="button"
+          disabled={busy}
+          onClick={(e) => save(e.currentTarget.form!, 'published')}
+        >
+          Publish
+        </button>
+        <button className="button secondary" type="button" disabled={busy} onClick={showPreview}>
+          Preview
+        </button>
+      </div>
+      {preview !== null && (
+        <section aria-label="Article preview" className="notice">
+          <div className="section-head">
+            <h2>Reader preview</h2>
+            <button className="button secondary" type="button" onClick={() => setPreview(null)}>
+              Close preview
+            </button>
+          </div>
+          <h1>{previewMeta.title}</h1>
+          <p>{previewMeta.excerpt}</p>
+          {cover && <img className="cover" src={cover} alt={previewMeta.alt} />}
+          <article className="prose" dangerouslySetInnerHTML={{ __html: preview }} />
+        </section>
+      )}
+    </form>
+  );
 }
