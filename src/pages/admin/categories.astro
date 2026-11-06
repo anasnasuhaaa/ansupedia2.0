@@ -1,88 +1,89 @@
 ---
-import Input from '@starwind-ui/astro/input';
 import AdminLayout from '../../layouts/AdminLayout.astro';
 import ConfirmDelete from '../../components/admin/ConfirmDelete.astro';
-import Button from '../../components/starwind/Button.astro';
-import { listCategories } from '../../db/queries/blog';
-const categories = await listCategories();
+import CategoryDialog from '../../components/admin/CategoryDialog.astro';
+import Table from '../../components/starwind/table';
+import Badge from '../../components/starwind/badge/Badge.astro';
+import Input from '../../components/starwind/input/Input.astro';
+import Button from '../../components/starwind/button/Button.astro';
+import Search from '@tabler/icons/outline/search.svg';
+import { listCategoryStats } from '../../db/queries/blog';
+const all = await listCategoryStats();
+const q = (Astro.url.searchParams.get('q') || '').slice(0, 80);
+const categories = all.filter((c) => `${c.name} ${c.slug}`.toLowerCase().includes(q.toLowerCase()));
 ---
 
 <AdminLayout title="Categories">
-  <h1>Organize your ideas.</h1>
-  <p>Articles can belong to more than one category. Removing a category preserves its articles.</p>
-  <p id="feedback" role="status" aria-live="polite"></p>
-  <section class="section">
-    <h2>New category</h2>
-    <form class="category-form">
-      <div class="two-col">
-        <div class="field">
-          <label for="new-name">Name</label>
-          <Input.Root id="new-name" name="name" required maxlength="80" />
-        </div>
-        <div class="field">
-          <label for="new-slug">Slug</label>
-          <Input.Root
-            id="new-slug"
-            name="slug"
-            required
-            pattern="[a-z0-9]+(-[a-z0-9]+)*"
-            maxlength="160"
-          />
-        </div>
-      </div>
-      <Button type="submit">Create category</Button>
-    </form>
-  </section>
-  {categories.map((c) => (
-    <form class="category-form post-row" data-id={c.id}>
-      <div class="two-col">
-        <div class="field">
-          <label for={`name-${c.id}`}>Name</label>
-          <Input.Root id={`name-${c.id}`} name="name" value={c.name} required maxlength="80" />
-        </div>
-        <div class="field">
-          <label for={`slug-${c.id}`}>Slug</label>
-          <Input.Root
-            id={`slug-${c.id}`}
-            name="slug"
-            value={c.slug}
-            required
-            maxlength="160"
-            pattern="[a-z0-9]+(-[a-z0-9]+)*"
-          />
-        </div>
-      </div>
-      <div class="actions">
-        <Button type="submit" variant="secondary">
-          Save changes
-        </Button>
-        <ConfirmDelete id={c.id} title={c.name} kind="categories" />
-      </div>
-    </form>
-  ))}
+  <header class="section-head admin-page-heading">
+    <div>
+      <span class="eyebrow">A little organization</span>
+      <h1>Categories</h1>
+      <p>Connect your ideas. Articles can belong to more than one category.</p>
+    </div>
+    <CategoryDialog />
+  </header>
+  <form class="filters admin-filters" role="search">
+    <div class="search-field">
+      <Search class="size-4" aria-hidden="true" />
+      <label class="sr-only" for="category-search">
+        Search categories
+      </label>
+      <Input id="category-search" type="search" name="q" value={q} placeholder="Find a category…" />
+    </div>
+    <Button type="submit" variant="outline" size="sm">
+      Search
+    </Button>
+    {q && (
+      <Button href="/admin/categories" variant="ghost" size="sm">
+        Reset
+      </Button>
+    )}
+  </form>
+  {categories.length ? (
+    <div class="table-panel">
+      <Table.Root class="editorial-table category-table" aria-label="Categories">
+        <Table.Header>
+          <Table.Row>
+            <Table.Head>Name</Table.Head>
+            <Table.Head>Slug</Table.Head>
+            <Table.Head>Articles</Table.Head>
+            <Table.Head class="text-right">Actions</Table.Head>
+          </Table.Row>
+        </Table.Header>
+        <Table.Body>
+          {categories.map((c) => (
+            <Table.Row>
+              <Table.Cell class="table-title">{c.name}</Table.Cell>
+              <Table.Cell data-label="Slug">
+                <code class="meta">{c.slug}</code>
+              </Table.Cell>
+              <Table.Cell data-label="Articles">
+                <Badge variant="outline" class="category-badge">
+                  {c.articleCount} {c.articleCount === 1 ? 'article' : 'articles'}
+                </Badge>
+              </Table.Cell>
+              <Table.Cell class="table-actions">
+                <div class="actions">
+                  <CategoryDialog category={c} />
+                  <ConfirmDelete id={c.id} title={c.name} kind="categories" />
+                </div>
+              </Table.Cell>
+            </Table.Row>
+          ))}
+        </Table.Body>
+      </Table.Root>
+    </div>
+  ) : (
+    <div class="empty">
+      <h2>{q ? 'No matching categories.' : 'Give your ideas a home.'}</h2>
+      <p>
+        {q
+          ? 'Try another search.'
+          : 'Create your first category to help readers discover related writing.'}
+      </p>
+    </div>
+  )}
+  <p class="admin-help">
+    Deleting a category only removes its article associations. Your articles are always kept.
+  </p>
 </AdminLayout>
-<script>
-  const feedback = document.querySelector('#feedback')!;
-  async function mutate(body: unknown, method = 'POST') {
-    feedback.textContent = 'Saving…';
-    try {
-      const r = await fetch('/api/admin/categories', {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-      const result = await r.json();
-      if (!r.ok) throw Error(result.error);
-      location.reload();
-    } catch (e) {
-      feedback.textContent = e instanceof Error ? e.message : 'Request failed.';
-    }
-  }
-  document.querySelectorAll<HTMLFormElement>('.category-form').forEach((form) =>
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const data = new FormData(form);
-      void mutate({ id: form.dataset.id, name: data.get('name'), slug: data.get('slug') });
-    }),
-  );
-</script>

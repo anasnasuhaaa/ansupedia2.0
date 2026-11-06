@@ -1,6 +1,8 @@
 ---
-import AlertDialog from '@starwind-ui/astro/alert-dialog';
-import Button from '../starwind/Button.astro';
+import AlertDialog from '../starwind/alert-dialog';
+import Button from '../starwind/button/Button.astro';
+import { button } from '../starwind/button/variants';
+import Trash from '@tabler/icons/outline/trash.svg';
 interface Props {
   id: string;
   title: string;
@@ -10,58 +12,56 @@ const { id, title, kind } = Astro.props;
 ---
 
 <AlertDialog.Root>
-  <AlertDialog.Trigger class="button secondary">
-    Delete{kind === 'categories' ? ' category' : ''}
+  <AlertDialog.Trigger
+    class={button({ variant: 'ghost', size: 'icon-sm' })}
+    aria-label={`Delete ${kind === 'categories' ? 'category' : 'article'}: ${title}`}
+    title="Delete"
+  >
+    <Trash class="size-4" aria-hidden="true" />
   </AlertDialog.Trigger>
-  <AlertDialog.Backdrop />
-  <AlertDialog.Viewport>
-    <AlertDialog.Popup class="confirm-dialog">
+  <AlertDialog.Content class="cms-dialog">
+    <AlertDialog.Header>
+      <span class="empty-icon">
+        <Trash class="size-5" aria-hidden="true" />
+      </span>
       <AlertDialog.Title>Delete “{title}”?</AlertDialog.Title>
       <AlertDialog.Description>
         {kind === 'posts'
           ? 'This permanently removes the article. This action cannot be undone.'
           : 'Articles will be kept and unlinked from this category.'}
       </AlertDialog.Description>
-      <p role="status" data-delete-feedback></p>
-      <div class="actions">
-        <AlertDialog.Close class="button secondary">Cancel</AlertDialog.Close>
-        <Button data-confirm-delete={id} data-kind={kind}>
-          Confirm deletion
-        </Button>
-      </div>
-    </AlertDialog.Popup>
-  </AlertDialog.Viewport>
+    </AlertDialog.Header>
+    <p role="status" data-delete-feedback class="form-feedback"></p>
+    <AlertDialog.Footer>
+      <AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
+      <Button data-confirm-delete={id} data-kind={kind}>
+        Confirm deletion
+      </Button>
+    </AlertDialog.Footer>
+  </AlertDialog.Content>
 </AlertDialog.Root>
-<style>
-  .confirm-dialog {
-    background: var(--card);
-    color: var(--foreground);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 2rem;
-    margin: auto;
-    max-width: min(480px, calc(100vw - 32px));
-  }
-  .confirm-dialog::backdrop {
-    background: #0009;
-  }
-</style>
 <script>
+  import { toast } from '../starwind/toast';
   document.querySelectorAll<HTMLButtonElement>('[data-confirm-delete]').forEach((button) =>
     button.addEventListener('click', async () => {
       button.disabled = true;
       const feedback = button.closest('dialog')!.querySelector('[data-delete-feedback]')!;
       feedback.textContent = 'Deleting…';
       try {
-        const r = await fetch(`/api/admin/${button.dataset.kind}`, {
+        const response = await fetch(`/api/admin/${button.dataset.kind}`, {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ id: button.dataset.confirmDelete }),
         });
-        if (!r.ok) throw Error();
-        location.reload();
-      } catch {
-        feedback.textContent = 'Unable to delete. Please try again.';
+        if (!response.ok) throw Error((await response.json()).error);
+        const url = new URL(location.href);
+        url.searchParams.set('notice', 'deleted');
+        location.href = url.href;
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : 'Unable to delete. Please try again.';
+        feedback.textContent = message;
+        toast.error(message);
         button.disabled = false;
       }
     }),

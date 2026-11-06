@@ -1,0 +1,107 @@
+---
+import Dialog from '../starwind/dialog';
+import Input from '../starwind/input/Input.astro';
+import Field from '../starwind/field';
+import Button from '../starwind/button/Button.astro';
+import { button } from '../starwind/button/variants';
+import Plus from '@tabler/icons/outline/plus.svg';
+interface Props {
+  category?: { id: string; name: string; slug: string };
+}
+const { category } = Astro.props;
+const suffix = category?.id || 'new';
+---
+
+<Dialog.Root>
+  <Dialog.Trigger class={button({ variant: category ? 'outline' : 'primary', size: 'sm' })}>
+    {!category && <Plus class="size-4" aria-hidden="true" />}
+    {category ? 'Edit' : 'New category'}
+  </Dialog.Trigger>
+  <Dialog.Content class="cms-dialog">
+    <Dialog.Header>
+      <Dialog.Title>{category ? 'Edit category' : 'Create a category'}</Dialog.Title>
+      <Dialog.Description>Give related articles a place to belong.</Dialog.Description>
+    </Dialog.Header>
+    <form class="category-form" data-id={category?.id}>
+      <Field.Root class="field">
+        <Field.Label for={`name-${suffix}`}>Name</Field.Label>
+        <Input
+          id={`name-${suffix}`}
+          name="name"
+          value={category?.name}
+          required
+          maxlength="80"
+          placeholder="e.g. Software Engineering"
+        />
+      </Field.Root>
+      <Field.Root class="field">
+        <Field.Label for={`slug-${suffix}`}>Slug</Field.Label>
+        <Input
+          id={`slug-${suffix}`}
+          name="slug"
+          value={category?.slug}
+          required
+          pattern="[a-z0-9]+(-[a-z0-9]+)*"
+          maxlength="160"
+          placeholder="software-engineering"
+        />
+        <Field.Description>Lowercase letters, numbers, and single hyphens.</Field.Description>
+      </Field.Root>
+      <p class="form-feedback error" role="status" aria-live="polite"></p>
+      <Dialog.Footer>
+        <Dialog.Close class={button({ variant: 'outline', size: 'sm' })}>Cancel</Dialog.Close>
+        <Button type="submit" size="sm">
+          {category ? 'Save changes' : 'Create category'}
+        </Button>
+      </Dialog.Footer>
+    </form>
+  </Dialog.Content>
+</Dialog.Root>
+<script>
+  import { toast } from '../starwind/toast';
+  document.querySelectorAll<HTMLFormElement>('.category-form').forEach((form) => {
+    const name = form.elements.namedItem('name') as HTMLInputElement;
+    const slug = form.elements.namedItem('slug') as HTMLInputElement;
+    let customized = !!form.dataset.id;
+    slug.addEventListener('input', () => {
+      customized = !!slug.value;
+    });
+    name.addEventListener('input', () => {
+      if (!customized)
+        slug.value = name.value
+          .normalize('NFKD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-|-$/g, '')
+          .slice(0, 160)
+          .replace(/-$/, '');
+    });
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const submit = form.querySelector<HTMLButtonElement>('[type=submit]')!;
+      const feedback = form.querySelector('.form-feedback')!;
+      const data = new FormData(form);
+      submit.disabled = true;
+      feedback.textContent = 'Saving…';
+      try {
+        const response = await fetch('/api/admin/categories', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: form.dataset.id,
+            name: data.get('name'),
+            slug: data.get('slug'),
+          }),
+        });
+        const result = await response.json();
+        if (!response.ok) throw Error(result.error);
+        location.href = '/admin/categories?notice=saved';
+      } catch (error) {
+        feedback.textContent = error instanceof Error ? error.message : 'Unable to save.';
+        toast.error(feedback.textContent);
+        submit.disabled = false;
+      }
+    });
+  });
+</script>

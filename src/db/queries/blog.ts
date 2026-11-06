@@ -8,6 +8,20 @@ export const published = () =>
 export async function listCategories() {
   return databaseConfigured() ? getDb().select().from(categories).orderBy(categories.name) : [];
 }
+export async function listCategoryStats() {
+  if (!databaseConfigured()) return [];
+  return getDb()
+    .select({
+      id: categories.id,
+      name: categories.name,
+      slug: categories.slug,
+      articleCount: count(postCategories.postId),
+    })
+    .from(categories)
+    .leftJoin(postCategories, eq(categories.id, postCategories.categoryId))
+    .groupBy(categories.id)
+    .orderBy(categories.name);
+}
 // Hydrate category badges in one query per page, using the existing junction table.
 async function withCategories<T extends { id: string }>(items: T[]) {
   if (!items.length)

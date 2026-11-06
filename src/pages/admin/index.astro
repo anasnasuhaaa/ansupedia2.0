@@ -1,5 +1,10 @@
 ---
 import AdminLayout from '../../layouts/AdminLayout.astro';
+import Card from '../../components/starwind/card';
+import Button from '../../components/starwind/button/Button.astro';
+import ArticleTable from '../../components/admin/ArticleTable.astro';
+import Plus from '@tabler/icons/outline/plus.svg';
+import Notebook from '@tabler/icons/outline/notebook.svg';
 import { listPosts, listCategories } from '../../db/queries/blog';
 const [all, published, drafts, categories] = await Promise.all([
   listPosts({ admin: true, limit: 5 }),
@@ -10,41 +15,55 @@ const [all, published, drafts, categories] = await Promise.all([
 ---
 
 <AdminLayout>
-  <div class="section-head">
+  <header class="section-head admin-page-heading">
     <div>
-      <span class="eyebrow">Your workspace</span>
-      <h1>Overview.</h1>
+      <span class="eyebrow">Make something worth sharing</span>
+      <h1>Your writing, at a glance.</h1>
+      <p>A little clarity before the next idea.</p>
     </div>
-    <a class="button primary" href="/admin/posts/new">
+    <Button href="/admin/posts/new" size="sm">
+      <Plus aria-hidden="true" />
       New article
-    </a>
-  </div>
+    </Button>
+  </header>
   <div class="stats">
     {[
-      ['Total articles', all.total],
-      ['Published', published.total],
-      ['Drafts', drafts.total],
-      ['Categories', categories.length],
-    ].map(([label, value]) => (
-      <div class="stat">
-        <span class="meta">{label}</span>
-        <strong>{value}</strong>
-      </div>
+      ['Total articles', all.total, '/admin/posts'],
+      ['Published', published.total, '/admin/posts?status=published'],
+      ['Drafts', drafts.total, '/admin/posts?status=draft'],
+      ['Categories', categories.length, '/admin/categories'],
+    ].map(([label, value, href]) => (
+      <a href={String(href)} class="stat-link">
+        <Card.Root class="stat">
+          <Card.Content>
+            <span class="meta">{label}</span>
+            <strong>{value}</strong>
+            <span class="stat-caption">Manage {String(label).toLowerCase()} ↗</span>
+          </Card.Content>
+        </Card.Root>
+      </a>
     ))}
   </div>
-  <section style="margin-top:3rem">
-    <h2>Recent articles</h2>
+  <section class="admin-section">
+    <div class="section-head">
+      <h2>Recent articles</h2>
+      <Button href="/admin/posts" variant="ghost" size="sm">
+        View all ↗
+      </Button>
+    </div>
     {all.items.length ? (
-      all.items.map((p) => (
-        <article class="post-row">
-          <span class="meta">{p.status}</span>
-          <h3>
-            <a href={`/admin/posts/${p.id}`}>{p.title}</a>
-          </h3>
-        </article>
-      ))
+      <ArticleTable items={all.items} compact />
     ) : (
-      <div class="empty">Your notebook is ready. Create your first article.</div>
+      <div class="empty">
+        <span class="empty-icon">
+          <Notebook class="size-5" aria-hidden="true" />
+        </span>
+        <h3>Your notebook is ready.</h3>
+        <p>Start with a thought, a lesson, or something you built.</p>
+        <Button href="/admin/posts/new" variant="outline" size="sm">
+          Write your first article
+        </Button>
+      </div>
     )}
   </section>
 </AdminLayout>

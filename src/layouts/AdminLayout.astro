@@ -1,30 +1,133 @@
 ---
 import BaseLayout from './BaseLayout.astro';
-import Button from '../components/starwind/Button.astro';
-const { title = 'Dashboard' } = Astro.props;
+import Button from '../components/starwind/button/Button.astro';
+import Breadcrumb from '../components/starwind/breadcrumb';
+import Sheet from '../components/starwind/sheet';
+import { Toaster } from '../components/starwind/toast';
+import LayoutDashboard from '@tabler/icons/outline/layout-dashboard.svg';
+import FileText from '@tabler/icons/outline/file-text.svg';
+import Tags from '@tabler/icons/outline/tags.svg';
+import Arrow from '@tabler/icons/outline/arrow-up-right.svg';
+import Menu from '@tabler/icons/outline/menu-2.svg';
+import Logout from '@tabler/icons/outline/logout.svg';
+import { button } from '../components/starwind/button/variants';
+interface Props {
+  title?: string;
+}
+const { title = 'Overview' } = Astro.props;
+const path = Astro.url.pathname.replace(/\/$/, '');
+const navigation = [
+  { href: '/admin', label: 'Overview', icon: LayoutDashboard },
+  { href: '/admin/posts', label: 'Articles', icon: FileText },
+  { href: '/admin/categories', label: 'Categories', icon: Tags },
+];
+const active = (href: string) => (href === '/admin' ? path === href : path.startsWith(href));
 ---
 
-<BaseLayout title={`${title} — Ansupedia Admin`} noindex>
-  <div class="page">
-    <nav class="admin-nav" aria-label="Administration">
-      <a href="/admin">Overview</a>
-      <a href="/admin/posts">Articles</a>
-      <a href="/admin/categories">Categories</a>
-      <Button id="logout" variant="secondary">
+<BaseLayout title={`${title} — Ansupedia Admin`} noindex workspace>
+  <div class="container admin-frame">
+    <aside class="admin-sidebar">
+      <span class="eyebrow">Workspace</span>
+      <nav aria-label="Administration" class="admin-nav">
+        {navigation.map(({ href, label, icon: Icon }) => (
+          <a href={href} aria-current={active(href) ? 'page' : undefined}>
+            <Icon class="size-4" aria-hidden="true" />
+            {label}
+          </a>
+        ))}
+        <div class="admin-nav-divider"></div>
+        <a href="/">
+          <Arrow class="size-4" aria-hidden="true" />
+          View website
+        </a>
+      </nav>
+      <Button data-logout variant="ghost" size="sm" class="logout-button">
+        <Logout aria-hidden="true" />
         Sign out
       </Button>
-    </nav>
-    <slot />
+      <span class="admin-sidebar-note meta">
+        A space to think,
+        <br />
+        write, and share.
+      </span>
+    </aside>
+    <div class="admin-main">
+      <div class="admin-topline">
+        <Breadcrumb.Root>
+          <Breadcrumb.List>
+            <Breadcrumb.Item>
+              <Breadcrumb.Link href="/admin">Workspace</Breadcrumb.Link>
+            </Breadcrumb.Item>
+            <Breadcrumb.Separator />
+            {path.startsWith('/admin/posts/') && (
+              <>
+                <Breadcrumb.Item>
+                  <Breadcrumb.Link href="/admin/posts">Articles</Breadcrumb.Link>
+                </Breadcrumb.Item>
+                <Breadcrumb.Separator />
+              </>
+            )}
+            <Breadcrumb.Item>
+              <Breadcrumb.Page>{title}</Breadcrumb.Page>
+            </Breadcrumb.Item>
+          </Breadcrumb.List>
+        </Breadcrumb.Root>
+        <Sheet.Root class="admin-mobile-menu">
+          <Sheet.Trigger class={button({ variant: 'outline', size: 'sm' })}>
+            <Menu class="size-4" aria-hidden="true" />
+            Workspace menu
+          </Sheet.Trigger>
+          <Sheet.Content class="mobile-sheet">
+            <Sheet.Header>
+              <Sheet.Title>Your workspace</Sheet.Title>
+              <Sheet.Description>Make room for your next idea.</Sheet.Description>
+            </Sheet.Header>
+            <nav aria-label="Mobile administration" class="admin-nav">
+              {navigation.map(({ href, label, icon: Icon }) => (
+                <Sheet.Close asChild>
+                  <a href={href} aria-current={active(href) ? 'page' : undefined}>
+                    <Icon class="size-4" aria-hidden="true" />
+                    {label}
+                  </a>
+                </Sheet.Close>
+              ))}
+              <a href="/">View website ↗</a>
+            </nav>
+            <Button data-logout variant="outline">
+              <Logout aria-hidden="true" />
+              Sign out
+            </Button>
+          </Sheet.Content>
+        </Sheet.Root>
+      </div>
+      <slot />
+    </div>
   </div>
+  <Toaster />
 </BaseLayout>
 <script>
-  document.querySelector('#logout')?.addEventListener('click', async () => {
-    const result = await fetch('/api/auth/sign-out', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: '{}',
-    });
-    if (result.ok) location.href = '/admin/login';
-    else alert('Sign out failed. Please try again.');
-  });
+  import { toast } from '../components/starwind/toast';
+  const messages: Record<string, string> = {
+    saved: 'Category saved.',
+    deleted: 'Deleted successfully.',
+  };
+  const notice = new URL(location.href).searchParams.get('notice');
+  if (notice && messages[notice]) toast.success(messages[notice]);
+  document.querySelectorAll<HTMLButtonElement>('[data-logout]').forEach((button) =>
+    button.addEventListener('click', async () => {
+      button.disabled = true;
+      try {
+        const response = await fetch('/api/auth/sign-out', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: '{}',
+        });
+        if (!response.ok) throw Error('Sign out failed. Please try again.');
+        location.href = '/admin/login';
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : 'Unable to connect.');
+        button.disabled = false;
+      }
+    }),
+  );
 </script>

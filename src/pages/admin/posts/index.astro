@@ -1,10 +1,14 @@
 ---
-import Input from '@starwind-ui/astro/input';
+import Input from '../../../components/starwind/input/Input.astro';
+import Select from '../../../components/starwind/native-select';
+import Button from '../../../components/starwind/button/Button.astro';
+import Search from '@tabler/icons/outline/search.svg';
+import Plus from '@tabler/icons/outline/plus.svg';
 import AdminLayout from '../../../layouts/AdminLayout.astro';
-import ConfirmDelete from '../../../components/admin/ConfirmDelete.astro';
-import Button from '../../../components/starwind/Button.astro';
+import ArticleTable from '../../../components/admin/ArticleTable.astro';
+import PagePagination from '../../../components/site/PagePagination.astro';
 import { listPosts } from '../../../db/queries/blog';
-const q = Astro.url.searchParams.get('q') || '';
+const q = (Astro.url.searchParams.get('q') || '').slice(0, 200);
 const status = Astro.url.searchParams.get('status');
 const page = Math.max(1, Number(Astro.url.searchParams.get('page')) || 1);
 const result = await listPosts({
@@ -18,21 +22,29 @@ const pageUrl = (p: number) =>
 ---
 
 <AdminLayout title="Articles">
-  <div class="section-head">
-    <h1>Your writing.</h1>
-    <a class="button primary" href="/admin/posts/new">
+  <header class="section-head admin-page-heading">
+    <div>
+      <span class="eyebrow">Your notebook</span>
+      <h1>Articles</h1>
+      <p>Ideas in progress and words out in the world.</p>
+    </div>
+    <Button href="/admin/posts/new" size="sm">
+      <Plus aria-hidden="true" />
       New article
-    </a>
-  </div>
-  <form class="filters">
-    <label class="sr-only" for="q">
-      Search articles
-    </label>
-    <Input.Root id="q" name="q" type="search" value={q} placeholder="Search by title" />
+    </Button>
+  </header>
+  <form class="filters admin-filters" role="search">
+    <div class="search-field">
+      <Search class="size-4" aria-hidden="true" />
+      <label class="sr-only" for="q">
+        Search articles
+      </label>
+      <Input id="q" name="q" type="search" value={q} placeholder="Search by title…" />
+    </div>
     <label class="sr-only" for="status">
       Status
     </label>
-    <select name="status" id="status">
+    <Select.Root name="status" id="status">
       <option value="">All statuses</option>
       <option value="draft" selected={status === 'draft'}>
         Draft
@@ -40,44 +52,35 @@ const pageUrl = (p: number) =>
       <option value="published" selected={status === 'published'}>
         Published
       </option>
-    </select>
-    <Button type="submit">Filter</Button>
+    </Select.Root>
+    <Button type="submit" size="sm">
+      Filter
+    </Button>
+    {(q || status) && (
+      <Button href="/admin/posts" variant="ghost" size="sm">
+        Reset
+      </Button>
+    )}
   </form>
-  <p id="feedback" role="status"></p>
+  <div class="writing-heading">
+    <span class="meta">
+      {result.total} {result.total === 1 ? 'article' : 'articles'}
+    </span>
+  </div>
   {result.items.length ? (
-    result.items.map((post) => (
-      <article class="post-row">
-        <span class="meta">
-          {post.status} · Updated {post.updatedAt.toLocaleDateString('en-US')}
-        </span>
-        <div class="section-head">
-          <h2>
-            <a href={`/admin/posts/${post.id}`}>{post.title}</a>
-          </h2>
-          <div class="actions">
-            <a class="button secondary" href={`/admin/posts/${post.id}`}>
-              Edit
-            </a>
-            {post.status === 'published' && (
-              <a class="button secondary" href={`/blog/${post.slug}`}>
-                View
-              </a>
-            )}
-            <ConfirmDelete id={post.id} title={post.title} kind="posts" />
-          </div>
-        </div>
-      </article>
-    ))
+    <ArticleTable items={result.items} />
   ) : (
-    <div class="empty">No articles found.</div>
+    <div class="empty">
+      <h2>No articles found.</h2>
+      <p>
+        {q || status
+          ? 'Try a different title or status filter.'
+          : 'Your next article starts with a simple idea.'}
+      </p>
+      <Button href={q || status ? '/admin/posts' : '/admin/posts/new'} variant="outline" size="sm">
+        {q || status ? 'Clear filters' : 'Create an article'}
+      </Button>
+    </div>
   )}
-  {result.pages > 1 && (
-    <nav class="pagination" aria-label="Pagination">
-      {page > 1 && <a href={pageUrl(page - 1)}>← Previous</a>}
-      <span>
-        {page} / {result.pages}
-      </span>
-      {page < result.pages && <a href={pageUrl(page + 1)}>Next →</a>}
-    </nav>
-  )}
+  <PagePagination page={result.page} pages={result.pages} pageUrl={pageUrl} />
 </AdminLayout>

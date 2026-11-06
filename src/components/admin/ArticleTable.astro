@@ -1,0 +1,74 @@
+---
+import Table from '../starwind/table';
+import Badge from '../starwind/badge/Badge.astro';
+import Button from '../starwind/button/Button.astro';
+import ConfirmDelete from './ConfirmDelete.astro';
+import type { listPosts } from '../../db/queries/blog';
+interface Props {
+  items: Awaited<ReturnType<typeof listPosts>>['items'];
+  compact?: boolean;
+}
+const { items, compact = false } = Astro.props;
+---
+
+<div class="table-panel">
+  <Table.Root class="editorial-table" aria-label="Articles">
+    <Table.Header>
+      <Table.Row>
+        <Table.Head>Article</Table.Head>
+        <Table.Head>Status</Table.Head>
+        <Table.Head>Updated</Table.Head>
+        <Table.Head class="text-right">Actions</Table.Head>
+      </Table.Row>
+    </Table.Header>
+    <Table.Body>
+      {items.map((post) => (
+        <Table.Row>
+          <Table.Cell class="article-title-cell">
+            <a class="table-title" href={`/admin/posts/${post.id}`}>
+              {post.title}
+            </a>
+            <div class="tags">
+              {post.categories.map((c) => (
+                <Badge variant="outline" class="category-badge">
+                  {c.name}
+                </Badge>
+              ))}
+            </div>
+          </Table.Cell>
+          <Table.Cell data-label="Status">
+            <Badge
+              variant="outline"
+              class:list={['status-badge', { 'is-published': post.status === 'published' }]}
+            >
+              <span aria-hidden="true" />
+              {post.status === 'published' ? 'Published' : 'Draft'}
+            </Badge>
+          </Table.Cell>
+          <Table.Cell data-label="Updated">
+            <time class="meta" datetime={post.updatedAt.toISOString()}>
+              {post.updatedAt.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+              })}
+            </time>
+          </Table.Cell>
+          <Table.Cell class="table-actions">
+            <div class="actions">
+              <Button href={`/admin/posts/${post.id}`} variant="outline" size="sm">
+                Edit
+              </Button>
+              {!compact && post.status === 'published' && (
+                <Button href={`/blog/${post.slug}`} variant="ghost" size="sm">
+                  View
+                </Button>
+              )}
+              {!compact && <ConfirmDelete id={post.id} title={post.title} kind="posts" />}
+            </div>
+          </Table.Cell>
+        </Table.Row>
+      ))}
+    </Table.Body>
+  </Table.Root>
+</div>

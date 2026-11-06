@@ -1,42 +1,60 @@
 ---
-import Input from '@starwind-ui/astro/input';
+import Input from '../../components/starwind/input/Input.astro';
+import Card from '../../components/starwind/card';
+import Lock from '@tabler/icons/outline/lock.svg';
+import Field from '../../components/starwind/field';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import Button from '../../components/starwind/Button.astro';
+import Button from '../../components/starwind/button/Button.astro';
 import { databaseConfigured } from '../../lib/env';
 const configured = databaseConfigured();
 ---
 
 <BaseLayout title="Admin sign in — Ansupedia" noindex>
-  <div class="page narrow">
-    <span class="eyebrow">Private workspace</span>
-    <h1>Welcome back.</h1>
-    <p>Sign in to manage your writing.</p>
-    {!configured && (
-      <p class="notice">
-        CMS setup is required. Configure PostgreSQL and authentication in .env, apply migrations,
-        then bootstrap your administrator. See README for instructions.
-      </p>
-    )}
-    <form id="login">
-      <div class="field">
-        <label for="email">Email</label>
-        <Input.Root id="email" name="email" type="email" autocomplete="username" required />
-      </div>
-      <div class="field">
-        <label for="password">Password</label>
-        <Input.Root
-          id="password"
-          name="password"
-          type="password"
-          autocomplete="current-password"
-          required
-        />
-      </div>
-      <Button type="submit" disabled={!configured}>
-        Sign in
-      </Button>
-      <p id="message" role="status" aria-live="polite"></p>
-    </form>
+  <div class="page login-frame">
+    <Card.Root class="login-card">
+      <Card.Header>
+        <span class="empty-icon">
+          <Lock class="size-5" aria-hidden="true" />
+        </span>
+        <span class="eyebrow">Private workspace</span>
+        <h1>Welcome back.</h1>
+        <p>Sign in to make room for your next idea.</p>
+      </Card.Header>
+      <Card.Content>
+        {!configured && (
+          <p class="notice">The writing workspace is being set up. Please return later.</p>
+        )}
+        <form id="login">
+          <Field.Root class="field">
+            <Field.Label for="email">Email</Field.Label>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              autocomplete="username"
+              placeholder="you@example.com"
+              required
+            />
+          </Field.Root>
+          <Field.Root class="field">
+            <Field.Label for="password">Password</Field.Label>
+            <Input
+              id="password"
+              name="password"
+              type="password"
+              autocomplete="current-password"
+              placeholder="Your password"
+              required
+            />
+          </Field.Root>
+          <Button type="submit" disabled={!configured} class="login-submit">
+            Sign in
+          </Button>
+          <p id="message" role="status" aria-live="polite" class="form-feedback"></p>
+        </form>
+      </Card.Content>
+    </Card.Root>
+    <p class="login-note">A quiet space for your words.</p>
   </div>
 </BaseLayout>
 <script>

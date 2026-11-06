@@ -4,6 +4,7 @@ import '@fontsource-variable/manrope';
 import '@fontsource-variable/geist-mono';
 import '../styles/starwind.css';
 import '../styles/global.css';
+import ThemeControl from '../components/site/ThemeControl.astro';
 import SiteHeader from '../components/site/SiteHeader.astro';
 import { ThemeInitScript } from '@starwind-ui/astro/theme';
 interface Props {
@@ -12,6 +13,7 @@ interface Props {
   image?: string | null;
   noindex?: boolean;
   article?: boolean;
+  workspace?: boolean;
 }
 const {
   title = 'Anas Nasuha — Software & curiosity',
@@ -19,6 +21,7 @@ const {
   image,
   noindex = false,
   article = false,
+  workspace = false,
 } = Astro.props;
 const site = import.meta.env.PUBLIC_SITE_URL || 'http://localhost:4321';
 const canonical = new URL(Astro.url.pathname, site);
@@ -47,7 +50,20 @@ const canonical = new URL(Astro.url.pathname, site);
     <a class="skip-link" href="#main">
       Skip to content
     </a>
-    <SiteHeader />
+    {workspace ? (
+      <header class="site-header workspace-header">
+        <div class="container header-inner">
+          <a href="/" class="brand">
+            ansu<span>pedia</span>
+            <span class="brand-dot">.</span>
+          </a>
+          <span class="workspace-label meta">EDITORIAL WORKSPACE</span>
+          <ThemeControl />
+        </div>
+      </header>
+    ) : (
+      <SiteHeader />
+    )}
     <main id="main">
       <slot />
     </main>
