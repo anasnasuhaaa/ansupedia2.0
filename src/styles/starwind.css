@@ -1,6 +1,8 @@
-@import "tailwindcss";
-@import "tw-animate-css";
-@plugin "@tailwindcss/forms";
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@plugin "@tailwindcss/forms" {
+  strategy: 'class';
+}
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
@@ -27,6 +29,9 @@
 }
 
 @theme inline {
+  --font-sans: var(--font-body);
+  --font-heading: 'Manrope Variable', sans-serif;
+  --font-mono: var(--font-code);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -74,84 +79,68 @@
 }
 
 :root {
-  --background: var(--color-white);
-  --foreground: var(--color-neutral-950);
-  --card: var(--color-white);
-  --card-foreground: var(--color-neutral-950);
-  --popover: var(--color-white);
-  --popover-foreground: var(--color-neutral-950);
-  --primary: var(--color-blue-700);
-  --primary-foreground: var(--color-neutral-50);
-  --primary-accent: var(--color-blue-700);
-  --secondary: var(--color-neutral-200);
-  --secondary-foreground: var(--color-neutral-950);
-  --secondary-accent: var(--color-neutral-950);
-  --muted: var(--color-neutral-100);
-  --muted-foreground: var(--color-neutral-600);
-  --accent: var(--color-neutral-100);
-  --accent-foreground: var(--color-neutral-900);
-  --info: var(--color-sky-300);
-  --info-foreground: var(--color-sky-950);
-  --success: var(--color-green-300);
-  --success-foreground: var(--color-green-950);
-  --warning: var(--color-amber-300);
-  --warning-foreground: var(--color-amber-950);
-  --error: var(--color-red-700);
-  --error-foreground: var(--color-neutral-50);
-  --border: var(--color-neutral-200);
-  --input: var(--color-neutral-200);
-  --outline: var(--color-neutral-400);
-  --radius: 0.625rem;
-
-  /* sidebar variables */
-  --sidebar-background: var(--color-neutral-50);
-  --sidebar-foreground: var(--color-neutral-950);
-  --sidebar-primary: var(--color-blue-700);
-  --sidebar-primary-foreground: var(--color-neutral-50);
-  --sidebar-accent: var(--color-neutral-100);
-  --sidebar-accent-foreground: var(--color-neutral-900);
-  --sidebar-border: var(--color-neutral-200);
-  --sidebar-outline: var(--color-neutral-400);
+  --background: #fafafa;
+  --foreground: #18181b;
+  --card: #ffffff;
+  --card-foreground: var(--foreground);
+  --popover: #ffffff;
+  --popover-foreground: var(--foreground);
+  --primary: #202023;
+  --primary-foreground: #ffffff;
+  --primary-accent: #3f3f46;
+  --secondary: #f0f0f1;
+  --secondary-foreground: #27272a;
+  --secondary-accent: #e4e4e7;
+  --muted: #f4f4f5;
+  --muted-foreground: #63636c;
+  --accent: #eeeef0;
+  --accent-foreground: var(--foreground);
+  --border: #e4e4e7;
+  --input: #d4d4d8;
+  --outline: #71717a;
+  --info: var(--muted);
+  --info-foreground: var(--foreground);
+  --success: var(--muted);
+  --success-foreground: var(--foreground);
+  --warning: var(--muted);
+  --warning-foreground: var(--foreground);
+  --error: #a12634;
+  --error-foreground: #ffffff;
+  --radius: 0.75rem;
+  --shadow-soft: 0 2px 8px #18181b04, 0 8px 24px #18181b04;
+  --shadow-raised: 0 4px 8px #18181b04, 0 16px 36px #18181b0b;
+  --container-max-width: 1180px;
+  --container-gutter: 40px;
+  --font-body: 'Geist Variable', sans-serif;
+  --font-heading: 'Manrope Variable', sans-serif;
+  --font-code: 'Geist Mono Variable', monospace;
+  --transition-duration: 220ms;
+  --transition-ease: cubic-bezier(0.2, 0.7, 0.3, 1);
+  --section-space: clamp(3.5rem, 6vw, 5.5rem);
+  color-scheme: light;
 }
-
 .dark {
-  --background: var(--color-neutral-950);
-  --foreground: var(--color-neutral-50);
-  --card: var(--color-neutral-900);
-  --card-foreground: var(--color-neutral-50);
-  --popover: var(--color-neutral-900);
-  --popover-foreground: var(--color-neutral-50);
-  --primary: var(--color-blue-700);
-  --primary-foreground: var(--color-neutral-50);
-  --primary-accent: var(--color-blue-400);
-  --secondary: var(--color-neutral-800);
-  --secondary-foreground: var(--color-neutral-50);
-  --secondary-accent: var(--color-neutral-50);
-  --muted: var(--color-neutral-800);
-  --muted-foreground: var(--color-neutral-400);
-  --accent: var(--color-neutral-700);
-  --accent-foreground: var(--color-neutral-50);
-  --info: var(--color-sky-300);
-  --info-foreground: var(--color-sky-950);
-  --success: var(--color-green-300);
-  --success-foreground: var(--color-green-950);
-  --warning: var(--color-amber-300);
-  --warning-foreground: var(--color-amber-950);
-  --error: var(--color-red-800);
-  --error-foreground: var(--color-neutral-50);
-  --border: --alpha(var(--color-neutral-50) / 10%);
-  --input: --alpha(var(--color-neutral-50) / 15%);
-  --outline: var(--color-neutral-500);
-
-  /* sidebars variables */
-  --sidebar-background: var(--color-neutral-900);
-  --sidebar-foreground: var(--color-neutral-50);
-  --sidebar-primary: var(--color-blue-700);
-  --sidebar-primary-foreground: var(--color-neutral-50);
-  --sidebar-accent: var(--color-neutral-800);
-  --sidebar-accent-foreground: var(--color-neutral-100);
-  --sidebar-border: var(--color-neutral-800);
-  --sidebar-outline: var(--color-neutral-600);
+  --background: #101012;
+  --foreground: #f4f4f5;
+  --card: #18181b;
+  --popover: #202023;
+  --primary: #f4f4f5;
+  --primary-foreground: #18181b;
+  --primary-accent: #d4d4d8;
+  --secondary: #27272a;
+  --secondary-foreground: #e4e4e7;
+  --secondary-accent: #3f3f46;
+  --muted: #202023;
+  --muted-foreground: #a4a4ad;
+  --accent: #2c2c30;
+  --border: #303035;
+  --input: #46464e;
+  --outline: #a1a1aa;
+  --error: #e9949c;
+  --error-foreground: #20090d;
+  --shadow-soft: 0 2px 8px #00000012, 0 8px 24px #00000018;
+  --shadow-raised: 0 4px 12px #00000020, 0 16px 40px #00000035;
+  color-scheme: dark;
 }
 
 @layer base {
