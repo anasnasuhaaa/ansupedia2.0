@@ -1,0 +1,18 @@
+---
+import '@fontsource-variable/inter';
+import '../styles/starwind.css';
+import '../styles/global.css';
+import { ThemeInitScript } from '@starwind-ui/astro/theme';
+interface Props { title?: string; description?: string; image?: string | null; noindex?: boolean; article?: boolean }
+const {title = 'Anas Nasuha — Software & curiosity', description = 'Computer Science student at IPB University, exploring software engineering, cybersecurity, and the space between.', image, noindex = false, article = false} = Astro.props;
+const site = import.meta.env.PUBLIC_SITE_URL || 'http://localhost:4321';
+const canonical = new URL(Astro.url.pathname, site);
+---
+<!doctype html><html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><ThemeInitScript /><title>{title}</title><meta name="description" content={description}/><link rel="canonical" href={canonical}/><meta property="og:title" content={title}/><meta property="og:description" content={description}/><meta property="og:url" content={canonical}/><meta property="og:type" content={article ? 'article' : 'website'}/><meta name="twitter:card" content={image ? 'summary_large_image' : 'summary'}/>{image && <meta property="og:image" content={new URL(image, site)}/>} {noindex && <meta name="robots" content="noindex,nofollow"/>}<link rel="icon" href="/favicon.svg"/><link rel="alternate" type="application/rss+xml" title="Ansupedia" href="/rss.xml"/></head>
+<body><a class="skip-link" href="#main">Skip to content</a><header class="site-header"><div class="header-inner"><a class="brand" href="/">ansu<span>pedia</span><span class="brand-dot">.</span></a><nav aria-label="Main navigation"><a href="/#about">About</a><a href="/#projects">Projects</a><a href="/blog">Writing</a><a href="/#contact">Contact</a></nav><label class="theme-label"><span class="sr-only">Color theme</span><select id="theme-select" aria-label="Color theme"><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></label></div></header><main id="main"><slot /></main><footer class="site-footer"><span>© {new Date().getFullYear()} Anas Nasuha</span><span>Built with care. Always learning.</span><a href="/rss.xml">RSS ↗</a></footer>
+<script>
+import { initThemeController } from '@starwind-ui/astro/theme';
+const controller = initThemeController();
+const select = document.querySelector<HTMLSelectElement>('#theme-select');
+if (select) { select.value = controller.getTheme(); select.addEventListener('change', () => { controller.setTheme(select.value as 'light'|'dark'|'system'); }); }
+</script></body></html>

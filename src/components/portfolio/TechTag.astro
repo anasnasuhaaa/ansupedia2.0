@@ -1,0 +1,7 @@
+---
+import { technologyIcons } from '../../data/skills';
+const { name } = Astro.props;
+const icon = technologyIcons[name];
+---
+<span class="tag">{icon && <span class="tech-icon" style={`mask-image:url(/icons/${icon}.svg)`} aria-hidden="true"/>}{name}</span>
+<style>.tech-icon{width:13px;height:13px;background:currentColor;mask-size:contain;mask-repeat:no-repeat;display:inline-block}</style>
