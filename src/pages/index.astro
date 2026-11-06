@@ -1,4 +1,9 @@
 ---
+import Card from '../components/starwind/card';
+import Briefcase from '@tabler/icons/outline/briefcase.svg';
+import Award from '@tabler/icons/outline/award.svg';
+import Notebook from '@tabler/icons/outline/notebook.svg';
+import { button } from '../components/starwind/button/variants';
 import Button from '../components/starwind/button/Button.astro';
 import ArrowRight from '@tabler/icons/outline/arrow-right.svg';
 import ArrowUpRight from '@tabler/icons/outline/arrow-up-right.svg';
@@ -96,10 +101,13 @@ try {
       </section>
       <section id="projects" class="section">
         <div class="section-head">
-          <h2>Selected projects</h2>
+          <div>
+            <span class="eyebrow">Ideas into practice</span>
+            <h2>Selected projects</h2>
+          </div>
           <span class="meta">01 — 06</span>
         </div>
-        <p>A selection of things I've been building and exploring.</p>
+        <p class="section-description">A selection of things I've been building and exploring.</p>
         <div class="project-grid">
           {[...projects]
             .sort((a, b) => a.order - b.order)
@@ -110,12 +118,15 @@ try {
       </section>
       <section id="experience" class="section">
         <div class="section-head">
-          <h2>Experience</h2>
+          <div>
+            <span class="eyebrow">The journey</span>
+            <h2>Experience</h2>
+          </div>
           <span class="meta">Along the way</span>
         </div>
         {experiences.length ? (
           experiences.map((item) => (
-            <article class="post-row">
+            <article class="timeline-item">
               <span class="meta">{item.period}</span>
               <h3>
                 {item.role} · {item.organization}
@@ -124,21 +135,33 @@ try {
             </article>
           ))
         ) : (
-          <div class="empty">
-            <p>
-              My work so far is best explored through the projects above. More of the journey will
-              be documented here.
-            </p>
-          </div>
+          <Card.Root class="milestone-empty">
+            <Card.Content>
+              <span class="empty-icon">
+                <Briefcase class="size-5" aria-hidden="true" />
+              </span>
+              <h3>Learning through building.</h3>
+              <p>
+                My work so far is best explored through the projects above. More of the journey will
+                be documented here.
+              </p>
+              <a href="#projects" class="text-link">
+                Explore the projects <ArrowUpRight aria-hidden="true" />
+              </a>
+            </Card.Content>
+          </Card.Root>
         )}
       </section>
       <section id="credentials" class="section">
         <div class="section-head">
-          <h2>Certifications & achievements</h2>
+          <div>
+            <span class="eyebrow">Along the way</span>
+            <h2>Certifications &amp; achievements</h2>
+          </div>
         </div>
         {certifications.length ? (
           certifications.map((item) => (
-            <article class="post-row">
+            <article class="timeline-item">
               <span class="meta">
                 {item.date} · {item.type}
               </span>
@@ -150,20 +173,35 @@ try {
             </article>
           ))
         ) : (
-          <div class="empty">
-            <p>A space for milestones, as they happen.</p>
-          </div>
+          <Card.Root class="milestone-empty">
+            <Card.Content>
+              <span class="empty-icon">
+                <Award class="size-5" aria-hidden="true" />
+              </span>
+              <h3>The next chapter is in progress.</h3>
+              <p>A space for certifications and milestones, as they happen.</p>
+            </Card.Content>
+          </Card.Root>
         )}
       </section>
       <section id="blog" class="section">
         <div class="section-head">
-          <h2>Notes from the process</h2>
-          <a href="/blog">All writing ↗</a>
+          <div>
+            <span class="eyebrow">The notebook</span>
+            <h2>Notes from the process</h2>
+          </div>
+          <Button href="/blog" variant="ghost" size="sm">
+            All writing <ArrowUpRight aria-hidden="true" />
+          </Button>
         </div>
         {recent.length ? (
           recent.map((post) => <PostRow post={post} />)
         ) : (
           <div class="empty">
+            <span class="empty-icon">
+              <Notebook class="size-5" aria-hidden="true" />
+            </span>
+            <h3>{blogError ? 'A brief pause.' : 'Good notes take time.'}</h3>
             <p>
               {blogError
                 ? 'Writing is temporarily unavailable. Please try again later.'
@@ -172,24 +210,26 @@ try {
           </div>
         )}
       </section>
-      <section id="contact" class="section">
-        <span class="eyebrow">Keep in touch</span>
-        <h2>
-          Good conversations start
-          <br />
-          with a simple hello.
-        </h2>
-        <p>
-          Have a project to discuss or something interesting to share? Find me on GitHub or connect
-          on LinkedIn.
-        </p>
-        <div class="actions">
-          <a class="button primary" href={profile.linkedin}>
-            Connect on LinkedIn ↗
-          </a>
-          <a class="button secondary" href={profile.github}>
-            Find me on GitHub ↗
-          </a>
+      <section id="contact" class="section contact-section">
+        <div class="contact-surface">
+          <span class="eyebrow">Keep in touch</span>
+          <h2>
+            Good conversations start
+            <br />
+            with a simple hello.
+          </h2>
+          <p>
+            Have a project to discuss or something interesting to share? Find me on GitHub or
+            connect on LinkedIn.
+          </p>
+          <div class="actions">
+            <a class={button({ variant: 'primary' })} href={profile.linkedin}>
+              Connect on LinkedIn ↗
+            </a>
+            <a class={button({ variant: 'outline' })} href={profile.github}>
+              Find me on GitHub ↗
+            </a>
+          </div>
         </div>
       </section>
     </div>

@@ -1,33 +1,63 @@
 ---
 import type { Project } from '../../data/projects';
 import TechTag from './TechTag.astro';
+import Card from '../starwind/card';
+import Button from '../starwind/button/Button.astro';
+import Github from '@tabler/icons/outline/brand-github.svg';
+import Arrow from '@tabler/icons/outline/arrow-up-right.svg';
 interface Props {
   project: Project;
 }
 const { project } = Astro.props;
+const destination = project.liveUrl || project.githubUrl;
 ---
 
-<article class="project-card">
-  <img src={project.image} alt={project.imageAlt} width="800" height="500" loading="lazy" />
-  <div class="project-body">
-    <h3>{project.name}</h3>
-    <p>{project.description}</p>
-    <div class="tags">
-      {project.technologies.map((name) => (
-        <TechTag name={name} />
-      ))}
-    </div>
-    <div class="project-links">
+<article aria-labelledby={`project-${project.id}`}>
+  <Card.Root class="project-card">
+    <a class="project-cover" href={destination} tabindex="-1" aria-hidden="true">
+      <img src={project.image} alt={project.imageAlt} width="800" height="500" loading="lazy" />
+      <span class="project-cover-label">
+        {project.image.endsWith('.svg') ? 'Project overview' : 'Application preview'}
+      </span>
+      <span class="project-cover-arrow">
+        <Arrow class="size-5" />
+      </span>
+    </a>
+    <Card.Content class="project-body">
+      <div class="project-title-row">
+        <h3 id={`project-${project.id}`}>
+          <a href={destination}>{project.name}</a>
+        </h3>
+        <span class="meta">{String(project.order).padStart(2, '0')}</span>
+      </div>
+      <p>{project.description}</p>
+      <div class="tags project-technologies">
+        {project.technologies.map((name) => (
+          <TechTag name={name} />
+        ))}
+      </div>
+    </Card.Content>
+    <Card.Footer class="project-links">
       {project.githubUrl && (
-        <a href={project.githubUrl} aria-label={`View ${project.name} source on GitHub`}>
-          Source ↗
-        </a>
+        <Button
+          href={project.githubUrl}
+          variant="ghost"
+          size="sm"
+          aria-label={`View ${project.name} source on GitHub`}
+        >
+          <Github aria-hidden="true" /> Source code
+        </Button>
       )}
       {project.liveUrl && (
-        <a href={project.liveUrl} aria-label={`Visit ${project.name}`}>
-          Visit website ↗
-        </a>
+        <Button
+          href={project.liveUrl}
+          variant="ghost"
+          size="sm"
+          aria-label={`Visit ${project.name}`}
+        >
+          Visit website <Arrow aria-hidden="true" />
+        </Button>
       )}
-    </div>
-  </div>
+    </Card.Footer>
+  </Card.Root>
 </article>
