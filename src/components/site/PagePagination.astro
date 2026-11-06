@@ -1,0 +1,41 @@
+---
+import Pagination from '../starwind/pagination';
+interface Props {
+  page: number;
+  pages: number;
+  pageUrl: (page: number) => string;
+}
+const { page, pages, pageUrl } = Astro.props;
+---
+
+{pages > 1 && (
+  <Pagination.Root class="page-pagination">
+    <Pagination.Content>
+      <Pagination.Item>
+        <Pagination.Previous
+          href={pageUrl(page - 1)}
+          disabled={page <= 1}
+          aria-label="Previous page"
+          size="sm"
+        >
+          Previous
+        </Pagination.Previous>
+      </Pagination.Item>
+      <Pagination.Item>
+        <span class="meta pagination-count">
+          {page} / {pages}
+        </span>
+      </Pagination.Item>
+      <Pagination.Item>
+        <Pagination.Next
+          href={pageUrl(page + 1)}
+          disabled={page >= pages}
+          aria-label="Next page"
+          size="sm"
+        >
+          Next
+        </Pagination.Next>
+      </Pagination.Item>
+    </Pagination.Content>
+  </Pagination.Root>
+)}

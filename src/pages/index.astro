@@ -195,7 +195,11 @@ try {
           </Button>
         </div>
         {recent.length ? (
-          recent.map((post) => <PostRow post={post} />)
+          <div class="writing-grid">
+            {recent.map((post) => (
+              <PostRow post={post} />
+            ))}
+          </div>
         ) : (
           <div class="empty">
             <span class="empty-icon">

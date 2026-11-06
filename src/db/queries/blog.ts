@@ -8,6 +8,33 @@ export const published = () =>
 export async function listCategories() {
   return databaseConfigured() ? getDb().select().from(categories).orderBy(categories.name) : [];
 }
+// Hydrate category badges in one query per page, using the existing junction table.
+async function withCategories<T extends { id: string }>(items: T[]) {
+  if (!items.length)
+    return [] as (T & { categories: { id: string; name: string; slug: string }[] })[];
+  const links = await getDb()
+    .select({
+      postId: postCategories.postId,
+      id: categories.id,
+      name: categories.name,
+      slug: categories.slug,
+    })
+    .from(postCategories)
+    .innerJoin(categories, eq(categories.id, postCategories.categoryId))
+    .where(
+      inArray(
+        postCategories.postId,
+        items.map((item) => item.id),
+      ),
+    )
+    .orderBy(categories.name);
+  return items.map((item) => ({
+    ...item,
+    categories: links
+      .filter((link) => link.postId === item.id)
+      .map(({ id, name, slug }) => ({ id, name, slug })),
+  }));
+}
 export async function listPosts(
   options: {
     q?: string;
@@ -49,7 +76,7 @@ export async function listPosts(
     getDb().select({ value: count() }).from(posts).where(where),
   ]);
   return {
-    items,
+    items: await withCategories(items),
     total: totals[0].value,
     page,
     pages: Math.max(1, Math.ceil(totals[0].value / limit)),
@@ -109,7 +136,7 @@ export async function deletePost(id: string) {
 }
 export async function relatedPosts(id: string, categoryIds: string[]) {
   if (!categoryIds.length) return [];
-  return getDb()
+  const items = await getDb()
     .select()
     .from(posts)
     .where(
@@ -127,17 +154,15 @@ export async function relatedPosts(id: string, categoryIds: string[]) {
     )
     .orderBy(desc(posts.publishedAt))
     .limit(3);
+  return withCategories(items);
 }
 export async function featuredPost() {
   if (!databaseConfigured()) return null;
-  return (
-    (
-      await getDb()
-        .select()
-        .from(posts)
-        .where(and(published(), eq(posts.isFeatured, true)))
-        .orderBy(desc(posts.publishedAt))
-        .limit(1)
-    )[0] || null
-  );
+  const items = await getDb()
+    .select()
+    .from(posts)
+    .where(and(published(), eq(posts.isFeatured, true)))
+    .orderBy(desc(posts.publishedAt))
+    .limit(1);
+  return (await withCategories(items))[0] || null;
 }

@@ -1,7 +1,12 @@
 ---
-import Input from '@starwind-ui/astro/input';
+import Input from '../../components/starwind/input/Input.astro';
+import Button from '../../components/starwind/button/Button.astro';
+import Badge from '../../components/starwind/badge/Badge.astro';
+import Search from '@tabler/icons/outline/search.svg';
+import Notebook from '@tabler/icons/outline/notebook.svg';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PostRow from '../../components/blog/PostRow.astro';
+import PagePagination from '../../components/site/PagePagination.astro';
 import { listPosts, listCategories, featuredPost } from '../../db/queries/blog';
 const q = (Astro.url.searchParams.get('q') || '').slice(0, 200);
 const category = Astro.url.searchParams.get('category') || '';
@@ -21,71 +26,124 @@ try {
   failed = true;
   Astro.response.status = 503;
 }
-const pageUrl = (page: number) =>
-  `/blog?${new URLSearchParams({ q, category, page: String(page) })}`;
+const filterUrl = (category: string, page?: number) => {
+  const params = new URLSearchParams();
+  if (q) params.set('q', q);
+  if (category) params.set('category', category);
+  if (page && page > 1) params.set('page', String(page));
+  return `/blog${params.size ? `?${params}` : ''}`;
+};
+const showFeatured = featured && !q && !category && result.page === 1;
 ---
 
 <BaseLayout
   title="Writing — Ansupedia"
   description="Notes on software engineering, cybersecurity, and learning by building."
 >
-  <div class="page narrow">
-    <div class="page-heading">
-      <span class="eyebrow">The notebook</span>
-      <h1>Learning in public.</h1>
-      <p>Notes on software, security, and figuring things out.</p>
-    </div>
-    {featured && !q && !category && page === 1 && (
-      <section class="notice">
-        <span class="eyebrow">Featured article</span>
-        <PostRow post={featured} />
-      </section>
-    )}
-    <form class="filters" action="/blog">
-      <label class="sr-only" for="search">
-        Search articles
-      </label>
-      <Input.Root id="search" type="search" name="q" placeholder="Search articles…" value={q} />
-      <label class="sr-only" for="category">
-        Category
-      </label>
-      <select name="category" id="category">
-        <option value="">All categories</option>
+  <div class="page blog-page">
+    <header class="page-heading blog-heading">
+      <div>
+        <span class="eyebrow">The notebook</span>
+        <h1>Learning in public.</h1>
+        <p>
+          Notes on software, security, and figuring things out.
+          <br />
+          An open notebook from the process of building.
+        </p>
+      </div>
+      <Button href="/rss.xml" variant="outline" size="sm">
+        Subscribe via RSS ↗
+      </Button>
+    </header>
+    <div class="blog-filter-panel">
+      <form class="filters blog-search" action="/blog" role="search">
+        <div class="search-field">
+          <Search class="size-4" aria-hidden="true" />
+          <label class="sr-only" for="search">
+            Search articles
+          </label>
+          <Input
+            id="search"
+            type="search"
+            name="q"
+            placeholder="Find something to read…"
+            value={q}
+            maxlength="200"
+          />
+        </div>
+        {category && <input type="hidden" name="category" value={category} />}
+        <Button type="submit" size="sm">
+          Search
+        </Button>
+        {(q || category) && (
+          <Button href="/blog" variant="ghost" size="sm">
+            Clear filters
+          </Button>
+        )}
+      </form>
+      <nav class="category-filters" aria-label="Article categories">
+        <Badge
+          href={filterUrl('')}
+          variant="outline"
+          class:list={['category-chip', { selected: !category }]}
+          aria-current={!category ? 'page' : undefined}
+        >
+          All Articles
+        </Badge>
         {categories.map((c) => (
-          <option value={c.slug} selected={category === c.slug}>
+          <Badge
+            href={filterUrl(c.slug)}
+            variant="outline"
+            class:list={['category-chip', { selected: category === c.slug }]}
+            aria-current={category === c.slug ? 'page' : undefined}
+          >
             {c.name}
-          </option>
+          </Badge>
         ))}
-      </select>
-      <button class="button primary" type="submit">
-        Search
-      </button>
-    </form>
+      </nav>
+    </div>
+    {showFeatured && featured && <PostRow post={featured} featured />}
+    <div class="writing-heading">
+      <h2>{q || category ? 'Search results' : 'All writing'}</h2>
+      <span class="meta">
+        {result.total} {result.total === 1 ? 'article' : 'articles'}
+        {q && ` matching “${q}”`}
+      </span>
+    </div>
     {failed ? (
       <div class="notice" role="status">
         Writing is temporarily unavailable. Please try again later.
       </div>
     ) : result.items.length ? (
-      result.items.map((post) => <PostRow post={post} />)
+      <div class="writing-grid">
+        {result.items
+          .filter((post) => !showFeatured || post.id !== featured?.id)
+          .map((post) => (
+            <PostRow post={post} />
+          ))}
+      </div>
     ) : (
-      <div class="empty">
+      <div class="empty blog-empty">
+        <span class="empty-icon">
+          <Notebook class="size-5" aria-hidden="true" />
+        </span>
         <h2>{q || category ? 'No matching notes.' : 'A fresh page.'}</h2>
         <p>
           {q || category
-            ? 'Try a different search or category.'
+            ? 'Try another search or explore a different category.'
             : 'Articles will appear here as they are published. There is always something new to learn.'}
         </p>
-        {(q || category) && <a href="/blog">Clear filters</a>}
+        {(q || category) && (
+          <Button href="/blog" variant="outline" size="sm">
+            Show all articles
+          </Button>
+        )}
       </div>
     )}
-    {result.pages > 1 && (
-      <nav class="pagination" aria-label="Pagination">
-        {page > 1 ? <a href={pageUrl(page - 1)}>← Previous</a> : <span />}
-        <span class="meta">
-          Page {page} of {result.pages}
-        </span>
-        {page < result.pages && <a href={pageUrl(page + 1)}>Next →</a>}
-      </nav>
-    )}
+    <PagePagination
+      page={result.page}
+      pages={result.pages}
+      pageUrl={(page) => filterUrl(category, page)}
+    />
   </div>
 </BaseLayout>

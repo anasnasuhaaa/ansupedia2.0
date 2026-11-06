@@ -1,4 +1,7 @@
 ---
+import Badge from '../../components/starwind/badge/Badge.astro';
+import Prose from '../../components/starwind/prose/Prose.astro';
+import Button from '../../components/starwind/button/Button.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PostRow from '../../components/blog/PostRow.astro';
 import { getPost, relatedPosts } from '../../db/queries/blog';
@@ -24,69 +27,77 @@ const site = import.meta.env.PUBLIC_SITE_URL || 'http://localhost:4321';
   noindex={!post}
   article
 >
-  <div class="page narrow">
-    <a class="meta" href="/blog">
-      ← Back to writing
-    </a>
-    {post ? (
-      <>
-        <header class="page-heading" style="margin-top:2rem">
-          <div class="tags">
-            {post.categories.map((c) => (
-              <a class="tag" href={`/blog?category=${c.slug}`}>
-                {c.name}
-              </a>
-            ))}
-          </div>
-          <h1 style="margin-top:1rem">{post.title}</h1>
-          <p>{post.excerpt}</p>
-          <div class="meta">
-            {post.publishedAt?.toLocaleDateString('en-US', { dateStyle: 'long' })} ·{' '}
-            {readingTime(post.contentJson)} min read
-            {post.publishedAt &&
-              post.updatedAt.getTime() - post.publishedAt.getTime() > 86400000 && (
-                <span> · Updated {post.updatedAt.toLocaleDateString('en-US')}</span>
-              )}
-          </div>
-        </header>
-        {post.coverImageUrl && (
-          <img
-            class="cover"
-            src={post.coverImageUrl}
-            alt={post.coverImageAlt || ''}
-            width="1200"
-            height="675"
+  <div class="page article-page">
+    <div class="reading-width">
+      <Button variant="ghost" size="sm" href="/blog">
+        ← Back to writing
+      </Button>
+      {post ? (
+        <>
+          <header class="page-heading" style="margin-top:2rem">
+            <div class="tags">
+              {post.categories.map((c) => (
+                <Badge variant="outline" class="category-badge" href={`/blog?category=${c.slug}`}>
+                  {c.name}
+                </Badge>
+              ))}
+            </div>
+            <h1 style="margin-top:1rem">{post.title}</h1>
+            <p>{post.excerpt}</p>
+            <div class="meta">
+              {post.publishedAt?.toLocaleDateString('en-US', { dateStyle: 'long' })} ·{' '}
+              {readingTime(post.contentJson)} min read
+              {post.publishedAt &&
+                post.updatedAt.getTime() - post.publishedAt.getTime() > 86400000 && (
+                  <span> · Updated {post.updatedAt.toLocaleDateString('en-US')}</span>
+                )}
+            </div>
+          </header>
+          {post.coverImageUrl && (
+            <img
+              class="cover"
+              src={post.coverImageUrl}
+              alt={post.coverImageAlt || ''}
+              width="1200"
+              height="675"
+            />
+          )}
+          <article>
+            <Prose class="prose article-prose">
+              <Fragment set:html={html} />
+            </Prose>
+          </article>
+          {related.length > 0 && (
+            <section class="section" style="margin-top:4rem">
+              <h2>Keep reading</h2>
+              <div class="related-writing">
+                {related.map((post) => (
+                  <PostRow post={post} />
+                ))}
+              </div>
+            </section>
+          )}
+          <script
+            type="application/ld+json"
+            set:html={JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'BlogPosting',
+              headline: post.title,
+              description: post.excerpt,
+              datePublished: post.publishedAt?.toISOString(),
+              dateModified: post.updatedAt.toISOString(),
+              image: post.coverImageUrl || undefined,
+              author: { '@type': 'Person', name: 'Anas Nasuha', url: site },
+              mainEntityOfPage: new URL(`/blog/${post.slug}`, site).href,
+            }).replace(/</g, '\\u003c')}
           />
-        )}
-        <article class="prose" set:html={html} />
-        {related.length > 0 && (
-          <section class="section" style="margin-top:4rem">
-            <h2>Keep reading</h2>
-            {related.map((post) => (
-              <PostRow post={post} />
-            ))}
-          </section>
-        )}
-        <script
-          type="application/ld+json"
-          set:html={JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'BlogPosting',
-            headline: post.title,
-            description: post.excerpt,
-            datePublished: post.publishedAt?.toISOString(),
-            dateModified: post.updatedAt.toISOString(),
-            image: post.coverImageUrl || undefined,
-            author: { '@type': 'Person', name: 'Anas Nasuha', url: site },
-            mainEntityOfPage: new URL(`/blog/${post.slug}`, site).href,
-          }).replace(/</g, '\\u003c')}
-        />
-      </>
-    ) : (
-      <>
-        <h1 style="margin-top:2rem">Page not found.</h1>
-        <p>This article is unavailable or hasn't been published.</p>
-      </>
-    )}
+        </>
+      ) : (
+        <>
+          <h1 style="margin-top:2rem">Page not found.</h1>
+          <p>This article is unavailable or hasn't been published.</p>
+        </>
+      )}
+    </div>
   </div>
 </BaseLayout>

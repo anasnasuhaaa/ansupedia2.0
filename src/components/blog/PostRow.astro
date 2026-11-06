@@ -1,23 +1,63 @@
 ---
 import { readingTime } from '../../lib/blog/content';
 import type { posts } from '../../db/schema';
+import Card from '../starwind/card';
+import Badge from '../starwind/badge/Badge.astro';
+import Arrow from '@tabler/icons/outline/arrow-up-right.svg';
 interface Props {
-  post: typeof posts.$inferSelect;
+  post: typeof posts.$inferSelect & { categories?: { name: string; slug: string }[] };
+  featured?: boolean;
 }
-const { post } = Astro.props;
+const { post, featured = false } = Astro.props;
 ---
 
-<article class="post-row">
-  <span class="meta">
-    {post.publishedAt?.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    })}{' '}
-    · {readingTime(post.contentJson)} min read
-  </span>
-  <h2>
-    <a href={`/blog/${post.slug}`}>{post.title}</a>
-  </h2>
-  <p>{post.excerpt}</p>
+<article
+  class:list={['post-card-wrap', { 'featured-post': featured }]}
+  aria-labelledby={`post-${post.id}-${featured ? 'featured' : 'card'}`}
+>
+  <Card.Root class="post-card">
+    {post.coverImageUrl && (
+      <a href={`/blog/${post.slug}`} class="post-cover" tabindex="-1" aria-hidden="true">
+        <img
+          src={post.coverImageUrl}
+          alt={post.coverImageAlt || ''}
+          loading="lazy"
+          width="800"
+          height="450"
+        />
+      </a>
+    )}
+    <Card.Content class="post-card-content">
+      {featured && <span class="eyebrow">Featured article</span>}
+      <div class="post-meta meta">
+        <time datetime={post.publishedAt?.toISOString()}>
+          {post.publishedAt?.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+          })}
+        </time>
+        <span aria-hidden="true">·</span>
+        <span>{readingTime(post.contentJson)} min read</span>
+      </div>
+      <h2 id={`post-${post.id}-${featured ? 'featured' : 'card'}`}>
+        <a href={`/blog/${post.slug}`}>
+          {post.title}
+          <Arrow class="size-5" aria-hidden="true" />
+        </a>
+      </h2>
+      <p>{post.excerpt}</p>
+      <div class="tags">
+        {post.categories?.map((c) => (
+          <Badge
+            variant="outline"
+            href={`/blog?${new URLSearchParams({ category: c.slug })}`}
+            class="category-badge"
+          >
+            {c.name}
+          </Badge>
+        ))}
+      </div>
+    </Card.Content>
+  </Card.Root>
 </article>
