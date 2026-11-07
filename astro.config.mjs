@@ -6,5 +6,10 @@ export default defineConfig({
   output: 'server',
   adapter: vercel(),
   integrations: [react()],
-  vite: { plugins: [tailwindcss()] },
+  vite: {
+    plugins: [tailwindcss()],
+    // sanitize-html uses require() for the ESM-only htmlparser2. Bundle both so
+    // Vercel doesn't need runtime require(ESM) support to load the sanitizer.
+    ssr: { noExternal: ['sanitize-html', 'htmlparser2'] },
+  },
 });

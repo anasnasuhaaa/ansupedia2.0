@@ -21,7 +21,10 @@ pnpm check
 pnpm test
 pnpm test:browser
 pnpm build
+pnpm test:server
 ```
+
+`pnpm test:server` builds the Vercel function and checks public routes and the login page with Node's `require(ESM)` support disabled, without using a database. The SSR configuration bundles `sanitize-html` and its ESM parser together to avoid `ERR_REQUIRE_ESM` in the Vercel runtime.
 
 Browser tests require the dev server and `pnpm exec playwright install chromium`. Authenticated browser tests create a temporary administrator, categories, and clearly marked articles only against a configured localhost database, then remove those fixtures. They skip mutations against remote or unconfigured databases. A previous rate-limit test may require a short sign-in cooldown. Database tests run only against a configured localhost database, create uniquely named fixtures, and clean them up. They do not reset tables. A build creates Vercel artifacts locally; it does not deploy.
 
