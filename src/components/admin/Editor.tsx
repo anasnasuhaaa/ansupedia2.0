@@ -338,7 +338,7 @@ export default function Editor({
         <fieldset className="editor-controls" disabled={busy || !editor}>
           <legend className="sr-only">Article editor</legend>
           <div className="editor-layout">
-            <div className="editor-main">
+            <div className="editor-sections">
               <Panel
                 title="The essentials"
                 description="A clear title. A little context. Your words."
@@ -465,68 +465,6 @@ export default function Editor({
                   <span>Saved only when you choose an action below</span>
                 </div>
               </section>
-              <Panel
-                title="Search appearance"
-                description="Optional details for search engines and shared links."
-              >
-                <Field
-                  id="seo-title"
-                  label="SEO title"
-                  hint="Up to 70 characters. Defaults to your article title."
-                  error={errors.seoTitle}
-                >
-                  <input
-                    className={input()}
-                    id="seo-title"
-                    name="seoTitle"
-                    maxLength={70}
-                    placeholder={title || 'Article title'}
-                    defaultValue={post?.seoTitle || ''}
-                    {...attrs('seoTitle', 'seo-title')}
-                  />
-                </Field>
-                <Field
-                  id="seo-description"
-                  label="SEO description"
-                  hint="Up to 170 characters. Defaults to your excerpt."
-                  error={errors.seoDescription}
-                >
-                  <textarea
-                    className={textarea()}
-                    id="seo-description"
-                    name="seoDescription"
-                    maxLength={170}
-                    rows={3}
-                    placeholder="A concise description for search results…"
-                    defaultValue={post?.seoDescription || ''}
-                    {...attrs('seoDescription', 'seo-description')}
-                  />
-                </Field>
-              </Panel>
-            </div>
-            <aside className="editor-settings" aria-label="Article settings">
-              <Panel title="Publication">
-                <div className="publication-status">
-                  {status === 'published' ? (
-                    <Globe size={16} aria-hidden="true" />
-                  ) : (
-                    <FileText size={16} aria-hidden="true" />
-                  )}
-                  <span>{status === 'published' ? 'Published' : 'Draft'}</span>
-                  <span className="meta">{status === 'published' ? 'Live' : 'Private'}</span>
-                </div>
-                <p className="field-description">
-                  {status === 'published'
-                    ? 'Your article is live. Saving updates keeps it published.'
-                    : 'Only you can see this article until you publish it.'}
-                </p>
-                <label className="editor-checkbox feature-checkbox">
-                  <input type="checkbox" name="isFeatured" defaultChecked={post?.isFeatured} />
-                  <span>
-                    Feature this article<small>Highlight it on the writing page.</small>
-                  </span>
-                </label>
-              </Panel>
               <Panel title="Cover image">
                 {cover && safeUrl(cover, true) && !coverFailed && (
                   <img
@@ -643,7 +581,67 @@ export default function Editor({
                   </p>
                 )}
               </Panel>
-            </aside>
+              <Panel
+                title="Search appearance"
+                description="Optional details for search engines and shared links."
+              >
+                <Field
+                  id="seo-title"
+                  label="SEO title"
+                  hint="Up to 70 characters. Defaults to your article title."
+                  error={errors.seoTitle}
+                >
+                  <input
+                    className={input()}
+                    id="seo-title"
+                    name="seoTitle"
+                    maxLength={70}
+                    placeholder={title || 'Article title'}
+                    defaultValue={post?.seoTitle || ''}
+                    {...attrs('seoTitle', 'seo-title')}
+                  />
+                </Field>
+                <Field
+                  id="seo-description"
+                  label="SEO description"
+                  hint="Up to 170 characters. Defaults to your excerpt."
+                  error={errors.seoDescription}
+                >
+                  <textarea
+                    className={textarea()}
+                    id="seo-description"
+                    name="seoDescription"
+                    maxLength={170}
+                    rows={3}
+                    placeholder="A concise description for search results…"
+                    defaultValue={post?.seoDescription || ''}
+                    {...attrs('seoDescription', 'seo-description')}
+                  />
+                </Field>
+              </Panel>
+              <Panel title="Publication">
+                <div className="publication-status">
+                  {status === 'published' ? (
+                    <Globe size={16} aria-hidden="true" />
+                  ) : (
+                    <FileText size={16} aria-hidden="true" />
+                  )}
+                  <span>{status === 'published' ? 'Published' : 'Draft'}</span>
+                  <span className="meta">{status === 'published' ? 'Live' : 'Private'}</span>
+                </div>
+                <p className="field-description">
+                  {status === 'published'
+                    ? 'Your article is live. Saving updates keeps it published.'
+                    : 'Only you can see this article until you publish it.'}
+                </p>
+                <label className="editor-checkbox feature-checkbox">
+                  <input type="checkbox" name="isFeatured" defaultChecked={post?.isFeatured} />
+                  <span>
+                    Feature this article<small>Highlight it on the writing page.</small>
+                  </span>
+                </label>
+              </Panel>
+            </div>
           </div>
         </fieldset>
         <div className="editor-save-bar">

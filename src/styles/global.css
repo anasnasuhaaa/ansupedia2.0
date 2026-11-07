@@ -1593,3 +1593,14 @@ fieldset legend {
   min-width: 0;
   overflow-wrap: anywhere;
 }
+
+.field-error:empty {
+  display: none;
+}
+.cms-dialog input[aria-invalid='true'] {
+  border-color: var(--error);
+}
+.cms-dialog [data-slot='dialog-footer'] {
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}

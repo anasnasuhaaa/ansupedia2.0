@@ -33,6 +33,7 @@ const suffix = category?.id || 'new';
           maxlength="80"
           placeholder="e.g. Software Engineering"
         />
+        <span id={`name-error-${suffix}`} data-error="name" class="field-error" role="alert"></span>
       </Field.Root>
       <Field.Root class="field">
         <Field.Label for={`slug-${suffix}`}>Slug</Field.Label>
@@ -45,6 +46,7 @@ const suffix = category?.id || 'new';
           maxlength="160"
           placeholder="software-engineering"
         />
+        <span id={`slug-error-${suffix}`} data-error="slug" class="field-error" role="alert"></span>
         <Field.Description>Lowercase letters, numbers, and single hyphens.</Field.Description>
       </Field.Root>
       <p class="form-feedback error" role="status" aria-live="polite"></p>
@@ -82,6 +84,13 @@ const suffix = category?.id || 'new';
       const submit = form.querySelector<HTMLButtonElement>('[type=submit]')!;
       const feedback = form.querySelector('.form-feedback')!;
       const data = new FormData(form);
+      form.querySelectorAll<HTMLElement>('[data-error]').forEach((el) => {
+        el.textContent = '';
+      });
+      [name, slug].forEach((el) => {
+        el.removeAttribute('aria-invalid');
+        el.removeAttribute('aria-describedby');
+      });
       submit.disabled = true;
       feedback.textContent = 'Saving…';
       try {
@@ -95,7 +104,19 @@ const suffix = category?.id || 'new';
           }),
         });
         const result = await response.json();
-        if (!response.ok) throw Error(result.error);
+        if (!response.ok) {
+          for (const field of [name, slug]) {
+            const error = result.fieldErrors?.[field.name];
+            if (typeof error === 'string') {
+              const target = form.querySelector<HTMLElement>(`[data-error="${field.name}"]`)!;
+              target.textContent = error;
+              field.setAttribute('aria-invalid', 'true');
+              field.setAttribute('aria-describedby', target.id);
+            }
+          }
+          form.querySelector<HTMLInputElement>('[aria-invalid="true"]')?.focus();
+          throw Error(result.error);
+        }
         location.href = '/admin/categories?notice=saved';
       } catch (error) {
         feedback.textContent = error instanceof Error ? error.message : 'Unable to save.';

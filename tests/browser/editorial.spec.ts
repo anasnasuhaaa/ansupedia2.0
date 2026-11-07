@@ -137,6 +137,12 @@ test('editor formatting, insertion dialogs and manual slugs preserve selection a
   await page.goto('/admin/posts/new');
   const content = page.getByRole('textbox', { name: 'Article content', exact: true });
   await expect(content).toBeVisible();
+  await expect(page.locator('.article-editor aside')).toHaveCount(0);
+  expect(
+    await page
+      .locator('.editor-layout')
+      .evaluate((el) => getComputedStyle(el).gridTemplateColumns.split(' ').length),
+  ).toBe(1);
   await page.getByLabel('Title', { exact: true }).fill('A thoughtful article');
   await expect(page.getByLabel('URL slug')).toHaveValue('a-thoughtful-article');
   await page.getByLabel('URL slug').fill('my-custom-slug');
