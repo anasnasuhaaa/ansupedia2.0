@@ -1,11 +1,27 @@
 import { Extension, type Editor } from '@tiptap/core';
-import { Plugin, PluginKey } from '@tiptap/pm/state';
+import { Plugin, PluginKey, Selection } from '@tiptap/pm/state';
 import { Decoration, DecorationSet } from '@tiptap/pm/view';
 
 // Upload markers live only in plugin state, never in persisted article JSON.
 export const uploadKey = new PluginKey<DecorationSet>('imageUploads');
 export const ImageUploads = Extension.create({
   name: 'imageUploads',
+  addKeyboardShortcuts() {
+    const moveToEdge = (edge: 'start' | 'end') => {
+      if (!uploadKey.getState(this.editor.state)?.find().length) return false;
+      // Native document navigation can stall beside a noneditable upload widget
+      // in an empty paragraph. Use the document selection while uploads are pending.
+      return this.editor.commands.command(({ tr }) => {
+        tr.setSelection(edge === 'start' ? Selection.atStart(tr.doc) : Selection.atEnd(tr.doc));
+        tr.scrollIntoView();
+        return true;
+      });
+    };
+    return {
+      'Mod-Home': () => moveToEdge('start'),
+      'Mod-End': () => moveToEdge('end'),
+    };
+  },
   addProseMirrorPlugins() {
     return [
       new Plugin({

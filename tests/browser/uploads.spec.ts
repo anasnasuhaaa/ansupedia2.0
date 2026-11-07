@@ -48,6 +48,7 @@ test('file uploads map through edits and preserve image order through save, reop
     await expect(page.getByRole('button', { name: 'Save draft', exact: true })).toBeDisabled();
     await content.press('ControlOrMeta+Home');
     await page.keyboard.type('Updated ');
+    await expect(content.locator('p').first()).toHaveText('Updated Paragraph one.');
     await content.press('ControlOrMeta+End');
     await page.keyboard.type('Paragraph two.');
     finish();
@@ -99,6 +100,89 @@ test('file uploads map through edits and preserve image order through save, reop
         headers: { Origin: 'http://localhost:4321' },
         data: { id },
       });
+    if (/^\/dev-uploads\/[a-f0-9-]+\.png$/.test(src))
+      await unlink(new URL(`../../.local/uploads/${src.split('/').pop()}`, import.meta.url));
+  }
+});
+
+test('development cover uploads survive saving, reopening and publishing', async ({
+  page,
+  editorial,
+}) => {
+  let src = '';
+  const slug = `${editorial!.prefix}-cover`;
+  try {
+    await page.goto('/admin/posts/new');
+    await page.getByLabel('Title', { exact: true }).fill(`${editorial!.prefix} Cover`);
+    await page.getByLabel('URL slug').fill(slug);
+    await page
+      .getByRole('textbox', { name: 'Article content', exact: true })
+      .fill('Covered article.');
+    await page
+      .getByLabel('Upload cover image', { exact: true })
+      .setInputFiles({ name: 'cover.png', mimeType: 'image/png', buffer: png });
+    await expect(page.locator('[data-sonner-toast][data-type=success]')).toContainText(
+      'Cover image uploaded.',
+    );
+    const cover = page.getByLabel('Cover image URL (HTTPS)', { exact: true });
+    src = await cover.inputValue();
+    expect(src).toMatch(/^\/dev-uploads\/[a-f0-9-]+\.png$/);
+    await page.getByLabel('Cover alternative text', { exact: true }).fill('A cover pixel');
+    expect(await cover.evaluate((el: HTMLInputElement) => el.checkValidity())).toBe(true);
+    await page.getByRole('button', { name: 'Save draft', exact: true }).click();
+    await expect(page).toHaveURL(/\/admin\/posts\/[a-f0-9-]+$/);
+    await expect(cover).toHaveValue(src);
+    await page.reload();
+    await expect(cover).toHaveValue(src);
+    // Relative development assets remain supported without weakening HTTPS validation.
+    await cover.fill('http://example.com/unsafe.png');
+    await page.getByRole('button', { name: 'Publish', exact: true }).click();
+    await expect(page.locator('#cover-error')).toHaveText('Use an HTTPS image URL.');
+    await expect(cover).toBeFocused();
+    await cover.fill(src);
+    await page.getByRole('button', { name: 'Publish', exact: true }).click();
+    await expect(page.getByRole('button', { name: 'Update article', exact: true })).toBeVisible();
+    await page.goto(`/blog/${slug}`);
+    await expect(page.locator('.cover')).toHaveAttribute('src', src);
+    await expect(page.locator('.cover')).toHaveAttribute('alt', 'A cover pixel');
+    await expect(page.locator('.cover')).toHaveJSProperty('naturalWidth', 1);
+  } finally {
+    if (/^\/dev-uploads\/[a-f0-9-]+\.png$/.test(src))
+      await unlink(new URL(`../../.local/uploads/${src.split('/').pop()}`, import.meta.url));
+  }
+});
+
+test('a failed cover upload can retry the same file without leaving stale validation errors', async ({
+  page,
+}) => {
+  let src = '';
+  try {
+    await page.goto('/admin/posts/new');
+    await page.route('**/api/admin/upload', (route) =>
+      route.fulfill({
+        status: 500,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: 'Image upload failed. Try again.' }),
+      }),
+    );
+    const picker = page.getByLabel('Upload cover image', { exact: true });
+    const file = { name: 'retry.png', mimeType: 'image/png', buffer: png };
+    await picker.setInputFiles(file);
+    await expect(page.locator('#cover-error')).toContainText('Image upload failed.');
+    await expect(picker).toHaveValue('');
+    await page.unroute('**/api/admin/upload');
+    await picker.setInputFiles(file);
+    await expect(page.locator('[data-sonner-toast][data-type=success]')).toContainText(
+      'Cover image uploaded.',
+    );
+    src = await page.getByLabel('Cover image URL (HTTPS)', { exact: true }).inputValue();
+    await expect(picker).toHaveValue('');
+    await expect(page.locator('#cover-error')).toHaveCount(0);
+    await expect(page.getByLabel('Cover image URL (HTTPS)', { exact: true })).toHaveAttribute(
+      'aria-invalid',
+      'false',
+    );
+  } finally {
     if (/^\/dev-uploads\/[a-f0-9-]+\.png$/.test(src))
       await unlink(new URL(`../../.local/uploads/${src.split('/').pop()}`, import.meta.url));
   }

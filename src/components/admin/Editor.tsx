@@ -340,6 +340,11 @@ export default function Editor({
       if (target === 'cover') {
         setCover(result.url);
         setCoverFailed(false);
+        setErrors((previous) => {
+          const next = { ...previous };
+          delete next.coverImageUrl;
+          return next;
+        });
         setDirty(true);
       } else {
         const pos = uploadPosition(editor, id);
@@ -602,7 +607,8 @@ export default function Editor({
                   <input
                     className={input()}
                     id="cover"
-                    type="url"
+                    type="text"
+                    inputMode="url"
                     value={cover}
                     placeholder="https://…"
                     {...attrs('coverImageUrl', 'cover')}
@@ -640,7 +646,12 @@ export default function Editor({
                       id="upload"
                       type="file"
                       accept="image/png,image/jpeg,image/webp"
-                      onChange={(event) => void upload(event.target.files?.[0], 'cover')}
+                      disabled={uploading}
+                      onChange={(event) => {
+                        const file = event.currentTarget.files?.[0];
+                        event.currentTarget.value = '';
+                        void upload(file, 'cover');
+                      }}
                     />
                   </Field>
                 )}
@@ -906,7 +917,11 @@ export default function Editor({
                     id="inline-upload"
                     accept="image/png,image/jpeg,image/webp"
                     disabled={busy || uploading}
-                    onChange={(event) => void upload(event.target.files?.[0], 'inline')}
+                    onChange={(event) => {
+                      const file = event.currentTarget.files?.[0];
+                      event.currentTarget.value = '';
+                      void upload(file, 'inline');
+                    }}
                   />
                 </Field>
               )}
