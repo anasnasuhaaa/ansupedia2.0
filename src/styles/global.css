@@ -900,20 +900,17 @@ fieldset legend {
 }
 
 /* Writing shares the site frame; articles have an inner reading measure. */
-.blog-heading {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 2rem;
+.blog-page {
+  padding-top: clamp(2.5rem, 5vw, 4rem);
 }
-.blog-heading p {
+.blog-heading {
+  margin-bottom: 1.75rem;
+}
+.blog-heading h1 {
   margin-bottom: 0;
 }
-.blog-heading > a {
-  flex-shrink: 0;
-}
 .blog-filter-panel {
-  margin-block: 3rem;
+  margin-block: 0 2.5rem;
 }
 .blog-search {
   margin-block: 0 1.25rem;
@@ -964,8 +961,9 @@ fieldset legend {
 }
 .category-badge {
   border-radius: 0.4rem;
-  font-size: 0.65rem;
-  padding: 0.25rem 0.5rem;
+  font-size: 0.73rem;
+  line-height: 1.5;
+  padding: 0.3rem 0.55rem;
   color: var(--muted-foreground);
   background: var(--muted);
   border-color: transparent;
@@ -1102,13 +1100,52 @@ fieldset legend {
   display: grid;
   gap: 1.25rem;
 }
-.article-page .page-heading {
-  margin-top: 2.5rem;
+.article-page {
+  padding-top: clamp(2rem, 5vw, 3.5rem);
+}
+.article-back {
+  color: var(--muted-foreground);
+}
+.article-back:hover {
+  color: var(--foreground);
+}
+.article-back:hover svg {
+  transform: translateX(-2px);
+}
+.article-heading {
+  margin-block: 1.5rem 2rem;
 }
 .article-page .page-heading h1 {
   font-size: clamp(2rem, 4.5vw, 3rem);
   line-height: 1.2;
   overflow-wrap: anywhere;
+  margin-block: 1rem 0.9rem;
+}
+.article-excerpt {
+  font-size: 1rem;
+  line-height: 1.8;
+  margin-bottom: 1.25rem;
+}
+.article-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.6rem;
+  font-size: 0.78rem;
+  line-height: 1.6;
+}
+.article-page .cover {
+  margin-block: 0 2rem;
+}
+.related-section {
+  margin-top: 3rem;
+  padding-block: 2.5rem 0;
+}
+.related-section > h2 {
+  font-size: 1.3rem;
+  margin-bottom: 1.5rem;
+}
+.article-not-found {
+  margin-top: 1.5rem;
 }
 .article-prose,
 .editor-prose {
@@ -1157,12 +1194,6 @@ fieldset legend {
 @media (max-width: 700px) {
   .writing-grid {
     grid-template-columns: minmax(0, 1fr);
-  }
-  .blog-heading {
-    display: block;
-  }
-  .blog-heading > a {
-    margin-top: 1.25rem;
   }
   .featured-post .post-card {
     flex-direction: column;

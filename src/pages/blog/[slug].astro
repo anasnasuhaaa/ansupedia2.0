@@ -1,7 +1,7 @@
 ---
 import Badge from '../../components/starwind/badge/Badge.astro';
 import Prose from '../../components/starwind/prose/Prose.astro';
-import Button from '../../components/starwind/button/Button.astro';
+import ArrowLeft from '@tabler/icons/outline/arrow-left.svg';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PostRow from '../../components/blog/PostRow.astro';
 import { getPost, relatedPosts } from '../../db/queries/blog';
@@ -29,27 +29,44 @@ const site = import.meta.env.PUBLIC_SITE_URL || 'http://localhost:4321';
 >
   <div class="page article-page">
     <div class="reading-width">
-      <Button variant="ghost" size="sm" href="/blog">
-        ← Back to writing
-      </Button>
+      <a class="text-link article-back" href="/blog">
+        <ArrowLeft aria-hidden="true" /> Back to blog
+      </a>
       {post ? (
         <>
-          <header class="page-heading" style="margin-top:2rem">
-            <div class="tags">
-              {post.categories.map((c) => (
-                <Badge variant="outline" class="category-badge" href={`/blog?category=${c.slug}`}>
-                  {c.name}
-                </Badge>
-              ))}
-            </div>
-            <h1 style="margin-top:1rem">{post.title}</h1>
-            <p>{post.excerpt}</p>
-            <div class="meta">
-              {post.publishedAt?.toLocaleDateString('en-US', { dateStyle: 'long' })} ·{' '}
-              {readingTime(post.contentJson)} min read
+          <header class="page-heading article-heading">
+            {post.categories.length > 0 && (
+              <div class="tags">
+                {post.categories.map((c) => (
+                  <Badge
+                    variant="outline"
+                    class="category-badge"
+                    href={`/blog?${new URLSearchParams({ category: c.slug })}`}
+                  >
+                    {c.name}
+                  </Badge>
+                ))}
+              </div>
+            )}
+            <h1>{post.title}</h1>
+            {post.excerpt && <p class="article-excerpt">{post.excerpt}</p>}
+            <div class="meta article-meta">
+              <time datetime={post.publishedAt?.toISOString()}>
+                {post.publishedAt?.toLocaleDateString('en-US', { dateStyle: 'long' })}
+              </time>
+              <span aria-hidden="true">·</span>
+              <span>{readingTime(post.contentJson)} min read</span>
               {post.publishedAt &&
                 post.updatedAt.getTime() - post.publishedAt.getTime() > 86400000 && (
-                  <span> · Updated {post.updatedAt.toLocaleDateString('en-US')}</span>
+                  <>
+                    <span aria-hidden="true">·</span>
+                    <span>
+                      Updated{' '}
+                      <time datetime={post.updatedAt.toISOString()}>
+                        {post.updatedAt.toLocaleDateString('en-US')}
+                      </time>
+                    </span>
+                  </>
                 )}
             </div>
           </header>
@@ -68,7 +85,7 @@ const site = import.meta.env.PUBLIC_SITE_URL || 'http://localhost:4321';
             </Prose>
           </article>
           {related.length > 0 && (
-            <section class="section" style="margin-top:4rem">
+            <section class="section related-section">
               <h2>Keep reading</h2>
               <div class="related-writing">
                 {related.map((post) => (
@@ -94,7 +111,7 @@ const site = import.meta.env.PUBLIC_SITE_URL || 'http://localhost:4321';
         </>
       ) : (
         <>
-          <h1 style="margin-top:2rem">Page not found.</h1>
+          <h1 class="article-not-found">Page not found.</h1>
           <p>This article is unavailable or hasn't been published.</p>
         </>
       )}
