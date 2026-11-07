@@ -1,39 +1,54 @@
 ---
 import Input from '../../components/starwind/input/Input.astro';
 import Button from '../../components/starwind/button/Button.astro';
-import Badge from '../../components/starwind/badge/Badge.astro';
+import Check from '@tabler/icons/outline/check.svg';
 import Search from '@tabler/icons/outline/search.svg';
 import Notebook from '@tabler/icons/outline/notebook.svg';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PostRow from '../../components/blog/PostRow.astro';
 import PagePagination from '../../components/site/PagePagination.astro';
 import { listPosts, listCategories, featuredPost } from '../../db/queries/blog';
+import { normalizeCategorySlugs } from '../../lib/blog/filters';
 const q = (Astro.url.searchParams.get('q') || '').slice(0, 200);
-const category = Astro.url.searchParams.get('category') || '';
+const requestedCategories = normalizeCategorySlugs(Astro.url.searchParams.getAll('category'));
+let selectedCategories: string[] = [];
 const page = Math.max(1, Number(Astro.url.searchParams.get('page')) || 1);
 let failed = false;
 let result: Awaited<ReturnType<typeof listPosts>> = { items: [], total: 0, page: 1, pages: 1 };
 let categories: Awaited<ReturnType<typeof listCategories>> = [];
 let featured: Awaited<ReturnType<typeof featuredPost>> = null;
 try {
-  [result, categories, featured] = await Promise.all([
-    listPosts({ q, category, page }),
-    listCategories(),
-    featuredPost(),
+  categories = await listCategories();
+  const knownSlugs = new Set(categories.map((category) => category.slug));
+  selectedCategories = requestedCategories.filter((slug) => knownSlugs.has(slug));
+  [result, featured] = await Promise.all([
+    listPosts({ q, category: selectedCategories, page }),
+    !q && !selectedCategories.length && page === 1 ? featuredPost() : Promise.resolve(null),
   ]);
 } catch {
   console.error('Public article listing failed');
   failed = true;
   Astro.response.status = 503;
 }
-const filterUrl = (category: string, page?: number) => {
+const filterUrl = (page?: number) => {
   const params = new URLSearchParams();
   if (q) params.set('q', q);
-  if (category) params.set('category', category);
+  selectedCategories.forEach((slug) => params.append('category', slug));
   if (page && page > 1) params.set('page', String(page));
   return `/blog${params.size ? `?${params}` : ''}`;
 };
-const showFeatured = featured && !q && !category && result.page === 1;
+const hasFilters = !!q || selectedCategories.length > 0;
+const showFeatured = featured && result.items.some((post) => post.id === featured.id);
+const categoryOptions = [
+  { name: 'All Articles', selected: !selectedCategories.length, slugs: [] as string[] },
+  ...categories.map((category) => ({
+    name: category.name,
+    selected: selectedCategories.includes(category.slug),
+    slugs: selectedCategories.includes(category.slug)
+      ? selectedCategories.filter((slug) => slug !== category.slug)
+      : [...selectedCategories, category.slug],
+  })),
+];
 ---
 
 <BaseLayout
@@ -60,40 +75,42 @@ const showFeatured = featured && !q && !category && result.page === 1;
             maxlength="200"
           />
         </div>
-        {category && <input type="hidden" name="category" value={category} />}
+        {selectedCategories.map((slug) => (
+          <input type="hidden" name="category" value={slug} />
+        ))}
         <Button type="submit" size="sm">
           Search
         </Button>
-        {(q || category) && (
+        {hasFilters && (
           <Button href="/blog" variant="ghost" size="sm">
             Clear filters
           </Button>
         )}
       </form>
       <nav class="category-filters" aria-label="Article categories">
-        <Badge
-          href={filterUrl('')}
-          variant="outline"
-          class:list={['category-chip', { selected: !category }]}
-          aria-current={!category ? 'page' : undefined}
-        >
-          All Articles
-        </Badge>
-        {categories.map((c) => (
-          <Badge
-            href={filterUrl(c.slug)}
-            variant="outline"
-            class:list={['category-chip', { selected: category === c.slug }]}
-            aria-current={category === c.slug ? 'page' : undefined}
-          >
-            {c.name}
-          </Badge>
+        {categoryOptions.map((option) => (
+          <form action="/blog" method="get">
+            {q && <input type="hidden" name="q" value={q} />}
+            {option.slugs.map((slug) => (
+              <input type="hidden" name="category" value={slug} />
+            ))}
+            <Button
+              type="submit"
+              variant="outline"
+              size="sm"
+              class:list={['category-chip', { selected: option.selected }]}
+              aria-pressed={option.selected}
+            >
+              {option.selected && <Check class="category-check" aria-hidden="true" />}
+              {option.name}
+            </Button>
+          </form>
         ))}
       </nav>
     </div>
     {showFeatured && featured && <PostRow post={featured} featured />}
     <div class="writing-heading">
-      <h2>{q || category ? 'Search results' : 'All writing'}</h2>
+      <h2>{hasFilters ? 'Search results' : 'All writing'}</h2>
       <span class="meta">
         {result.total} {result.total === 1 ? 'article' : 'articles'}
         {q && ` matching “${q}”`}
@@ -116,23 +133,19 @@ const showFeatured = featured && !q && !category && result.page === 1;
         <span class="empty-icon">
           <Notebook class="size-5" aria-hidden="true" />
         </span>
-        <h2>{q || category ? 'No matching notes.' : 'A fresh page.'}</h2>
+        <h2>{hasFilters ? 'No matching notes.' : 'A fresh page.'}</h2>
         <p>
-          {q || category
+          {hasFilters
             ? 'Try another search or explore a different category.'
             : 'Articles will appear here as they are published. There is always something new to learn.'}
         </p>
-        {(q || category) && (
+        {hasFilters && (
           <Button href="/blog" variant="outline" size="sm">
             Show all articles
           </Button>
         )}
       </div>
     )}
-    <PagePagination
-      page={result.page}
-      pages={result.pages}
-      pageUrl={(page) => filterUrl(category, page)}
-    />
+    <PagePagination page={result.page} pages={result.pages} pageUrl={(page) => filterUrl(page)} />
   </div>
 </BaseLayout>

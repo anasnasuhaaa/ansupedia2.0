@@ -1,8 +1,9 @@
-import { and, desc, eq, ilike, inArray, lte, sql, count } from 'drizzle-orm';
+import { and, desc, eq, exists, ilike, inArray, lte, sql, count } from 'drizzle-orm';
 import { getDb } from '../client';
 import { posts, categories, postCategories } from '../schema';
 import { databaseConfigured } from '../../lib/env';
 import type { PostInput } from '../../lib/validation/post';
+import { normalizeCategorySlugs } from '../../lib/blog/filters';
 export const published = () =>
   and(eq(posts.status, 'published'), lte(posts.publishedAt, new Date()));
 export async function listCategories() {
@@ -49,36 +50,43 @@ async function withCategories<T extends { id: string }>(items: T[]) {
       .map(({ id, name, slug }) => ({ id, name, slug })),
   }));
 }
-export async function listPosts(
-  options: {
-    q?: string;
-    category?: string;
-    page?: number;
-    admin?: boolean;
-    status?: 'draft' | 'published';
-    limit?: number;
-  } = {},
-) {
+interface PostListOptions {
+  q?: string;
+  category?: string | string[];
+  page?: number;
+  admin?: boolean;
+  status?: 'draft' | 'published';
+  limit?: number;
+}
+
+export function postListWhere(options: PostListOptions = {}) {
+  const values = options.category
+    ? Array.isArray(options.category)
+      ? options.category
+      : [options.category]
+    : [];
+  // Keep administrator filters unchanged; normalize public URL input.
+  const slugs = options.admin ? values : normalizeCategorySlugs(values);
+  return and(
+    options.admin ? undefined : published(),
+    options.q ? ilike(posts.title, `%${options.q.replace(/[\\%_]/g, '\\$&')}%`) : undefined,
+    options.status ? eq(posts.status, options.status) : undefined,
+    slugs.length
+      ? exists(sql`(select 1 from ${postCategories}
+          inner join ${categories} on ${postCategories.categoryId} = ${categories.id}
+          where ${postCategories.postId} = ${posts.id}
+          and ${inArray(categories.slug, slugs)})`)
+      : undefined,
+  );
+}
+
+export async function listPosts(options: PostListOptions = {}) {
   const limit = options.limit || 9;
   const page = Number.isFinite(options.page)
     ? Math.min(10000, Math.max(1, Math.floor(options.page || 1)))
     : 1;
   if (!databaseConfigured()) return { items: [], total: 0, page, pages: 1 };
-  const where = and(
-    options.admin ? undefined : published(),
-    options.q ? ilike(posts.title, `%${options.q.replace(/[\\%_]/g, '\\$&')}%`) : undefined,
-    options.status ? eq(posts.status, options.status) : undefined,
-    options.category
-      ? inArray(
-          posts.id,
-          getDb()
-            .select({ id: postCategories.postId })
-            .from(postCategories)
-            .innerJoin(categories, eq(postCategories.categoryId, categories.id))
-            .where(eq(categories.slug, options.category)),
-        )
-      : undefined,
-  );
+  const where = postListWhere(options);
   const [items, totals] = await Promise.all([
     getDb()
       .select()

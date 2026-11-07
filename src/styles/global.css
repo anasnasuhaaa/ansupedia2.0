@@ -955,9 +955,16 @@ fieldset legend {
   background: var(--muted);
 }
 .category-chip.selected {
-  background: var(--primary);
-  color: var(--primary-foreground);
-  border-color: var(--primary);
+  background: var(--muted);
+  color: var(--foreground);
+  border-color: var(--input);
+}
+.category-chip.selected:hover {
+  background: var(--accent);
+}
+.category-check {
+  width: 14px;
+  height: 14px;
 }
 .category-badge {
   border-radius: 0.4rem;
