@@ -109,6 +109,8 @@
   --radius: 0.75rem;
   --shadow-soft: 0 2px 8px #18181b04, 0 8px 24px #18181b04;
   --shadow-raised: 0 4px 8px #18181b04, 0 16px 36px #18181b0b;
+  --shadow-project: 0 2px 6px #18181b0a, 0 8px 24px #18181b0d;
+  --shadow-project-hover: 0 4px 10px #18181b0d, 0 16px 32px #18181b17;
   --container-max-width: 1180px;
   --container-gutter: 40px;
   --font-body: 'Geist Variable', sans-serif;
@@ -140,6 +142,8 @@
   --error-foreground: #20090d;
   --shadow-soft: 0 2px 8px #00000012, 0 8px 24px #00000018;
   --shadow-raised: 0 4px 12px #00000020, 0 16px 40px #00000035;
+  --shadow-project: 0 2px 6px #00000026, 0 8px 24px #00000033;
+  --shadow-project-hover: 0 4px 10px #00000033, 0 16px 32px #0000004d;
   color-scheme: dark;
 }
 

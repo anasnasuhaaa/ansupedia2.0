@@ -154,11 +154,6 @@ svg {
 .section-head .eyebrow {
   margin-bottom: 0.6rem;
 }
-.section-description {
-  margin-top: -1rem;
-  margin-bottom: 2rem;
-  max-width: 620px;
-}
 .actions,
 .tags {
   display: flex;
@@ -432,7 +427,7 @@ fieldset legend {
 }
 .hero {
   position: relative;
-  padding-block: clamp(3rem, 6vw, 5.5rem) 2rem;
+  padding-block: clamp(3rem, 6vw, 5.5rem) clamp(2.5rem, 4vw, 3.5rem);
 }
 .hero::before {
   content: '';
@@ -499,32 +494,24 @@ fieldset legend {
   display: flex;
   gap: 0.25rem;
 }
-.hero-footnote {
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
-  font-size: 0.73rem;
-  color: var(--muted-foreground);
-  margin-top: 3rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--border);
+.portfolio .section {
+  padding-block: clamp(3rem, 5vw, 4.25rem);
 }
-.hero-footnote .meta {
-  margin-left: auto;
-  font-size: 0.65rem;
-  letter-spacing: 0.05em;
+.portfolio .section-head {
+  margin-bottom: clamp(1.5rem, 3vw, 2rem);
 }
-.status-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--muted-foreground);
-  box-shadow: 0 0 0 4px var(--muted);
-  margin-inline: 4px;
+.portfolio .section-head h2,
+.contact-surface h2 {
+  line-height: 1.3;
+  letter-spacing: -0.035em;
+}
+.portfolio .meta {
+  font-size: 0.78rem;
+  line-height: 1.6;
 }
 #skills {
   border-top: 0;
-  padding-top: 2rem;
+  padding-top: 1.5rem;
 }
 @media (max-width: 850px) {
   .desktop-nav {
@@ -557,13 +544,6 @@ fieldset legend {
   .hero-socials {
     margin-left: -0.5rem;
   }
-  .hero-footnote {
-    margin-top: 2rem;
-    font-size: 0.67rem;
-  }
-  .hero-footnote .meta {
-    display: none;
-  }
   .footer-inner {
     flex-wrap: wrap;
     gap: 1rem;
@@ -582,24 +562,29 @@ fieldset legend {
 .skills-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 2rem 2.5rem;
+  gap: 2rem;
 }
 .skill-group h3 {
-  color: var(--muted-foreground);
+  color: var(--foreground);
   font-family: var(--font-body);
-  font-size: 0.76rem;
-  font-weight: 500;
+  font-size: 0.82rem;
+  font-weight: 550;
   letter-spacing: 0;
-  margin-bottom: 0.85rem;
+  line-height: 1.5;
+  margin-bottom: 0.75rem;
+}
+.skill-group .tags {
+  gap: 0.55rem;
 }
 .tech-tag {
-  gap: 0.4rem;
-  padding: 0.32rem 0.6rem;
+  max-width: 100%;
+  gap: 0.5rem;
+  padding: 0.4rem 0.65rem;
   border-radius: 0.5rem;
   background: var(--card);
-  color: var(--muted-foreground);
-  font-size: 0.7rem;
-  font-weight: 450;
+  color: var(--foreground);
+  font-size: 0.8rem;
+  font-weight: 500;
   line-height: 1.5;
   transition:
     background-color var(--transition-duration),
@@ -610,13 +595,19 @@ fieldset legend {
   color: var(--foreground);
   border-color: var(--input);
 }
+.tech-label {
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
 .tech-icon {
   display: inline-block;
-  width: 14px;
-  height: 14px;
+  width: 18px;
+  height: 18px;
   background: currentColor;
   mask-size: contain;
   mask-repeat: no-repeat;
+  mask-position: center;
   flex-shrink: 0;
 }
 .project-grid {
@@ -633,17 +624,19 @@ fieldset legend {
   padding: 0;
   gap: 0;
   overflow: hidden;
-  box-shadow: var(--shadow-soft);
+  border: 1px solid var(--border);
+  background: var(--card);
+  box-shadow: var(--shadow-project);
   transition:
     transform var(--transition-duration) var(--transition-ease),
     box-shadow var(--transition-duration),
-    outline-color var(--transition-duration);
+    border-color var(--transition-duration);
 }
 .project-card:hover,
 .project-card:focus-within {
   transform: translateY(-4px);
-  box-shadow: var(--shadow-raised);
-  outline: 1px solid var(--input);
+  box-shadow: var(--shadow-project-hover);
+  border-color: var(--input);
 }
 .project-cover {
   position: relative;
@@ -660,19 +653,6 @@ fieldset legend {
 }
 .project-card:hover .project-cover img {
   transform: scale(1.025);
-}
-.project-cover-label {
-  position: absolute;
-  bottom: 0.8rem;
-  left: 1rem;
-  padding: 0.2rem 0.55rem;
-  font-family: var(--font-code);
-  font-size: 0.6rem;
-  border: 1px solid #ffffff30;
-  border-radius: 0.4rem;
-  background: #18181bd9;
-  color: #fafafa;
-  backdrop-filter: blur(4px);
 }
 .project-cover-arrow {
   position: absolute;
@@ -691,57 +671,54 @@ fieldset legend {
   transform: rotate(5deg) translate(1px, -1px);
 }
 .project-body {
-  padding: 1rem;
+  padding: 1.1rem 1rem;
   display: flex;
   flex: 1;
   flex-direction: column;
 }
-.project-title-row {
-  display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
-  justify-content: space-between;
-  margin-bottom: 0.7rem;
-}
-.project-title-row h3 {
-  margin: 0;
-  font-size: 1rem;
+.project-body h3 {
+  margin: 0 0 0.6rem;
+  font-size: 1.05rem;
+  font-weight: 650;
+  line-height: 1.4;
   overflow-wrap: anywhere;
 }
-.project-title-row a:hover {
+.project-body h3 a:hover {
   color: var(--muted-foreground);
 }
-.project-title-row .meta {
-  font-size: 0.65rem;
-}
 .project-body p {
-  font-size: 0.83rem;
-  line-height: 1.8;
-  margin-bottom: 1.25rem;
+  font-size: 0.85rem;
+  line-height: 1.7;
+  margin-bottom: 1rem;
 }
 .project-technologies {
   margin-top: auto;
+  gap: 0.4rem;
 }
 .project-technologies .tech-tag {
-  font-size: 0.63rem;
-  padding: 0.2rem 0.4rem;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  padding: 0.25rem 0.45rem;
   background: var(--muted);
   border: 0;
 }
+.project-technologies .tech-tag:hover {
+  background: var(--accent);
+}
 .project-technologies .tech-icon {
-  width: 12px;
-  height: 12px;
+  width: 16px;
+  height: 16px;
 }
 .project-links {
-  padding: 0.65rem;
+  padding: 0.65rem 0.5rem;
   flex-wrap: wrap;
   justify-content: space-between;
-  gap: 0.5rem;
+  gap: 0.25rem;
   background: color-mix(in srgb, var(--muted) 50%, var(--card));
 }
 .project-links [data-slot='button'] {
-  font-size: 0.73rem;
-  padding-inline: 0.5rem;
+  font-size: 0.75rem;
+  padding-inline: 0.25rem;
 }
 .project-links a:last-child svg:last-child {
   transition: transform var(--transition-duration);
@@ -752,13 +729,10 @@ fieldset legend {
 .milestone-empty {
   background: color-mix(in srgb, var(--card) 60%, transparent);
   box-shadow: none;
-  padding-block: 1.75rem;
+  padding-block: 1.5rem;
 }
 .milestone-empty > [data-slot='card-content'] {
   padding-inline: 1.75rem;
-}
-.milestone-empty h3 {
-  margin-bottom: 0.5rem;
 }
 .milestone-empty p {
   font-size: 0.88rem;
@@ -782,7 +756,7 @@ fieldset legend {
   box-shadow: var(--shadow-soft);
 }
 .timeline-item {
-  padding: 1rem 0 1rem 1.5rem;
+  padding: 1.25rem 0 1.25rem 1.5rem;
   border-left: 1px solid var(--input);
   position: relative;
 }
@@ -799,7 +773,10 @@ fieldset legend {
 .timeline-item h3 {
   margin-block: 0.5rem;
 }
-.contact-section {
+.timeline-item p {
+  margin-bottom: 0;
+}
+.portfolio .contact-section {
   padding-top: 0;
   border-top: 0;
 }
@@ -811,8 +788,7 @@ fieldset legend {
   box-shadow: var(--shadow-soft);
 }
 .contact-surface h2 {
-  max-width: 700px;
-  font-size: clamp(1.8rem, 3.2vw, 2.6rem);
+  margin-bottom: 1rem;
 }
 .contact-surface p {
   max-width: 540px;
@@ -844,15 +820,11 @@ fieldset legend {
   .project-body {
     padding: 0.8rem;
   }
-  .project-title-row h3 {
-    font-size: 0.87rem;
-  }
-  .project-title-row .meta,
-  .project-cover-label {
-    display: none;
+  .project-body h3 {
+    font-size: 0.95rem;
   }
   .project-body p {
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     line-height: 1.65;
     display: -webkit-box;
     -webkit-line-clamp: 4;
@@ -865,8 +837,12 @@ fieldset legend {
   .project-technologies .tech-tag {
     max-width: 100%;
     overflow-wrap: anywhere;
-    font-size: 0.6rem;
+    font-size: 0.7rem;
     padding: 0.2rem 0.3rem;
+  }
+  .project-technologies .tech-icon {
+    width: 15px;
+    height: 15px;
   }
   .project-cover img {
     aspect-ratio: 4/3;
@@ -914,10 +890,6 @@ fieldset legend {
 @media (max-width: 400px) {
   .skills-grid {
     grid-template-columns: minmax(0, 1fr);
-  }
-
-  .section-head > .meta {
-    display: none;
   }
 }
 

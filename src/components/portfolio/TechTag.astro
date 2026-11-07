@@ -12,5 +12,5 @@ const icon = technologyIcons[name];
   {icon && (
     <span class="tech-icon" style={`mask-image:url(/icons/${icon}.svg)`} aria-hidden="true" />
   )}
-  {name}
+  <span class="tech-label">{name}</span>
 </Badge>

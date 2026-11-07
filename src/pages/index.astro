@@ -68,171 +68,135 @@ try {
           </Button>
         </div>
       </div>
-      <div class="hero-footnote">
-        <span class="status-dot" aria-hidden="true"></span> Building with curiosity. Learning by
-        doing.<span class="meta">SCROLL TO EXPLORE ↓</span>
+    </section>
+    <section id="skills" class="section">
+      <div class="section-head">
+        <h2>Technical Skills</h2>
+      </div>
+      <div class="skills-grid">
+        {skills.map((group) => (
+          <div class="skill-group">
+            <h3>{group.name}</h3>
+            <div class="tags">
+              {group.technologies.map((name) => (
+                <TechTag name={name} />
+              ))}
+            </div>
+          </div>
+        ))}
       </div>
     </section>
-    <div>
-      <section id="skills" class="section">
-        <div class="section-head">
-          <div>
-            <span class="eyebrow">The toolkit</span>
-            <h2>Technical skills</h2>
-          </div>
-          <span class="meta">Always evolving</span>
-        </div>
-        <div class="skills-grid">
-          {skills.map((group) => (
-            <div class="skill-group">
-              <h3>{group.name}</h3>
-              <div class="tags">
-                {group.technologies.map((name) => (
-                  <TechTag name={name} />
-                ))}
-              </div>
-            </div>
+    <section id="projects" class="section">
+      <div class="section-head">
+        <h2>Selected Projects</h2>
+      </div>
+      <div class="project-grid">
+        {[...projects]
+          .sort((a, b) => a.order - b.order)
+          .map((project) => (
+            <ProjectCard project={project} />
+          ))}
+      </div>
+    </section>
+    <section id="experience" class="section">
+      <div class="section-head">
+        <h2>Experience</h2>
+      </div>
+      {experiences.length ? (
+        experiences.map((item) => (
+          <article class="timeline-item">
+            <span class="meta">{item.period}</span>
+            <h3>
+              {item.role} · {item.organization}
+            </h3>
+            <p>{item.description}</p>
+          </article>
+        ))
+      ) : (
+        <Card.Root class="milestone-empty">
+          <Card.Content>
+            <span class="empty-icon">
+              <Briefcase class="size-5" aria-hidden="true" />
+            </span>
+            <p>My work so far is best explored through the projects above.</p>
+            <a href="#projects" class="text-link">
+              Explore the projects <ArrowUpRight aria-hidden="true" />
+            </a>
+          </Card.Content>
+        </Card.Root>
+      )}
+    </section>
+    <section id="credentials" class="section">
+      <div class="section-head">
+        <h2>Certifications &amp; Achievements</h2>
+      </div>
+      {certifications.length ? (
+        certifications.map((item) => (
+          <article class="timeline-item">
+            <span class="meta">
+              {item.date} · {item.type}
+            </span>
+            <h3>{item.title}</h3>
+            <p>
+              {item.issuer} — {item.description}
+            </p>
+            {item.credentialUrl && <a href={item.credentialUrl}>View credential ↗</a>}
+          </article>
+        ))
+      ) : (
+        <Card.Root class="milestone-empty">
+          <Card.Content>
+            <span class="empty-icon">
+              <Award class="size-5" aria-hidden="true" />
+            </span>
+            <p>No certifications or achievements listed yet.</p>
+          </Card.Content>
+        </Card.Root>
+      )}
+    </section>
+    <section id="blog" class="section">
+      <div class="section-head">
+        <h2>Latest Writing</h2>
+        <Button href="/blog" variant="ghost" size="sm">
+          All writing <ArrowUpRight aria-hidden="true" />
+        </Button>
+      </div>
+      {recent.length ? (
+        <div class="writing-grid">
+          {recent.map((post) => (
+            <PostRow post={post} />
           ))}
         </div>
-      </section>
-      <section id="projects" class="section">
-        <div class="section-head">
-          <div>
-            <span class="eyebrow">Ideas into practice</span>
-            <h2>Selected projects</h2>
-          </div>
-          <span class="meta">01 — 06</span>
-        </div>
-        <p class="section-description">A selection of things I've been building and exploring.</p>
-        <div class="project-grid">
-          {[...projects]
-            .sort((a, b) => a.order - b.order)
-            .map((project) => (
-              <ProjectCard project={project} />
-            ))}
-        </div>
-      </section>
-      <section id="experience" class="section">
-        <div class="section-head">
-          <div>
-            <span class="eyebrow">The journey</span>
-            <h2>Experience</h2>
-          </div>
-          <span class="meta">Along the way</span>
-        </div>
-        {experiences.length ? (
-          experiences.map((item) => (
-            <article class="timeline-item">
-              <span class="meta">{item.period}</span>
-              <h3>
-                {item.role} · {item.organization}
-              </h3>
-              <p>{item.description}</p>
-            </article>
-          ))
-        ) : (
-          <Card.Root class="milestone-empty">
-            <Card.Content>
-              <span class="empty-icon">
-                <Briefcase class="size-5" aria-hidden="true" />
-              </span>
-              <h3>Learning through building.</h3>
-              <p>
-                My work so far is best explored through the projects above. More of the journey will
-                be documented here.
-              </p>
-              <a href="#projects" class="text-link">
-                Explore the projects <ArrowUpRight aria-hidden="true" />
-              </a>
-            </Card.Content>
-          </Card.Root>
-        )}
-      </section>
-      <section id="credentials" class="section">
-        <div class="section-head">
-          <div>
-            <span class="eyebrow">Along the way</span>
-            <h2>Certifications &amp; achievements</h2>
-          </div>
-        </div>
-        {certifications.length ? (
-          certifications.map((item) => (
-            <article class="timeline-item">
-              <span class="meta">
-                {item.date} · {item.type}
-              </span>
-              <h3>{item.title}</h3>
-              <p>
-                {item.issuer} — {item.description}
-              </p>
-              {item.credentialUrl && <a href={item.credentialUrl}>View credential ↗</a>}
-            </article>
-          ))
-        ) : (
-          <Card.Root class="milestone-empty">
-            <Card.Content>
-              <span class="empty-icon">
-                <Award class="size-5" aria-hidden="true" />
-              </span>
-              <h3>The next chapter is in progress.</h3>
-              <p>A space for certifications and milestones, as they happen.</p>
-            </Card.Content>
-          </Card.Root>
-        )}
-      </section>
-      <section id="blog" class="section">
-        <div class="section-head">
-          <div>
-            <span class="eyebrow">The notebook</span>
-            <h2>Notes from the process</h2>
-          </div>
-          <Button href="/blog" variant="ghost" size="sm">
-            All writing <ArrowUpRight aria-hidden="true" />
-          </Button>
-        </div>
-        {recent.length ? (
-          <div class="writing-grid">
-            {recent.map((post) => (
-              <PostRow post={post} />
-            ))}
-          </div>
-        ) : (
-          <div class="empty">
-            <span class="empty-icon">
-              <Notebook class="size-5" aria-hidden="true" />
-            </span>
-            <h3>{blogError ? 'A brief pause.' : 'Good notes take time.'}</h3>
-            <p>
-              {blogError
-                ? 'Writing is temporarily unavailable. Please try again later.'
-                : 'Software, security, and lessons learned while building. Notes will appear here as they are published.'}
-            </p>
-          </div>
-        )}
-      </section>
-      <section id="contact" class="section contact-section">
-        <div class="contact-surface">
-          <span class="eyebrow">Keep in touch</span>
-          <h2>
-            Good conversations start
-            <br />
-            with a simple hello.
-          </h2>
+      ) : (
+        <div class="empty">
+          <span class="empty-icon">
+            <Notebook class="size-5" aria-hidden="true" />
+          </span>
           <p>
-            Have a project to discuss or something interesting to share? Find me on GitHub or
-            connect on LinkedIn.
+            {blogError
+              ? 'Writing is temporarily unavailable. Please try again later.'
+              : 'Software, security, and lessons learned while building. Notes will appear here as they are published.'}
           </p>
-          <div class="actions">
-            <a class={button({ variant: 'primary' })} href={profile.linkedin}>
-              Connect on LinkedIn ↗
-            </a>
-            <a class={button({ variant: 'outline' })} href={profile.github}>
-              Find me on GitHub ↗
-            </a>
-          </div>
         </div>
-      </section>
-    </div>
+      )}
+    </section>
+    <section id="contact" class="section contact-section">
+      <div class="contact-surface">
+        <h2>Contact</h2>
+        <p>
+          Have a project to discuss or something interesting to share? Find me on GitHub or connect
+          on LinkedIn.
+        </p>
+        <div class="actions">
+          <a class={button({ variant: 'primary' })} href={profile.linkedin}>
+            Connect on LinkedIn ↗
+          </a>
+          <a class={button({ variant: 'outline' })} href={profile.github}>
+            Find me on GitHub ↗
+          </a>
+        </div>
+      </div>
+    </section>
   </div>
   <script
     type="application/ld+json"
