@@ -1,26 +1,20 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
-test('public routes, themes and mobile layout', async ({ page, request }) => {
+
+test('public routes preserve SEO, content and authorization boundaries', async ({
+  page,
+  request,
+}) => {
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
   await page.goto('/');
-  await expect(page.getByRole('heading', { name: 'Anas Nasuha', exact: true })).toBeVisible();
-  await page.selectOption('#theme-select', 'dark');
-  await expect(page.locator('html')).toHaveClass(/dark/);
-  await page.reload();
-  await expect(page.locator('html')).toHaveClass(/dark/);
-  expect(
-    (await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze()).violations,
-  ).toEqual([]);
-  await page.screenshot({ path: '/tmp/ansupedia-desktop.png', fullPage: true });
-  await page.selectOption('#theme-select', 'light');
-  await expect(page.locator('html')).not.toHaveClass(/dark/);
-  await page.setViewportSize({ width: 390, height: 844 });
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-  expect(
-    (await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze()).violations,
-  ).toEqual([]);
-  await page.screenshot({ path: '/tmp/ansupedia-mobile.png', fullPage: true });
+  await expect(page.getByRole('heading', { name: /^Anas Nasuha/ })).toBeVisible();
+  await expect(page.locator('.project-card')).toHaveCount(6);
+  await expect(page.locator('.profile')).toHaveCount(0);
+  expect(await page.locator('link[rel=canonical]').getAttribute('href')).toBeTruthy();
+  expect(await page.locator('script[type="application/ld+json"]').textContent()).toContain(
+    'Person',
+  );
   for (const path of ['/blog', '/rss.xml', '/sitemap.xml', '/robots.txt', '/admin/login'])
     expect((await request.get(path)).status()).toBe(200);
   expect((await request.get('/blog/missing-fixture')).status()).toBe(404);
@@ -29,99 +23,131 @@ test('public routes, themes and mobile layout', async ({ page, request }) => {
   expect((await request.post('/api/auth/sign-up/email', { data: {} })).status()).toBe(404);
   expect(errors).toEqual([]);
 });
-test('administrator signs in, writes, previews, publishes and deletes an article', async ({
-  page,
-  request,
-}) => {
-  test.skip(
-    !process.env.SEED_ADMIN_EMAIL || !process.env.SEED_ADMIN_PASSWORD,
-    'Requires temporary local admin credentials.',
-  );
-  const errors: string[] = [];
-  page.on('pageerror', (e) => errors.push(e.message));
-  await page.goto('/admin/login');
-  await page.getByLabel('Email', { exact: true }).fill(process.env.SEED_ADMIN_EMAIL!);
-  await page.getByLabel('Password', { exact: true }).fill(process.env.SEED_ADMIN_PASSWORD!);
-  await page.getByRole('button', { name: 'Sign in', exact: true }).click();
-  await expect(page).toHaveURL('/admin');
-  await page.getByRole('link', { name: 'New article', exact: true }).click();
-  await expect(page.getByRole('textbox', { name: 'Article content', exact: true })).toBeVisible();
-  const slug = `browser-test-${Date.now()}`;
-  await page.getByLabel('Title', { exact: true }).fill('Browser verification fixture');
-  await page.getByLabel('URL slug').fill(slug);
-  await page.getByLabel('Excerpt', { exact: true }).fill('Temporary verification article.');
-  await page
-    .getByRole('textbox', { name: 'Article content', exact: true })
-    .fill('A safe paragraph from the browser test.');
-  await page.getByLabel('Software Engineering', { exact: true }).check();
-  await page.getByLabel('Learning Notes', { exact: true }).check();
-  await page.getByRole('button', { name: 'Preview', exact: true }).click();
-  await expect(page.getByRole('region', { name: 'Article preview' })).toContainText(
-    'A safe paragraph',
-  );
-  await page.getByRole('button', { name: 'Close preview' }).click();
-  await page.getByRole('button', { name: 'Save draft', exact: true }).click();
-  await expect(page).toHaveURL(/\/admin\/posts\/[a-f0-9-]+\?saved=1/);
-  const id = page.url().split('/').pop()!.split('?')[0];
-  const createdCategory = await page.request.post('/api/admin/categories', {
-    headers: { Origin: 'http://localhost:4321' },
-    data: { name: slug, slug },
-  });
-  expect(createdCategory.ok()).toBe(true);
-  const categoryId = (await createdCategory.json()).id;
-  const renamed = await page.request.post('/api/admin/categories', {
-    headers: { Origin: 'http://localhost:4321' },
-    data: { id: categoryId, name: slug + ' updated', slug: slug + '-updated' },
-  });
-  expect(renamed.ok()).toBe(true);
-  await page.request.delete('/api/admin/categories', {
-    headers: { Origin: 'http://localhost:4321' },
-    data: { id: categoryId },
-  });
-  try {
-    expect((await request.get(`/blog/${slug}`)).status()).toBe(404);
-    await expect(page.getByLabel('Software Engineering', { exact: true })).toBeChecked();
-    await expect(page.getByLabel('Learning Notes', { exact: true })).toBeChecked();
-    const csrf = await page.request.post('/api/admin/posts', {
-      headers: { Origin: 'https://evil.example' },
-      data: {},
+
+for (const width of [1440, 1024, 768, 390, 320])
+  test(`shared container alignment and mobile navigation at ${width}px`, async ({
+    page,
+  }, testInfo) => {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto('/');
+    await page.addStyleTag({ content: 'astro-dev-toolbar {display:none}' });
+    await page.evaluate(() => document.fonts.ready);
+    const metrics = await page.evaluate(() => {
+      const selectors = ['.header-inner', '.portfolio', '.footer-inner'];
+      return selectors.map((selector) => {
+        const element = document.querySelector(selector)!;
+        const rect = element.getBoundingClientRect();
+        const css = getComputedStyle(element);
+        return {
+          left: rect.left + parseFloat(css.paddingLeft),
+          right: rect.right - parseFloat(css.paddingRight),
+        };
+      });
     });
-    expect(csrf.status()).toBe(403);
-    await page.getByRole('button', { name: 'Publish', exact: true }).click();
-    await page.waitForLoadState('networkidle');
-    await expect(page.getByText('Article saved.', { exact: true })).toBeVisible();
-    expect((await request.get(`/blog/${slug}`)).status()).toBe(200);
-    expect(await (await request.get('/rss.xml')).text()).toContain(slug);
-    await page.goto(`/blog/${slug}`);
-    await expect(page.locator('.prose')).toContainText('A safe paragraph');
-    await page.goto(`/admin/posts/${id}`);
-    await page.getByRole('button', { name: 'Save as draft / unpublish' }).click();
-    await page.waitForURL(/saved=1/);
-    expect((await request.get(`/blog/${slug}`)).status()).toBe(404);
-    await page.goto(`/admin/posts?q=${slug}`);
-    // Search the unique fixture title instead of its URL slug.
-    await page.getByRole('searchbox').fill('Browser verification fixture');
-    await page.getByRole('button', { name: 'Filter', exact: true }).click();
-    await page.getByRole('button', { name: 'Delete', exact: true }).click();
-    await expect(page.getByRole('alertdialog')).toBeVisible();
-    await page.getByRole('button', { name: 'Cancel', exact: true }).click();
-    await expect(page.getByRole('alertdialog')).not.toBeVisible();
-    await page.getByRole('button', { name: 'Delete', exact: true }).click();
-    await page.getByRole('button', { name: 'Confirm deletion', exact: true }).click();
-    await expect(page.getByText('No articles found.', { exact: true })).toBeVisible();
-  } finally {
-    await page.request.delete('/api/admin/posts', {
-      headers: { Origin: 'http://localhost:4321' },
-      data: { id },
-    });
+    for (const frame of metrics) {
+      expect(Math.abs(frame.left - metrics[0].left)).toBeLessThan(1);
+      expect(Math.abs(frame.right - metrics[0].right)).toBeLessThan(1);
+    }
+    const hero = await page.locator('.hero').boundingBox();
+    const projects = await page.locator('.project-grid').boundingBox();
+    expect(Math.abs(hero!.x - projects!.x)).toBeLessThan(1);
+    expect(Math.abs(hero!.width - projects!.width)).toBeLessThan(1);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true,
+    );
+    if (width <= 768) {
+      const trigger = page.getByRole('button', { name: 'Open navigation' });
+      await trigger.click();
+      await expect(page.getByRole('dialog')).toBeVisible();
+      await page.keyboard.press('Escape');
+      await expect(page.getByRole('dialog')).not.toBeVisible();
+      await expect(trigger).toBeFocused();
+      await trigger.click();
+      await page
+        .getByRole('navigation', { name: 'Mobile navigation' })
+        .getByRole('link', { name: 'Projects', exact: true })
+        .click();
+      await expect(page.getByRole('dialog')).not.toBeVisible();
+      await expect(page).toHaveURL(/#projects$/);
+      await expect(page.locator('.mobile-nav-link[href="/#projects"]')).toHaveAttribute(
+        'aria-current',
+        'location',
+      );
+    }
+    await page.goto('/');
+    await page.addStyleTag({ content: 'astro-dev-toolbar {display:none}' });
+    if (width === 1440 || width === 390) {
+      await page.screenshot({
+        path: testInfo.outputPath(`home-${width}-light.png`),
+        fullPage: true,
+      });
+      await page.getByRole('button', { name: 'Color theme', exact: true }).click();
+      await page.getByRole('menuitem', { name: 'Dark', exact: true }).click();
+      await expect(page.locator('html')).toHaveClass(/dark/);
+      await page.screenshot({
+        path: testInfo.outputPath(`home-${width}-dark.png`),
+        fullPage: true,
+      });
+    }
+  });
+
+test('theme preference persists across routes and follows the system setting', async ({ page }) => {
+  await page.emulateMedia({ colorScheme: 'dark' });
+  await page.goto('/');
+  await expect(page.locator('html')).toHaveClass(/dark/);
+  await page.getByRole('button', { name: 'Color theme', exact: true }).click();
+  await page.getByRole('menuitem', { name: 'Light', exact: true }).click();
+  await expect(page.locator('html')).not.toHaveClass(/dark/);
+  for (const path of ['/blog', '/admin/login', '/']) {
+    await page.goto(path);
+    await expect(page.locator('html')).not.toHaveClass(/dark/);
   }
-  await page.goto('/admin');
-  await page.getByRole('button', { name: 'Sign out' }).click();
-  await expect(page).toHaveURL('/admin/login');
-  expect(errors).toEqual([]);
+  await page.getByRole('button', { name: 'Color theme', exact: true }).click();
+  await page.getByRole('menuitem', { name: 'System', exact: true }).click();
+  await expect(page.locator('html')).toHaveClass(/dark/);
+  await page.emulateMedia({ colorScheme: 'light' });
+  await expect(page.locator('html')).not.toHaveClass(/dark/);
+  await page.reload();
+  await expect(page.locator('html')).not.toHaveClass(/dark/);
 });
 
-test('login attempts are rate limited', async ({ request }) => {
+test('public accessibility in both themes, navigation and appearance menus', async ({ page }) => {
+  await page.goto('/');
+  for (const mode of ['Light', 'Dark']) {
+    await page.getByRole('button', { name: 'Color theme', exact: true }).click();
+    await page.getByRole('menuitem', { name: mode, exact: true }).click();
+    expect(
+      (
+        await new AxeBuilder({ page })
+          .exclude('astro-dev-toolbar')
+          .withTags(['wcag2a', 'wcag2aa'])
+          .analyze()
+      ).violations,
+    ).toEqual([]);
+  }
+  await page.getByRole('button', { name: 'Color theme', exact: true }).click();
+  expect(
+    (
+      await new AxeBuilder({ page })
+        .exclude('astro-dev-toolbar')
+        .withTags(['wcag2a', 'wcag2aa'])
+        .analyze()
+    ).violations,
+  ).toEqual([]);
+  await page.keyboard.press('Escape');
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole('button', { name: 'Open navigation' }).click();
+  expect(
+    (
+      await new AxeBuilder({ page })
+        .exclude('astro-dev-toolbar')
+        .withTags(['wcag2a', 'wcag2aa'])
+        .analyze()
+    ).violations,
+  ).toEqual([]);
+});
+
+test('login attempts remain rate limited', async ({ request }) => {
   let limited = false;
   for (let i = 0; i < 6; i++) {
     const response = await request.post('/api/auth/sign-in/email', {

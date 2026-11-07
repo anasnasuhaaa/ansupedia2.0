@@ -98,6 +98,7 @@ export default function Editor({
   uploadsEnabled: boolean;
 }) {
   const formRef = useRef<HTMLFormElement>(null);
+  const previewTrigger = useRef<HTMLButtonElement>(null);
   const allowLeave = useRef(false);
   const selection = useRef<{ from: number; to: number } | null>(null);
   const [title, setTitle] = useState(post?.title || '');
@@ -156,6 +157,18 @@ export default function Editor({
   useEffect(() => {
     if (new URL(location.href).searchParams.has('saved')) toast.success('Article saved.');
   }, []);
+  useEffect(() => {
+    if (busy) return;
+    const first = Object.keys(errors)[0];
+    if (!first) return;
+    const names: Record<string, string> = {
+      coverImageUrl: 'cover',
+      coverImageAlt: 'cover-alt',
+      seoTitle: 'seo-title',
+      seoDescription: 'seo-description',
+    };
+    document.getElementById(names[first] || first)?.focus();
+  }, [busy, errors]);
   const attrs = (name: string, id = name) => ({
     'aria-invalid': !!errors[name],
     'aria-describedby': errors[name]
@@ -198,14 +211,6 @@ export default function Editor({
       const result = await response.json();
       if (!response.ok) {
         setErrors(result.fieldErrors || {});
-        const first = Object.keys(result.fieldErrors || {})[0];
-        const names: Record<string, string> = {
-          coverImageUrl: 'cover',
-          coverImageAlt: 'cover-alt',
-          seoTitle: 'seo-title',
-          seoDescription: 'seo-description',
-        };
-        if (first) document.getElementById(names[first] || first)?.focus();
         throw Error(result.error || 'Unable to save.');
       }
       allowLeave.current = true;
@@ -330,7 +335,7 @@ export default function Editor({
           void save(status);
         }}
       >
-        <fieldset className="editor-controls" disabled={busy}>
+        <fieldset className="editor-controls" disabled={busy || !editor}>
           <legend className="sr-only">Article editor</legend>
           <div className="editor-layout">
             <div className="editor-main">
@@ -658,6 +663,7 @@ export default function Editor({
               className={button({ variant: 'ghost', size: 'sm' })}
               type="button"
               disabled={busy || !editor}
+              ref={previewTrigger}
               onClick={() => void showPreview()}
             >
               <Eye size={16} aria-hidden="true" />
@@ -855,6 +861,10 @@ export default function Editor({
         open={!!preview}
         onOpenChange={(open) => {
           if (!open) setPreview(null);
+        }}
+        onCloseAutoFocus={(event) => {
+          event.preventDefault();
+          previewTrigger.current?.focus();
         }}
         title="Reader preview"
         description="This is how your current content will appear to readers."

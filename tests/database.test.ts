@@ -4,7 +4,13 @@ import { randomUUID } from 'node:crypto';
 import { eq, inArray } from 'drizzle-orm';
 import { getDb } from '../src/db/client';
 import { posts, categories, postCategories } from '../src/db/schema';
-import { savePost, getPost, deletePost, listPosts } from '../src/db/queries/blog';
+import {
+  savePost,
+  getPost,
+  deletePost,
+  listPosts,
+  listCategoryStats,
+} from '../src/db/queries/blog';
 import { databaseConfigured } from '../src/lib/env';
 const local =
   databaseConfigured() &&
@@ -50,7 +56,14 @@ it.skipIf(!local)(
     await expect(savePost(input)).rejects.toThrow();
     await savePost({ ...input, status: 'published' }, post.id);
     expect((await getPost(post.slug))?.title).toBe(prefix);
-    expect((await listPosts({ q: prefix, category: created[0].slug })).total).toBe(1);
+    const listing = await listPosts({ q: prefix, category: created[0].slug });
+    expect(listing.total).toBe(1);
+    expect(listing.items[0].categories.map((category) => category.id).sort()).toEqual(
+      [...cats].sort(),
+    );
+    const usage = await listCategoryStats();
+    for (const categoryId of cats)
+      expect(usage.find((category) => category.id === categoryId)?.articleCount).toBe(1);
     await savePost(
       { ...input, status: 'published', categoryIds: [cats[0]], title: 'Edited ' + prefix },
       post.id,

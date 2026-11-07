@@ -23,7 +23,7 @@ pnpm test:browser
 pnpm build
 ```
 
-Browser tests require the dev server and `pnpm exec playwright install chromium`. The authenticated browser test uses `SEED_ADMIN_EMAIL` and `SEED_ADMIN_PASSWORD` only when temporarily supplied; otherwise that test is skipped. Database tests run only against a configured localhost database, create uniquely named fixtures, and clean them up. They do not reset tables. A build creates Vercel artifacts locally; it does not deploy.
+Browser tests require the dev server and `pnpm exec playwright install chromium`. Authenticated browser tests create a temporary administrator, categories, and clearly marked articles only against a configured localhost database, then remove those fixtures. They skip mutations against remote or unconfigured databases. A previous rate-limit test may require a short sign-in cooldown. Database tests run only against a configured localhost database, create uniquely named fixtures, and clean them up. They do not reset tables. A build creates Vercel artifacts locally; it does not deploy.
 
 ## Local PostgreSQL setup
 
@@ -60,7 +60,7 @@ Better Auth validates secure cookie sessions. An explicit stored administrator r
 - `/blog`: title search, category filter, featured article and pagination.
 - `/blog/[slug]`: published articles with related writing, reading time and structured metadata. Drafts return 404 and are excluded from feeds and sitemap.
 
-Content is JSONB, validated against an allowlist and ProseMirror's schema. The same Tiptap static renderer and HTML sanitizer power preview and public pages. Links and image schemes are restricted. Code is escaped and highlighted. The editor does not autosave; use Save draft or Publish. Publication dates are set on first publish and retained on subsequent edits.
+Content is JSONB, validated against an allowlist and ProseMirror's schema. The same Tiptap static renderer and HTML sanitizer power preview and public pages. Links and image schemes are restricted. Code is escaped and highlighted. The editor indicates unsaved changes. Use Save draft or Publish for a draft, and Update article for published writing. Saving updates keeps the article published; Unpublish is a separate confirmation. Publication dates are set on first publish and retained on subsequent edits.
 
 ## Images
 
@@ -90,7 +90,7 @@ postgres.js uses a small pool, idle/connect timeouts and `prepare:false` for com
 - `src/lib/blog`, `src/lib/validation`: renderer, validation and feed utilities.
 - `drizzle`: committed migration history.
 
-Starwind's official theme initialization runs before paint. Light, dark and system settings persist; the runtime follows OS preference changes. Semantic theme tokens and Astro Starwind buttons are shared throughout the interface. Inter is bundled locally. Public pages include canonical, Open Graph, Twitter metadata, Person/BlogPosting JSON-LD, `/sitemap.xml`, `/robots.txt` and `/rss.xml`.
+Starwind's official theme initialization runs before paint. Light, dark and system settings persist; the runtime follows OS preference changes. Semantic monochrome tokens and installed Starwind components are shared across the portfolio and CMS. Manrope headings, Geist body text, and Geist Mono metadata are bundled locally. The homepage, navigation and footer use one shared container. The mobile menu uses a Starwind Sheet; appearance choices use a keyboard-accessible Starwind dropdown. The React Tiptap editor uses Radix Toolbar, Tooltip and Dialog controls with the shared Starwind styles. Public pages include canonical, Open Graph, Twitter metadata, Person/BlogPosting JSON-LD, `/sitemap.xml`, `/robots.txt` and `/rss.xml`.
 
 ## Verification and limitations
 

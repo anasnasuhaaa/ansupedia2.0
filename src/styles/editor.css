@@ -476,3 +476,22 @@
     font-size: 1rem;
   }
 }
+@media (max-width: 600px) {
+  .editor-save-bar .actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.3rem;
+  }
+  .editor-save-bar button {
+    min-height: 44px;
+    font-size: 0.7rem;
+    padding-inline: 0.3rem;
+  }
+  .editor-save-bar button svg {
+    display: none;
+  }
+  .editor-toolbar .editor-tool {
+    width: 40px;
+    height: 40px;
+  }
+}

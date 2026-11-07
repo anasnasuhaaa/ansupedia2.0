@@ -23,7 +23,7 @@ import Check from '@tabler/icons/outline/check.svg';
       ['dark', 'Dark', Moon],
       ['system', 'System', Monitor],
     ].map(([value, label, Icon]) => (
-      <Dropdown.Item data-sw-theme-control data-theme-value={value} class="theme-option">
+      <Dropdown.Item data-theme-value={value} class="theme-option">
         <Icon class="size-4" aria-hidden="true" /> {label}
         <Check class="theme-check ml-auto size-4" aria-hidden="true" />
       </Dropdown.Item>
@@ -41,6 +41,11 @@ import Check from '@tabler/icons/outline/check.svg';
       else item.removeAttribute('aria-current');
     });
   }
+  document.querySelectorAll<HTMLElement>('[data-theme-value]').forEach((item) => {
+    item.addEventListener('click', () =>
+      controller.setTheme(item.dataset.themeValue as 'light' | 'dark' | 'system'),
+    );
+  });
   controller.subscribe('themeChange', syncTheme);
   syncTheme();
 </script>
