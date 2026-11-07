@@ -89,6 +89,7 @@ test('admin dashboard and category manager dialogs work at desktop and mobile si
   await expect(dialog.getByLabel('Slug', { exact: true })).toHaveValue(`${fixture.prefix}-new`);
   await dialog.getByRole('button', { name: 'Create category', exact: true }).click();
   await expect(dialog).not.toBeVisible();
+  await expect(page.locator('[data-sonner-toast]')).toContainText('Category created successfully.');
   await page.getByRole('searchbox', { name: 'Search categories' }).fill(`${fixture.prefix} New`);
   await page.getByRole('button', { name: 'Search', exact: true }).click();
   await expect(page.locator('tbody tr')).toHaveCount(1);
@@ -99,6 +100,7 @@ test('admin dashboard and category manager dialogs work at desktop and mobile si
   await expect(
     page.getByRole('cell', { name: `${fixture.prefix} Renamed`, exact: true }),
   ).toBeVisible();
+  await expect(page.locator('[data-sonner-toast]')).toContainText('Category updated successfully.');
   await page
     .getByRole('button', { name: `Delete category: ${fixture.prefix} Renamed`, exact: true })
     .click();
@@ -112,6 +114,7 @@ test('admin dashboard and category manager dialogs work at desktop and mobile si
   await expect(
     page.getByRole('cell', { name: `${fixture.prefix} Renamed`, exact: true }),
   ).toHaveCount(0);
+  await expect(page.locator('[data-sonner-toast]')).toContainText('Category deleted successfully.');
   for (const width of [1440, 1024, 768, 390, 320]) {
     await page.setViewportSize({ width, height: 900 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
@@ -256,7 +259,8 @@ test('draft, preview, publish, update, unpublish and delete preserve the complet
   await page.getByRole('button', { name: 'Close preview', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Preview', exact: true })).toBeFocused();
   await page.getByRole('button', { name: 'Save draft', exact: true }).click();
-  await expect(page).toHaveURL(/\/admin\/posts\/[a-f0-9-]+\?saved=1/);
+  await expect(page).toHaveURL(/\/admin\/posts\/[a-f0-9-]+$/);
+  await expect(page.locator('[data-sonner-toast]')).toHaveText(/Article created successfully/);
   id = page.url().split('/').pop()!.split('?')[0];
   try {
     expect((await request.get(`/blog/${slug}`)).status()).toBe(404);
@@ -272,6 +276,9 @@ test('draft, preview, publish, update, unpublish and delete preserve the complet
     ).toBe(403);
     await page.getByRole('button', { name: 'Publish', exact: true }).click();
     await expect(page.getByRole('button', { name: 'Update article', exact: true })).toBeVisible();
+    await expect(page.locator('[data-sonner-toast]')).toContainText(
+      'Article published successfully.',
+    );
     expect((await request.get(`/blog/${slug}`)).status()).toBe(200);
     expect(await (await request.get('/rss.xml')).text()).toContain(slug);
     expect(await (await request.get('/sitemap.xml')).text()).toContain(slug);
@@ -287,6 +294,7 @@ test('draft, preview, publish, update, unpublish and delete preserve the complet
     await page.getByRole('button', { name: 'Unpublish', exact: true }).click();
     await page.getByRole('button', { name: 'Unpublish article', exact: true }).click();
     await expect(page.getByRole('button', { name: 'Save draft', exact: true })).toBeVisible();
+    await expect(page.locator('[data-sonner-toast]')).toContainText('Article unpublished');
     expect((await request.get(`/blog/${slug}`)).status()).toBe(404);
     await page.goto(`/admin/posts?q=${encodeURIComponent(`${fixture.prefix} Workflow`)}`);
     await page
@@ -321,9 +329,26 @@ test('server validation appears beside the relevant article field', async ({ pag
   await expect(page.locator('#slug-error')).toContainText('already in use');
   await expect(page.getByLabel('URL slug')).toHaveAttribute('aria-invalid', 'true');
   await expect(page.getByLabel('URL slug')).toBeFocused();
+  await expect(page.locator('[data-sonner-toast][data-type=error]')).toContainText(
+    'already in use',
+  );
 });
 
-test('administrator can sign out and protected routes redirect', async ({ page }) => {
+test('administrator can sign out and protected routes redirect', async ({
+  page,
+  context,
+  editorial,
+}) => {
+  // Sign out a separate session so the shared fixture remains usable by later files.
+  await context.clearCookies();
+  expect(
+    (
+      await page.request.post('/api/auth/sign-in/email', {
+        headers: { Origin: 'http://localhost:4321' },
+        data: editorial!.credentials,
+      })
+    ).status(),
+  ).toBe(200);
   await page.goto('/admin');
   await page.getByRole('button', { name: 'Sign out', exact: true }).first().click();
   await expect(page).toHaveURL('/admin/login');

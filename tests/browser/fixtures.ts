@@ -7,6 +7,7 @@ import { user, account, posts, categories } from '../../src/db/schema';
 type EditorialFixture = {
   state: Awaited<ReturnType<APIRequestContext['storageState']>>;
   prefix: string;
+  credentials: { email: string; password: string };
   categories: { id: string; name: string; slug: string }[];
   posts: (typeof posts.$inferSelect)[];
 };
@@ -131,6 +132,7 @@ export const test = base.extend<{}, { editorial: EditorialFixture | null }>({
         await use({
           state: await client.storageState(),
           prefix,
+          credentials: { email, password },
           categories: createdCategories,
           posts: createdPosts,
         });

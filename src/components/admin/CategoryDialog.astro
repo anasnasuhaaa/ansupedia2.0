@@ -60,7 +60,7 @@ const suffix = category?.id || 'new';
   </Dialog.Content>
 </Dialog.Root>
 <script>
-  import { toast } from '../starwind/toast';
+  import { toast, redirectWithNotice } from '../../lib/notifications';
   document.querySelectorAll<HTMLFormElement>('.category-form').forEach((form) => {
     const name = form.elements.namedItem('name') as HTMLInputElement;
     const slug = form.elements.namedItem('slug') as HTMLInputElement;
@@ -93,6 +93,7 @@ const suffix = category?.id || 'new';
       });
       submit.disabled = true;
       feedback.textContent = 'Saving…';
+      const notice = toast.loading('Saving category…');
       try {
         const response = await fetch('/api/admin/categories', {
           method: 'POST',
@@ -117,10 +118,14 @@ const suffix = category?.id || 'new';
           form.querySelector<HTMLInputElement>('[aria-invalid="true"]')?.focus();
           throw Error(result.error);
         }
-        location.href = '/admin/categories?notice=saved';
+        toast.dismiss(notice);
+        redirectWithNotice(
+          '/admin/categories',
+          form.dataset.id ? 'categoryUpdated' : 'categoryCreated',
+        );
       } catch (error) {
         feedback.textContent = error instanceof Error ? error.message : 'Unable to save.';
-        toast.error(feedback.textContent);
+        toast.error(feedback.textContent, { id: notice });
         submit.disabled = false;
       }
     });

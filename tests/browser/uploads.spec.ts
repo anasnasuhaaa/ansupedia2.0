@@ -52,6 +52,9 @@ test('file uploads map through edits and preserve image order through save, reop
     await page.keyboard.type('Paragraph two.');
     finish();
     await expect(content.locator('img:not(.image-upload-placeholder img)')).toHaveCount(1);
+    await expect(page.locator('[data-sonner-toast][data-type=success]')).toContainText(
+      'Image uploaded and inserted.',
+    );
     src = (await content.locator('img').getAttribute('src'))!;
     expect(src).toMatch(/^\/dev-uploads\/[a-f0-9-]+\.png$/);
     const asset = await page.request.get(src);
@@ -114,6 +117,7 @@ test('failed images never become document nodes and upload security checks remai
     .getByLabel('Upload from device')
     .setInputFiles({ name: 'fake.png', mimeType: 'image/png', buffer: Buffer.from('not a PNG') });
   await expect(dialog.getByRole('alert')).toContainText('Only valid');
+  await expect(page.locator('[data-sonner-toast][data-type=error]')).toContainText('Only valid');
   await dialog.getByRole('button', { name: 'Cancel', exact: true }).click();
   await expect(content.locator('img')).toHaveCount(0);
   await expect(content).toHaveText('Keep this paragraph.');

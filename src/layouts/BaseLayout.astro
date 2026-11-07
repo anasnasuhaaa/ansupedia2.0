@@ -6,6 +6,7 @@ import '../styles/starwind.css';
 import '../styles/global.css';
 import ThemeControl from '../components/site/ThemeControl.astro';
 import SiteHeader from '../components/site/SiteHeader.astro';
+import NotificationHost from '../components/notifications/NotificationHost';
 import { ThemeInitScript } from '@starwind-ui/astro/theme';
 interface Props {
   title?: string;
@@ -81,5 +82,6 @@ const canonical = new URL(Astro.url.pathname, site);
         </a>
       </div>
     </footer>
+    {(workspace || Astro.url.pathname === '/admin/login') && <NotificationHost client:load />}
   </body>
 </html>

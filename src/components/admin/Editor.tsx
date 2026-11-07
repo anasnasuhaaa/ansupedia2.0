@@ -12,7 +12,7 @@ import { input } from '../starwind/input/variants';
 import { textarea } from '../starwind/textarea/variants';
 import { nativeSelect } from '../starwind/native-select/variants';
 import { card, cardContent, cardHeader } from '../starwind/card/variants';
-import { toast } from '@starwind-ui/astro/toast';
+import { toast, redirectWithNotice } from '../../lib/notifications';
 import '../starwind/prose/styles.css';
 import '../../styles/editor.css';
 import EditorDialog from './EditorDialog';
@@ -186,9 +186,6 @@ export default function Editor({
     return () => window.removeEventListener('beforeunload', beforeUnload);
   }, [dirty, uploading]);
   useEffect(() => {
-    if (new URL(location.href).searchParams.has('saved')) toast.success('Article saved.');
-  }, []);
-  useEffect(() => {
     if (busy) return;
     const first = Object.keys(errors)[0];
     if (!first) return;
@@ -219,6 +216,7 @@ export default function Editor({
     setBusy(true);
     setErrors({});
     setMessage('Saving your article…');
+    const notice = toast.loading('Saving article…');
     const data = new FormData(form);
     try {
       const response = await fetch('/api/admin/posts', {
@@ -246,18 +244,31 @@ export default function Editor({
       }
       allowLeave.current = true;
       setDirty(false);
-      location.href = `/admin/posts/${result.id}?saved=1`;
+      toast.dismiss(notice);
+      redirectWithNotice(
+        `/admin/posts/${result.id}`,
+        status === 'published'
+          ? post?.status === 'published'
+            ? 'articleUpdated'
+            : 'articlePublished'
+          : post?.status === 'published'
+            ? 'articleUnpublished'
+            : post?.id
+              ? 'draftSaved'
+              : 'articleCreated',
+      );
     } catch (error) {
       const text = error instanceof Error ? error.message : 'Unable to save. Please try again.';
       setMessage(text);
-      toast.error(text);
+      toast.error(text, { id: notice });
     } finally {
       setBusy(false);
     }
   }
   async function showPreview() {
-    if (!editor || busy) return;
+    if (!editor || busy || uploading) return;
     setBusy(true);
+    const notice = toast.loading('Preparing preview…');
     try {
       const response = await fetch('/api/admin/preview', {
         method: 'POST',
@@ -274,10 +285,11 @@ export default function Editor({
         alt: String(formData.get('coverImageAlt') || ''),
         cover: safeUrl(cover, true) ? cover : '',
       });
+      toast.success('Preview ready.', { id: notice });
     } catch (error) {
       const text = error instanceof Error ? error.message : 'Preview failed.';
       setMessage(text);
-      toast.error(text);
+      toast.error(text, { id: notice });
     } finally {
       setBusy(false);
     }
@@ -310,6 +322,7 @@ export default function Editor({
     uploadInFlight.current = true;
     setUploading(true);
     setModalError('');
+    const notice = toast.loading('Uploading image…');
     try {
       const data = new FormData();
       data.set('file', file);
@@ -317,7 +330,10 @@ export default function Editor({
       const result = await response.json();
       if (!response.ok || !safeUrl(result.url, true))
         throw Error(result.error || 'Image upload failed. Try again.');
-      if (editor.isDestroyed) return;
+      if (editor.isDestroyed) {
+        toast.dismiss(notice);
+        return;
+      }
       if (target === 'cover') {
         setCover(result.url);
         setCoverFailed(false);
@@ -336,7 +352,10 @@ export default function Editor({
           .setMeta(uploadKey, { remove: id })
           .run();
       }
-      toast.success(target === 'inline' ? 'Image uploaded and inserted.' : 'Cover image uploaded.');
+      toast.success(
+        target === 'inline' ? 'Image uploaded and inserted.' : 'Cover image uploaded.',
+        { id: notice },
+      );
     } catch (error) {
       const text =
         error instanceof Error ? error.message : 'Upload failed. Choose the file again to retry.';
@@ -344,7 +363,7 @@ export default function Editor({
         setModal('image');
         setModalError(text);
       } else setErrors({ coverImageUrl: text });
-      toast.error(text);
+      toast.error(text, { id: notice });
     } finally {
       if (!editor.isDestroyed)
         editor.view.dispatch(editor.state.tr.setMeta(uploadKey, { remove: id }));

@@ -41,12 +41,13 @@ const { id, title, kind } = Astro.props;
   </AlertDialog.Content>
 </AlertDialog.Root>
 <script>
-  import { toast } from '../starwind/toast';
+  import { toast, redirectWithNotice } from '../../lib/notifications';
   document.querySelectorAll<HTMLButtonElement>('[data-confirm-delete]').forEach((button) =>
     button.addEventListener('click', async () => {
       button.disabled = true;
       const feedback = button.closest('dialog')!.querySelector('[data-delete-feedback]')!;
       feedback.textContent = 'Deleting…';
+      const notice = toast.loading('Deleting…');
       try {
         const response = await fetch(`/api/admin/${button.dataset.kind}`, {
           method: 'DELETE',
@@ -54,14 +55,16 @@ const { id, title, kind } = Astro.props;
           body: JSON.stringify({ id: button.dataset.confirmDelete }),
         });
         if (!response.ok) throw Error((await response.json()).error);
-        const url = new URL(location.href);
-        url.searchParams.set('notice', 'deleted');
-        location.href = url.href;
+        toast.dismiss(notice);
+        redirectWithNotice(
+          location.pathname + location.search,
+          button.dataset.kind === 'posts' ? 'articleDeleted' : 'categoryDeleted',
+        );
       } catch (error) {
         const message =
           error instanceof Error ? error.message : 'Unable to delete. Please try again.';
         feedback.textContent = message;
-        toast.error(message);
+        toast.error(message, { id: notice });
         button.disabled = false;
       }
     }),

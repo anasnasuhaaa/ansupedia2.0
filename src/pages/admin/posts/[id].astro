@@ -18,11 +18,6 @@ const categories = await listCategories();
         <h1>Edit article.</h1>
         <p>A little care makes good writing better.</p>
       </header>
-      {Astro.url.searchParams.has('saved') && (
-        <p role="status" class="notice">
-          Article saved.
-        </p>
-      )}
       <Editor client:load post={post} categories={categories} uploadsEnabled={uploadsEnabled()} />
     </>
   ) : (

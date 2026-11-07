@@ -3,7 +3,6 @@ import BaseLayout from './BaseLayout.astro';
 import Button from '../components/starwind/button/Button.astro';
 import Breadcrumb from '../components/starwind/breadcrumb';
 import Sheet from '../components/starwind/sheet';
-import { Toaster } from '../components/starwind/toast';
 import LayoutDashboard from '@tabler/icons/outline/layout-dashboard.svg';
 import FileText from '@tabler/icons/outline/file-text.svg';
 import Tags from '@tabler/icons/outline/tags.svg';
@@ -103,19 +102,13 @@ const active = (href: string) => (href === '/admin' ? path === href : path.start
       <slot />
     </div>
   </div>
-  <Toaster />
 </BaseLayout>
 <script>
-  import { toast } from '../components/starwind/toast';
-  const messages: Record<string, string> = {
-    saved: 'Category saved.',
-    deleted: 'Deleted successfully.',
-  };
-  const notice = new URL(location.href).searchParams.get('notice');
-  if (notice && messages[notice]) toast.success(messages[notice]);
+  import { toast, redirectWithNotice } from '../lib/notifications';
   document.querySelectorAll<HTMLButtonElement>('[data-logout]').forEach((button) =>
     button.addEventListener('click', async () => {
       button.disabled = true;
+      const notice = toast.loading('Signing out…');
       try {
         const response = await fetch('/api/auth/sign-out', {
           method: 'POST',
@@ -123,9 +116,10 @@ const active = (href: string) => (href === '/admin' ? path === href : path.start
           body: '{}',
         });
         if (!response.ok) throw Error('Sign out failed. Please try again.');
-        location.href = '/admin/login';
+        toast.dismiss(notice);
+        redirectWithNotice('/admin/login', 'signedOut');
       } catch (error) {
-        toast.error(error instanceof Error ? error.message : 'Unable to connect.');
+        toast.error(error instanceof Error ? error.message : 'Unable to connect.', { id: notice });
         button.disabled = false;
       }
     }),
