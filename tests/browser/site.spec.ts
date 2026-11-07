@@ -96,9 +96,16 @@ for (const width of [1440, 1280, 1024, 768, 390, 375, 320])
         await page.getByRole('button', { name: 'Color theme', exact: true }).evaluate(controlStyle),
       );
       await trigger.click();
-      const dialog = page.getByRole('dialog', { name: 'Navigation', exact: true });
+      const dialog = page.getByRole('dialog', { name: 'Menu', exact: true });
       await expect(dialog).toBeVisible();
-      expect((await dialog.boundingBox())!.width).toBeCloseTo(270, 2);
+      const panel = (await dialog.boundingBox())!;
+      expect(panel.width).toBeCloseTo(Math.min(280, Math.max(210, width * 0.55)), 2);
+      expect(panel.y + panel.height).toBeLessThanOrEqual(900);
+      expect(
+        await dialog
+          .locator('.mobile-nav')
+          .evaluate((element) => element.scrollHeight <= element.clientHeight),
+      ).toBe(true);
       await expect(dialog.getByRole('navigation').getByRole('link')).toHaveText([
         'About',
         'Projects',
@@ -107,7 +114,8 @@ for (const width of [1440, 1280, 1024, 768, 390, 375, 320])
         'Blog',
         'Contact',
       ]);
-      await expect(dialog.locator('.mobile-nav svg, [data-slot="sheet-footer"]')).toHaveCount(0);
+      await expect(dialog.locator('.mobile-nav svg')).toHaveCount(6);
+      await expect(dialog.locator('[data-slot="sheet-footer"]')).toHaveCount(0);
       expect(await dialog.innerText()).not.toContain(
         'Software, security, and the things in between.',
       );
@@ -155,7 +163,7 @@ test('compact navigation keeps focus inside the dialog and closes through the ba
     const trigger = page.getByRole('button', { name: 'Open navigation', exact: true });
     await trigger.focus();
     await page.keyboard.press('Enter');
-    const dialog = page.getByRole('dialog', { name: 'Navigation', exact: true });
+    const dialog = page.getByRole('dialog', { name: 'Menu', exact: true });
     await expect(dialog).toBeVisible();
     await expect(dialog.getByRole('link', { name: 'Blog', exact: true })).toHaveAttribute(
       'aria-current',

@@ -4,13 +4,19 @@ import Sheet from '../starwind/sheet';
 import ThemeControl from './ThemeControl.astro';
 import { button } from '../starwind/button/variants';
 import Menu from '@tabler/icons/outline/menu-2.svg';
+import User from '@tabler/icons/outline/user.svg';
+import Projects from '@tabler/icons/outline/layout-grid.svg';
+import Briefcase from '@tabler/icons/outline/briefcase.svg';
+import Award from '@tabler/icons/outline/award.svg';
+import Notebook from '@tabler/icons/outline/notebook.svg';
+import Mail from '@tabler/icons/outline/mail.svg';
 const links = [
-  ['About', '/#about'],
-  ['Projects', '/#projects'],
-  ['Experience', '/#experience'],
-  ['Credentials', '/#credentials'],
-  ['Blog', '/blog'],
-  ['Contact', '/#contact'],
+  { label: 'About', href: '/#about', Icon: User },
+  { label: 'Projects', href: '/#projects', Icon: Projects },
+  { label: 'Experience', href: '/#experience', Icon: Briefcase },
+  { label: 'Credentials', href: '/#credentials', Icon: Award },
+  { label: 'Blog', href: '/blog', Icon: Notebook },
+  { label: 'Contact', href: '/#contact', Icon: Mail },
 ];
 const isBlog = Astro.url.pathname.startsWith('/blog');
 ---
@@ -23,7 +29,7 @@ const isBlog = Astro.url.pathname.startsWith('/blog');
     </a>
     <NavigationMenu.Root aria-label="Main navigation" class="desktop-nav" size="sm">
       <NavigationMenu.List>
-        {links.map(([label, href]) => (
+        {links.map(({ label, href }) => (
           <NavigationMenu.Item>
             <NavigationMenu.Link
               href={href}
@@ -49,13 +55,13 @@ const isBlog = Astro.url.pathname.startsWith('/blog');
         </Sheet.Trigger>
         <Sheet.Content class="mobile-sheet">
           <Sheet.Header>
-            <Sheet.Title>Navigation</Sheet.Title>
+            <Sheet.Title>Menu</Sheet.Title>
             <Sheet.Description class="sr-only">
               Choose a page or portfolio section.
             </Sheet.Description>
           </Sheet.Header>
           <nav aria-label="Mobile navigation" class="mobile-nav">
-            {links.map(([label, href]) => (
+            {links.map(({ label, href, Icon }) => (
               <Sheet.Close asChild>
                 <a
                   href={href}
@@ -63,7 +69,8 @@ const isBlog = Astro.url.pathname.startsWith('/blog');
                   aria-current={href === '/blog' && isBlog ? 'page' : undefined}
                   data-section-link={href.startsWith('/#') ? href.slice(2) : undefined}
                 >
-                  {label}
+                  <Icon class="size-4.5" aria-hidden="true" />
+                  <span>{label}</span>
                 </a>
               </Sheet.Close>
             ))}
