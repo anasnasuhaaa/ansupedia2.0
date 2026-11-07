@@ -60,7 +60,7 @@ const categoryOptions = [
       <h1>Ansupedia's Blog</h1>
     </header>
     <div class="blog-filter-panel">
-      <form class="filters blog-search" action="/blog" role="search">
+      <form class="blog-search" action="/blog" role="search">
         <div class="search-field">
           <Search class="size-4" aria-hidden="true" />
           <label class="sr-only" for="search">
@@ -70,7 +70,7 @@ const categoryOptions = [
             id="search"
             type="search"
             name="q"
-            placeholder="Find something to read…"
+            placeholder="Search articles…"
             value={q}
             maxlength="200"
           />
@@ -78,14 +78,7 @@ const categoryOptions = [
         {selectedCategories.map((slug) => (
           <input type="hidden" name="category" value={slug} />
         ))}
-        <Button type="submit" size="sm">
-          Search
-        </Button>
-        {hasFilters && (
-          <Button href="/blog" variant="ghost" size="sm">
-            Clear filters
-          </Button>
-        )}
+        <Button type="submit">Search</Button>
       </form>
       <nav class="category-filters" aria-label="Article categories">
         {categoryOptions.map((option) => (
@@ -102,11 +95,16 @@ const categoryOptions = [
               aria-pressed={option.selected}
             >
               {option.selected && <Check class="category-check" aria-hidden="true" />}
-              {option.name}
+              <span>{option.name}</span>
             </Button>
           </form>
         ))}
       </nav>
+      {hasFilters && (
+        <Button href="/blog" variant="ghost" size="sm" class="blog-filter-reset">
+          Clear filters
+        </Button>
+      )}
     </div>
     {showFeatured && featured && <PostRow post={featured} featured />}
     <div class="writing-heading">
