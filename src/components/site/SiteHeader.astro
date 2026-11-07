@@ -4,7 +4,6 @@ import Sheet from '../starwind/sheet';
 import ThemeControl from './ThemeControl.astro';
 import { button } from '../starwind/button/variants';
 import Menu from '@tabler/icons/outline/menu-2.svg';
-import Arrow from '@tabler/icons/outline/arrow-up-right.svg';
 const links = [
   ['About', '/#about'],
   ['Projects', '/#projects'],
@@ -43,15 +42,17 @@ const isBlog = Astro.url.pathname.startsWith('/blog');
       <ThemeControl />
       <Sheet.Root class="mobile-menu">
         <Sheet.Trigger
-          class={button({ variant: 'outline', size: 'icon' })}
+          class={button({ variant: 'ghost', size: 'icon' })}
           aria-label="Open navigation"
         >
-          <Menu class="size-5" aria-hidden="true" />
+          <Menu class="size-4.5" aria-hidden="true" />
         </Sheet.Trigger>
         <Sheet.Content class="mobile-sheet">
           <Sheet.Header>
-            <Sheet.Title>Explore Ansupedia</Sheet.Title>
-            <Sheet.Description>Software, security, and the things in between.</Sheet.Description>
+            <Sheet.Title>Navigation</Sheet.Title>
+            <Sheet.Description class="sr-only">
+              Choose a page or portfolio section.
+            </Sheet.Description>
           </Sheet.Header>
           <nav aria-label="Mobile navigation" class="mobile-nav">
             {links.map(([label, href]) => (
@@ -63,14 +64,10 @@ const isBlog = Astro.url.pathname.startsWith('/blog');
                   data-section-link={href.startsWith('/#') ? href.slice(2) : undefined}
                 >
                   {label}
-                  <Arrow class="size-4" aria-hidden="true" />
                 </a>
               </Sheet.Close>
             ))}
           </nav>
-          <Sheet.Footer>
-            <span class="meta">Anas Nasuha · Always learning.</span>
-          </Sheet.Footer>
         </Sheet.Content>
       </Sheet.Root>
     </div>
