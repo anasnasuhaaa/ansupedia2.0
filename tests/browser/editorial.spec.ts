@@ -18,27 +18,27 @@ test('blog categories, search and pagination preserve combined URL state', async
   await expect(page.locator('.post-card-wrap')).toHaveCount(9);
   await page
     .getByRole('navigation', { name: 'Article categories' })
-    .getByRole('link', { name: first.name, exact: true })
+    .getByRole('button', { name: first.name, exact: true })
     .click();
   await expect(page).toHaveURL(new RegExp(`q=${fixture.prefix}.*category=${first.slug}`));
   await expect(
     page
       .getByRole('navigation', { name: 'Article categories' })
-      .getByRole('link', { name: first.name, exact: true }),
-  ).toHaveAttribute('aria-current', 'page');
+      .getByRole('button', { name: first.name, exact: true }),
+  ).toHaveAttribute('aria-pressed', 'true');
   await page.getByRole('link', { name: 'Next page', exact: true }).click();
   await expect(page.locator('.post-card-wrap')).toHaveCount(2);
   await expect(page).toHaveURL(/page=2/);
   await page
     .getByRole('navigation', { name: 'Article categories' })
-    .getByRole('link', { name: second.name, exact: true })
+    .getByRole('button', { name: second.name, exact: true })
     .click();
   await expect(page).not.toHaveURL(/page=/);
   expect(new URL(page.url()).searchParams.get('q')).toBe(fixture.prefix);
   await page.getByRole('searchbox', { name: 'Search articles' }).fill(fixture.posts[8].title);
   await page.getByRole('button', { name: 'Search', exact: true }).click();
   await expect(page.locator('.post-card-wrap')).toHaveCount(1);
-  expect(new URL(page.url()).searchParams.get('category')).toBe(second.slug);
+  expect(new URL(page.url()).searchParams.getAll('category')).toEqual([first.slug, second.slug]);
   await page.addStyleTag({ content: 'astro-dev-toolbar{display:none}' });
   await page.screenshot({ path: testInfo.outputPath('blog-filtered-desktop.png'), fullPage: true });
   await page.locator('.post-card h2 a').click();

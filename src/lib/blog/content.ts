@@ -131,7 +131,7 @@ export function renderContent(value: unknown): string {
         language && hljs.getLanguage(language)
           ? hljs.highlight(decoded, { language }).value
           : hljs.highlight(decoded, { language: 'plaintext' }).value;
-      return `<pre><code class="hljs">${highlighted}</code></pre>`;
+      return `<pre tabindex="0"><code class="hljs">${highlighted}</code></pre>`;
     },
   );
 }

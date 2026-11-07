@@ -76,8 +76,42 @@ for (const width of [1440, 1280, 1024, 768, 390, 375, 320])
     );
     if (width <= 768) {
       const trigger = page.getByRole('button', { name: 'Open navigation' });
+      const controlStyle = (element: Element) => {
+        const css = getComputedStyle(element);
+        const icon = [...element.querySelectorAll('svg')].find(
+          (svg) => getComputedStyle(svg).display !== 'none',
+        )!;
+        return {
+          width: css.width,
+          height: css.height,
+          border: css.borderWidth,
+          background: css.backgroundColor,
+          icon: getComputedStyle(icon).width,
+          stroke: icon.getAttribute('stroke-width'),
+        };
+      };
+      const hamburger = await trigger.evaluate(controlStyle);
+      expect(hamburger.border).toBe('0px');
+      expect(hamburger).toEqual(
+        await page.getByRole('button', { name: 'Color theme', exact: true }).evaluate(controlStyle),
+      );
       await trigger.click();
-      await expect(page.getByRole('dialog')).toBeVisible();
+      const dialog = page.getByRole('dialog', { name: 'Navigation', exact: true });
+      await expect(dialog).toBeVisible();
+      expect((await dialog.boundingBox())!.width).toBeCloseTo(270, 2);
+      await expect(dialog.getByRole('navigation').getByRole('link')).toHaveText([
+        'About',
+        'Projects',
+        'Experience',
+        'Credentials',
+        'Blog',
+        'Contact',
+      ]);
+      await expect(dialog.locator('.mobile-nav svg, [data-slot="sheet-footer"]')).toHaveCount(0);
+      expect(await dialog.innerText()).not.toContain(
+        'Software, security, and the things in between.',
+      );
+      expect(await dialog.innerText()).not.toContain('Always learning');
       await page.keyboard.press('Escape');
       await expect(page.getByRole('dialog')).not.toBeVisible();
       await expect(trigger).toBeFocused();
@@ -109,6 +143,42 @@ for (const width of [1440, 1280, 1024, 768, 390, 375, 320])
       });
     }
   });
+
+test('compact navigation keeps focus inside the dialog and closes through the backdrop', async ({
+  page,
+}, testInfo) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  for (const theme of ['light', 'dark'] as const) {
+    await page.emulateMedia({ colorScheme: theme, reducedMotion: 'reduce' });
+    await page.goto('/blog');
+    await page.addStyleTag({ content: 'astro-dev-toolbar {display:none}' });
+    const trigger = page.getByRole('button', { name: 'Open navigation', exact: true });
+    await trigger.focus();
+    await page.keyboard.press('Enter');
+    const dialog = page.getByRole('dialog', { name: 'Navigation', exact: true });
+    await expect(dialog).toBeVisible();
+    await expect(dialog.getByRole('link', { name: 'Blog', exact: true })).toHaveAttribute(
+      'aria-current',
+      'page',
+    );
+    await dialog.getByRole('button', { name: 'Close sheet', exact: true }).focus();
+    for (let index = 0; index < 8; index++) {
+      await page.keyboard.press('Tab');
+      expect(await dialog.evaluate((element) => element.contains(document.activeElement))).toBe(
+        true,
+      );
+    }
+    await settleAnimations(page);
+    await page.screenshot({ path: testInfo.outputPath(`navigation-${theme}.png`) });
+    await page.keyboard.press('Escape');
+    await expect(dialog).not.toBeVisible();
+    await expect(trigger).toBeFocused();
+    await trigger.click();
+    await page.mouse.click(10, 120);
+    await expect(dialog).not.toBeVisible();
+    await expect(trigger).toBeFocused();
+  }
+});
 
 test('theme preference persists across routes and follows the system setting', async ({ page }) => {
   await page.emulateMedia({ colorScheme: 'dark' });

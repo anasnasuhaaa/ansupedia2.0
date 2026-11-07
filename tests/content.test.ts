@@ -89,18 +89,18 @@ describe('article content safety', () => {
     expect(safeUrl('data:image/svg+xml,x', true)).toBe(false);
     expect(safeUrl('//evil.test', true)).toBe(false);
     expect(safeUrl('https://example.com/a.png', true)).toBe(true);
-    expect(
-      renderContent({
-        type: 'doc',
-        content: [
-          {
-            type: 'codeBlock',
-            attrs: { language: 'javascript' },
-            content: [{ type: 'text', text: 'const x = "<script>";' }],
-          },
-        ],
-      }),
-    ).toContain('hljs');
+    const code = renderContent({
+      type: 'doc',
+      content: [
+        {
+          type: 'codeBlock',
+          attrs: { language: 'javascript' },
+          content: [{ type: 'text', text: 'const x = "<script>";' }],
+        },
+      ],
+    });
+    expect(code).toContain('hljs');
+    expect(code).toContain('<pre tabindex="0">');
     expect(readingTime(document)).toBe(1);
   });
 });

@@ -80,3 +80,58 @@ it.skipIf(!local)(
     ).toHaveLength(0);
   },
 );
+
+it.skipIf(!local)(
+  'filters category unions without duplicates and combines search, visibility and pagination',
+  async () => {
+    const db = getDb();
+    const query = `${prefix}-multi`;
+    const selected = await db
+      .insert(categories)
+      .values([
+        { name: query + ' Security', slug: query + '-security' },
+        { name: query + ' Software', slug: query + '-software' },
+      ])
+      .returning();
+    cats.push(...selected.map((category) => category.id));
+    const created = await db
+      .insert(posts)
+      .values(
+        ['Astro security', 'Software only', 'Astro both', 'Uncategorized', 'Draft', 'Future'].map(
+          (title, index) => ({
+            title: `${query} ${title}`,
+            slug: `${query}-${index}`,
+            status: index === 4 ? ('draft' as const) : ('published' as const),
+            publishedAt: new Date(Date.now() + (index === 5 ? 86400000 : -index * 1000)),
+            contentJson: { type: 'doc', content: [{ type: 'paragraph' }] },
+          }),
+        ),
+      )
+      .returning();
+    ids.push(...created.map((post) => post.id));
+    await db.insert(postCategories).values([
+      { postId: created[0].id, categoryId: selected[0].id },
+      { postId: created[1].id, categoryId: selected[1].id },
+      { postId: created[2].id, categoryId: selected[0].id },
+      { postId: created[2].id, categoryId: selected[1].id },
+      { postId: created[4].id, categoryId: selected[0].id },
+      { postId: created[5].id, categoryId: selected[0].id },
+    ]);
+    const slugs = selected.map((category) => category.slug);
+    const options = { q: query, category: slugs, limit: 2 };
+    const first = await listPosts(options);
+    const second = await listPosts({ ...options, page: 2 });
+    expect(first.total).toBe(3);
+    expect(first.pages).toBe(2);
+    expect(first.items).toHaveLength(2);
+    expect(second.items).toHaveLength(1);
+    expect(new Set([...first.items, ...second.items].map((post) => post.id)).size).toBe(3);
+    expect((await listPosts({ q: query, category: slugs[0] })).total).toBe(2);
+    expect((await listPosts({ q: query, category: [slugs[0], slugs[0]] })).total).toBe(2);
+    expect((await listPosts({ q: query + ' Astro', category: slugs })).total).toBe(2);
+    expect((await listPosts({ q: query, category: [] })).total).toBe(4);
+    expect((await listPosts({ q: query, category: ['unknown-category'] })).total).toBe(0);
+    expect((await listPosts({ q: query, admin: true })).total).toBe(6);
+    expect((await listPosts({ q: query, admin: true, status: 'draft' })).total).toBe(1);
+  },
+);
