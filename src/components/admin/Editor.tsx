@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import type { JSONContent } from '@tiptap/core';
+import { Selection } from '@tiptap/pm/state';
 import Placeholder from '@tiptap/extension-placeholder';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
 import { common, createLowlight } from 'lowlight';
@@ -308,7 +309,7 @@ export default function Editor({
     const id = crypto.randomUUID();
     const preview = URL.createObjectURL(file);
     const alt =
-      imageAlt.trim() ||
+      (position === undefined ? imageAlt.trim() : '') ||
       file.name
         .replace(/\.[^.]+$/, '')
         .replace(/[-_]/g, ' ')
@@ -319,6 +320,8 @@ export default function Editor({
       editor.view.dispatch(editor.state.tr.setMeta(uploadKey, { add: { id, pos, preview } }));
       setModal(null);
     }
+    const initialDoc = editor.state.doc;
+    const initialSelection = editor.state.selection;
     uploadInFlight.current = true;
     setUploading(true);
     setModalError('');
@@ -342,7 +345,9 @@ export default function Editor({
         const pos = uploadPosition(editor, id);
         if (pos === undefined)
           throw Error('The insertion location was removed. Choose the image again to retry.');
-        editor
+        const continueBelow =
+          editor.state.doc.eq(initialDoc) && editor.state.selection.eq(initialSelection);
+        const inserted = editor
           .chain()
           .insertContentAt(
             pos,
@@ -351,6 +356,22 @@ export default function Editor({
           )
           .setMeta(uploadKey, { remove: id })
           .run();
+        if (!inserted)
+          throw Error('Unable to insert the image here. Choose another position and retry.');
+        if (continueBelow) {
+          // A trailing paragraph is added by StarterKit before this selection update.
+          // If the user edited or moved the cursor meanwhile, keep their live selection.
+          let after: number | undefined;
+          editor.state.doc.descendants((node, pos) => {
+            if (node.type.name === 'image' && node.attrs.src === result.url)
+              after = pos + node.nodeSize;
+          });
+          if (after !== undefined)
+            editor.commands.command(({ tr }) => {
+              tr.setSelection(Selection.near(tr.doc.resolve(after!), 1));
+              return true;
+            });
+        }
       }
       toast.success(
         target === 'inline' ? 'Image uploaded and inserted.' : 'Cover image uploaded.',

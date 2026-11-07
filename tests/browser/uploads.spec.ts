@@ -150,3 +150,72 @@ test('failed images never become document nodes and upload security checks remai
   expect(invalid.status()).toBe(400);
   expect((await page.request.get('/dev-uploads/not-an-image.svg')).status()).toBe(404);
 });
+
+test('file picker restores typing below the image and clipboard and drop use document nodes', async ({
+  page,
+}) => {
+  const assets: string[] = [];
+  await page.goto('/admin/posts/new');
+  try {
+    const content = page.getByRole('textbox', { name: 'Article content', exact: true });
+    await content.fill('Before the image.');
+    await content.press('End');
+    await content.press('Enter');
+    await page.getByRole('button', { name: 'Insert image', exact: true }).click();
+    await page
+      .getByLabel('Upload from device')
+      .setInputFiles({ name: 'picker.png', mimeType: 'image/png', buffer: png });
+    await expect(content.locator('img')).toHaveCount(1);
+    assets.push((await content.locator('img').getAttribute('src'))!);
+    await expect(content).toBeFocused();
+    await page.keyboard.type('After the image.');
+    await expect(content.locator('p').last()).toHaveText('After the image.');
+    await expect(content.locator('img + p')).toHaveText('After the image.');
+    await content.locator('img').click();
+    await expect(content.locator('img')).toHaveClass(/ProseMirror-selectednode/);
+    await page.keyboard.press('Backspace');
+    await expect(content.locator('img')).toHaveCount(0);
+    await page.getByRole('button', { name: 'Undo', exact: true }).click();
+    await expect(content.locator('img')).toHaveCount(1);
+    await content.press('ControlOrMeta+End');
+    for (const kind of ['paste', 'drop'] as const) {
+      await content.evaluate(
+        (el, { kind, base64 }) => {
+          const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
+          const transfer = new DataTransfer();
+          transfer.items.add(new File([bytes], `${kind}.png`, { type: 'image/png' }));
+          const rect = el.getBoundingClientRect();
+          el.dispatchEvent(
+            kind === 'paste'
+              ? new ClipboardEvent('paste', {
+                  bubbles: true,
+                  cancelable: true,
+                  clipboardData: transfer,
+                })
+              : new DragEvent('drop', {
+                  bubbles: true,
+                  cancelable: true,
+                  dataTransfer: transfer,
+                  clientX: rect.x + 30,
+                  clientY: rect.y + 30,
+                }),
+          );
+        },
+        { kind, base64: png.toString('base64') },
+      );
+      await expect(content.locator('img')).toHaveCount(kind === 'paste' ? 2 : 3);
+      assets.push(
+        ...(await content
+          .locator('img')
+          .evaluateAll((images) => images.map((image) => image.getAttribute('src')!))),
+      );
+      await expect(page.locator('[data-sonner-toast][data-type=success]').last()).toContainText(
+        'Image uploaded and inserted.',
+      );
+    }
+  } finally {
+    for (const src of new Set(assets))
+      if (/^\/dev-uploads\/[a-f0-9-]+\.png$/.test(src))
+        await unlink(new URL(`../../.local/uploads/${src.split('/').pop()}`, import.meta.url));
+  }
+});

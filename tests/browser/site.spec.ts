@@ -1,5 +1,17 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import type { Page } from '@playwright/test';
+
+async function settleAnimations(page: Page) {
+  await page.evaluate(() =>
+    Promise.all(
+      document
+        .getAnimations()
+        .filter((animation) => animation.effect?.getComputedTiming().iterations !== Infinity)
+        .map((animation) => animation.finished.catch(() => {})),
+    ),
+  );
+}
 
 test('public routes preserve SEO, content and authorization boundaries', async ({
   page,
@@ -128,6 +140,7 @@ test('public accessibility in both themes, navigation and appearance menus', asy
   for (const mode of ['Light', 'Dark']) {
     await page.getByRole('button', { name: 'Color theme', exact: true }).click();
     await page.getByRole('menuitem', { name: mode, exact: true }).click();
+    await settleAnimations(page);
     expect(
       (
         await new AxeBuilder({ page })
@@ -138,6 +151,7 @@ test('public accessibility in both themes, navigation and appearance menus', asy
     ).toEqual([]);
   }
   await page.getByRole('button', { name: 'Color theme', exact: true }).click();
+  await settleAnimations(page);
   expect(
     (
       await new AxeBuilder({ page })
@@ -149,6 +163,7 @@ test('public accessibility in both themes, navigation and appearance menus', asy
   await page.keyboard.press('Escape');
   await page.setViewportSize({ width: 390, height: 844 });
   await page.getByRole('button', { name: 'Open navigation' }).click();
+  await settleAnimations(page);
   expect(
     (
       await new AxeBuilder({ page })

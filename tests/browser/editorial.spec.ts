@@ -162,7 +162,11 @@ test('editor formatting, insertion dialogs and manual slugs preserve selection a
   await content.locator('p').first().click();
   const sizes: number[] = [];
   for (const level of [1, 2, 3, 4]) {
+    // Target the first paragraph explicitly; StarterKit adds a trailing paragraph after headings.
+    await content.press('ControlOrMeta+Home');
     await page.getByLabel('Text style', { exact: true }).selectOption(String(level));
+    // Tiptap restores focus on the next animation frame after a native select change.
+    await expect(content).toBeFocused();
     await expect(content.locator(`h${level}`)).toHaveText('The selected words');
     sizes.push(
       await content

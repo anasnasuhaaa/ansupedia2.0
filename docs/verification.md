@@ -1,35 +1,73 @@
 # Verification
 
-UI refinement verified locally on 2026-11-07 (Asia/Jakarta), using pnpm 12.16.1 and its managed Node 24.22.2 runtime.
+Portfolio and CMS refinements verified locally on 2026-11-07 (Asia/Jakarta), starting from `3a8022949edc47f5854547932116f85753f46bb8` with pnpm 12.16.1 and its managed Node 24.22.2 runtime.
 
-- `pnpm check`: 222 files checked, zero errors, warnings or hints.
-- `pnpm test`: 9 tests passed, including the real localhost PostgreSQL integration test. Coverage includes JSON schema validation, HTML sanitization, XSS defenses, all four heading levels, URL schemes, slug constraints, role/origin checks, transactional CRUD, publication visibility, category badges and usage counts, and relationship cascades.
-- `pnpm test:browser`: all 15 Chromium tests passed (45.9 seconds). Authenticated tests used a temporary local administrator, 11 clearly marked articles, and temporary categories; fixtures are removed in `finally`. No existing administrator credentials are needed or changed. Remote databases are excluded from mutation tests. The fixture respects the sign-in cooldown left by a prior throttling test.
-- Browser coverage includes exact header/main/footer content alignment at 1440, 1024, 768, 390 and 320px; mobile menu focus return, Escape and link dismissal; theme persistence across routes and system preference changes; search/category URL preservation; pagination; featured article deduplication; category CRUD dialogs; responsive admin lists; rich-text heading sizes, active formatting, selection-preserving links, unsafe URL rejection, contextual code languages and syntax highlighting; slug generation/manual overrides; preview focus return; field-level server validation; draft/publish/update/unpublish/delete; RSS/sitemap visibility; logout and unauthorized/cross-origin denial; login rate limiting.
-- Axe WCAG 2 A/AA checks passed for both homepage themes, the open appearance menu, open mobile navigation, and the editor at 320px. This is not a complete manual assistive-technology audit.
-- `pnpm peers check`: no peer dependency issues.
-- `pnpm build`: production Vercel SSR build passed. Vite reports the hydrated admin editor chunk above 500 kB (approximately 688 kB minified); React/Tiptap are only hydrated on article-editing pages. The warning is retained rather than suppressed.
-- Browser screenshots were captured and visually inspected for the portfolio, article reading view, dashboard, article table, and editor, including mobile and light/dark portfolio variants. Screenshots of blog/admin records use clearly identified temporary fixtures, not published portfolio content.
+## Final checks
 
-## Screenshots
+- `pnpm check`: 220 files, zero errors, warnings or hints.
+- `pnpm test`: 11 tests passed across three files, including the real localhost PostgreSQL integration test.
+- `pnpm test:browser`: all 22 Chromium tests passed in the final standalone run (1.1 minutes).
+- `pnpm build`: Vercel SSR production build passed. The existing editor chunk-size warning remains (over 500 kB); it is not suppressed.
+- `git diff --check`: passed before each stage commit and final review.
 
-Artifacts remain local and ignored by Git under `test-results/`:
+## Browser and security coverage
 
-- `site-shared-container-alig-46aa4-mobile-navigation-at-1440px/home-1440-light.png`
-- `site-shared-container-alig-46aa4-mobile-navigation-at-1440px/home-1440-dark.png`
-- `site-shared-container-alig-9d98d--mobile-navigation-at-390px/home-390-light.png`
-- `site-shared-container-alig-9d98d--mobile-navigation-at-390px/home-390-dark.png`
-- `editorial-blog-categories--a5b58-preserve-combined-URL-state/article-desktop.png`
-- `editorial-blog-categories--a5b58-preserve-combined-URL-state/article-mobile.png`
-- `editorial-admin-dashboard--faa2e-at-desktop-and-mobile-sizes/admin-desktop.png`
-- `editorial-admin-dashboard--faa2e-at-desktop-and-mobile-sizes/admin-articles-mobile.png`
-- `editorial-editor-formattin-6e23d-rve-selection-and-semantics/editor-desktop.png`
-- `editorial-editor-formattin-6e23d-rve-selection-and-semantics/editor-mobile.png`
+- Exactly four project columns at 1440/1280px, three at 1024/768px, and two at 390/375/320px, with no document overflow. Existing container alignment, mobile navigation, CTAs and social links remain intact. The redundant introductory identity block is absent and the avatar is within the main heading composition.
+- Initial OS theme, live OS changes until an explicit choice, saved Light/Dark choices through reload and navigation, and exactly two menu choices without Appearance/System labels. The existing pre-paint Starwind initialization remains in the document head.
+- Admin navigation plus one vertical article form, with no nested settings sidebar. Mobile Sheet navigation, form widths, title/slug generation, rich text formatting, selection-preserving links, unsafe URL rejection, preview and publication controls remain functional.
+- Real file upload through the authenticated endpoint and local adapter: insertion at the intended position; edits before and after the marker during an intentionally held upload; automatic insertion; typing below a completed upload; node selection/deletion; undo/redo; persistence through saving, reopening, reloading and publishing; identical public paragraph/image order; successfully loaded image bytes. Actual ClipboardEvent and DragEvent handlers also create regular image nodes.
+- Failed signature validation leaves no image node or preview. Unauthorized and cross-origin uploads remain denied; SVG and invalid local filenames are rejected. Unit tests explicitly switch to production mode and verify that local URLs, local writes and local asset serving are disabled without Blob credentials.
+- Sonner loading/success/error feedback on article, category, preview, upload and authentication actions. Redirect success is consumed once. Malformed, unknown, expired or mismatched flash messages are ignored, and query parameters cannot fabricate a success message. One notification host serves both Astro and React. Theme changes and bottom-center mobile positioning are verified.
+- Existing content validation, sanitization, authorization, rate limiting, draft/public visibility, category relationships, transactional CRUD, feeds and sitemap tests are retained. Axe WCAG 2 A/AA checks pass in both homepage themes, theme/mobile menus and the narrow editor. This is not a full assistive-technology audit.
 
-## Repository and operational limits
+Fixtures use a temporary local administrator and uniquely prefixed articles/categories, removed in `finally`. Logout tests use separate sessions so they do not revoke the shared fixture. No existing credentials or articles are changed. Browser image fixtures remove their generated local assets. Mutation tests skip remote databases and upload tests skip configured production Blob credentials.
 
-The initial `git fetch origin` failed because the shell could not resolve GitHub. The read-only connected GitHub comparison API subsequently confirmed remote `main` is identical to starting commit `0179929fa3677dd415e8c4103e019de59835c771` (zero ahead/behind).
+During iteration, tests caught and corrected the image focus race and continuation-caret behavior, plus a test-only TypeScript context assertion. An overlapping Playwright run encountered shared artifact-directory collisions. Existing browser tests were also stabilized by targeting the first paragraph for heading changes, waiting for Tiptap focus restoration, and waiting for CSS transitions before contrast scans. The final full run is standalone. No failed run is reported as passing.
 
-No schema changes, migrations, resets, seeds or production database operations were performed for this redesign. Existing content metadata, API authorization, Better Auth, upload validation, JSON storage, and sanitization remain intact. A separate temporary account used for exploratory UI inspection was also removed. Existing local edits to `src/layouts/Layout.astro`, `.vscode/starwind.code-snippets`, and `PROMPT.md` remain excluded from implementation commits.
+## Visual review
 
-Real Vercel Blob delivery was not tested because no upload token is configured. Remote hosting, Neon connectivity, and deployment were not tested. No Lighthouse score or full screen-reader audit is claimed. No push or deployment was performed. The local background dev server remains available at http://localhost:4321; manage it with `pnpm dev:status`, `pnpm dev:logs`, and `pnpm dev:stop`.
+Screenshots of the mobile homepage and desktop editor were visually inspected. Browser artifacts are local and ignored under `test-results/`, including the homepage at 1440/390px in both themes, dashboard, mobile article table, article reading view, and desktop/mobile editor. The images use actual content or clearly marked temporary fixtures.
+
+## Changed files
+
+- `.gitignore`
+- `README.md`
+- `docs/architecture.md`
+- `docs/verification.md`
+- `package.json`
+- `pnpm-lock.yaml`
+- `src/components/admin/CategoryDialog.astro`
+- `src/components/admin/ConfirmDelete.astro`
+- `src/components/admin/Editor.tsx`
+- `src/components/admin/image-upload.ts`
+- `src/components/notifications/NotificationHost.tsx`
+- `src/components/portfolio/ProjectCard.astro`
+- `src/components/site/ThemeControl.astro`
+- `src/layouts/AdminLayout.astro`
+- `src/layouts/BaseLayout.astro`
+- `src/lib/blog/urls.ts`
+- `src/lib/notifications.ts`
+- `src/lib/uploads/storage.ts`
+- `src/pages/admin/login.astro`
+- `src/pages/admin/posts/[id].astro`
+- `src/pages/admin/posts/new.astro`
+- `src/pages/api/admin/upload.ts`
+- `src/pages/dev-uploads/[filename].ts`
+- `src/pages/index.astro`
+- `src/styles/editor.css`
+- `src/styles/global.css`
+- `tests/browser/editorial.spec.ts`
+- `tests/browser/fixtures.ts`
+- `tests/browser/notifications.spec.ts`
+- `tests/browser/site.spec.ts`
+- `tests/browser/uploads.spec.ts`
+- `tests/uploads.test.ts`
+- Removed the unused `src/components/starwind/toast/` components, exports and stylesheet.
+
+## Operational limits
+
+Production Vercel Blob delivery, Neon connectivity and deployed hosting were not exercised; no production credentials were used. Development uploads remain local and must be replaced with HTTPS persistent-storage URLs before moving articles to production. File uploads are serialized, and save/preview controls remain disabled during an upload while typing remains available. Meaningful alternative text should be supplied before choosing a file; otherwise the filename is used. Redirect flash notifications require sessionStorage. Local development assets have no automatic garbage collection.
+
+The build remains subject to the existing editor bundle-size warning. No database resets, schema changes, migrations, seeding or remote database writes were performed. No Git history was rewritten. Existing edits to `src/layouts/Layout.astro`, the default title in `src/layouts/BaseLayout.astro`, `.vscode/starwind.code-snippets`, and `PROMPT.md` remain outside implementation commits. Six focused local commits cover the requested stages. No remote push, pull request, or deployment occurred. The existing background server remains available at http://localhost:4321; manage it with `pnpm dev:status`, `pnpm dev:logs`, and `pnpm dev:stop`.
+
+Reference documentation consulted: [Astro components](https://docs.astro.build/en/basics/astro-components/), [styles](https://docs.astro.build/en/guides/styling/), [framework components](https://docs.astro.build/en/guides/framework-components/), [routing](https://docs.astro.build/en/guides/routing/), [Tiptap extensions](https://tiptap.dev/docs/editor/extensions/custom-extensions/create-new/extension), [Sonner](https://sonner.emilkowal.ski/). Installed Starwind and Tiptap source/types were also inspected.

@@ -542,15 +542,6 @@ fieldset legend {
     min-height: 68px;
     gap: 0.5rem;
   }
-  .hero-identity {
-    align-items: center;
-    gap: 1rem;
-  }
-  .hero-role {
-    display: block;
-    max-width: 190px;
-    font-size: 0.73rem;
-  }
   .hero h1 {
     font-size: clamp(2.05rem, 8vw, 3rem);
   }

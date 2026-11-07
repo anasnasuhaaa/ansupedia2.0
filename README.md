@@ -1,6 +1,6 @@
 # Ansupedia
 
-Anas Nasuha's Astro 7 portfolio and PostgreSQL blog CMS. Public pages are server-rendered Astro. Only the Tiptap editor hydrates React. Project metadata and assets are maintained in this repository; articles and categories are live database content and require no rebuild to publish.
+Anas Nasuha's Astro 7 portfolio and PostgreSQL blog CMS. Public pages are server-rendered Astro. React hydrates the Tiptap editor and a single shared Sonner host on CMS pages. Project metadata and assets are maintained in this repository; articles and categories are live database content and require no rebuild to publish.
 
 ## Development
 
@@ -66,7 +66,13 @@ Content is JSONB, validated against an allowlist and ProseMirror's schema. The s
 
 Project images are local assets; source provenance and factual checks are in [docs/content-sources.md](docs/content-sources.md). Title cards are explicitly identified as placeholders in alternative text. The public organizational website's source repository could not be verified, so its card has no GitHub link. Experience and credentials intentionally start empty.
 
-Set `BLOB_READ_WRITE_TOKEN` to enable Vercel Blob uploads. The server accepts PNG, JPEG and WebP, checks file signatures and MIME type, limits images to 3 MB, and generates random object names. SVG uploads are disallowed. Tokens never reach browsers. Without a token, cover and inline HTTPS image URLs work normally. Remote media is not downloaded by the server. Deleting a post does not delete Blob objects because images may be shared; clean unused objects separately in Vercel.
+In production, set `BLOB_READ_WRITE_TOKEN` to enable persistent Vercel Blob uploads. The server accepts PNG, JPEG and WebP, checks file signatures and MIME type, limits images to 3 MB, and generates random object names. SVG uploads are disallowed. Tokens never reach browsers. Without a token, development uses an isolated local adapter under `.local/uploads/` (ignored by Git). Only generated PNG, JPEG, and WebP names are served by `/dev-uploads/[filename]`; this route, local writes, and local image URLs are disabled in production. These assets are for local testing: replace them with HTTPS object-storage URLs before transferring an article to production. Production without a token supports hosted HTTPS URLs and returns 503 for file uploads. Remote media is not downloaded by the server. Deleting a post does not delete Blob objects because images may be shared; clean unused objects separately in Vercel.
+
+Place the cursor, open **Insert image**, optionally enter alternative text, then choose **Upload from device**. A preview marks the insertion point and the uploaded image inserts automatically. You can keep typing during upload; ProseMirror maps the marker through edits. With no intervening edits, typing resumes below the image. Clipboard image paste and file drop use the same secured endpoint. Filenames provide fallback alternative text; describe meaningful images before choosing the file. Failed uploads remove the preview and reopen the image dialog for retry. Uploads are serialized, and save/preview actions wait until the active upload completes. Image nodes remain standard Tiptap JSON through save, reopen, preview, and publication. Cover uploads use the same storage abstraction. Local uploads are not automatically garbage-collected; browser fixtures remove their own assets.
+
+## Notifications and themes
+
+CMS pages mount one `NotificationHost` at the base layout. React islands and Astro scripts import `src/lib/notifications.ts`, sharing Sonner's supported React integration. Loading messages become specific success/error messages. Redirects use expiring, allowlisted, destination-bound sessionStorage notices consumed once after navigation; query parameters cannot fabricate success. Field-level validation remains beside inputs. Toasts use monochrome tokens, track the resolved theme, and move to bottom-center on mobile. Browser storage must be available for redirect flash messages.
 
 ## Neon / Vercel production
 
@@ -90,7 +96,7 @@ postgres.js uses a small pool, idle/connect timeouts and `prepare:false` for com
 - `src/lib/blog`, `src/lib/validation`: renderer, validation and feed utilities.
 - `drizzle`: committed migration history.
 
-Starwind's official theme initialization runs before paint. Light, dark and system settings persist; the runtime follows OS preference changes. Semantic monochrome tokens and installed Starwind components are shared across the portfolio and CMS. Manrope headings, Geist body text, and Geist Mono metadata are bundled locally. The homepage, navigation and footer use one shared container. The mobile menu uses a Starwind Sheet; appearance choices use a keyboard-accessible Starwind dropdown. The React Tiptap editor uses Radix Toolbar, Tooltip and Dialog controls with the shared Starwind styles. Public pages include canonical, Open Graph, Twitter metadata, Person/BlogPosting JSON-LD, `/sitemap.xml`, `/robots.txt` and `/rss.xml`.
+Starwind's official theme initialization runs before paint. The compact menu offers Light and Dark. Until a manual choice is saved, the runtime follows OS preference changes; there is no visible System option. Semantic monochrome tokens and installed Starwind components are shared across the portfolio and CMS. Manrope headings, Geist body text, and Geist Mono metadata are bundled locally. The homepage, navigation and footer use one shared container. The hero pairs the main identity heading with the avatar, and projects use exactly four columns at 1280px+, three at 768–1279px, and two below 768px. The mobile menu uses a Starwind Sheet; appearance choices use a keyboard-accessible Starwind dropdown. The admin frame contains navigation and one content region. Article information, writing surface, media, categories, SEO, and publication settings stack vertically; save actions remain sticky. The React Tiptap editor uses Radix Toolbar, Tooltip and Dialog controls with the shared Starwind styles. Public pages include canonical, Open Graph, Twitter metadata, Person/BlogPosting JSON-LD, `/sitemap.xml`, `/robots.txt` and `/rss.xml`.
 
 ## Verification and limitations
 
