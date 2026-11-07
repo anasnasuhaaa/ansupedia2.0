@@ -24,7 +24,7 @@ test('public routes preserve SEO, content and authorization boundaries', async (
   expect(errors).toEqual([]);
 });
 
-for (const width of [1440, 1024, 768, 390, 320])
+for (const width of [1440, 1280, 1024, 768, 390, 375, 320])
   test(`shared container alignment and mobile navigation at ${width}px`, async ({
     page,
   }, testInfo) => {
@@ -48,6 +48,13 @@ for (const width of [1440, 1024, 768, 390, 320])
       expect(Math.abs(frame.left - metrics[0].left)).toBeLessThan(1);
       expect(Math.abs(frame.right - metrics[0].right)).toBeLessThan(1);
     }
+    expect(
+      await page
+        .locator('.project-grid')
+        .evaluate((el) => getComputedStyle(el).gridTemplateColumns.split(' ').length),
+    ).toBe(width >= 1280 ? 4 : width >= 768 ? 3 : 2);
+    await expect(page.getByText("Hello, I'm Anas")).toHaveCount(0);
+    await expect(page.locator('.hero-heading .avatar')).toBeVisible();
     const hero = await page.locator('.hero').boundingBox();
     const projects = await page.locator('.project-grid').boundingBox();
     expect(Math.abs(hero!.x - projects!.x)).toBeLessThan(1);

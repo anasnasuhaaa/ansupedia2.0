@@ -45,7 +45,7 @@ const destination = project.liveUrl || project.githubUrl;
           size="sm"
           aria-label={`View ${project.name} source on GitHub`}
         >
-          <Github aria-hidden="true" /> Source code
+          <Github aria-hidden="true" /> <span>Source code</span>
         </Button>
       )}
       {project.liveUrl && (
@@ -55,7 +55,7 @@ const destination = project.liveUrl || project.githubUrl;
           size="sm"
           aria-label={`Visit ${project.name}`}
         >
-          Visit website <Arrow aria-hidden="true" />
+          <span>Visit website</span> <Arrow aria-hidden="true" />
         </Button>
       )}
     </Card.Footer>

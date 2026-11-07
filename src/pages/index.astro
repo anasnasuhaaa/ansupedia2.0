@@ -32,27 +32,23 @@ try {
 <BaseLayout>
   <div class="portfolio">
     <section id="about" class="hero">
-      <div class="hero-identity">
+      <div class="hero-heading">
+        <h1>
+          {profile.name}
+          <span class="hero-heading-detail">
+            Software Engineering
+            <br class="desktop-break" /> &amp; Cybersecurity
+          </span>
+        </h1>
         <img
           class="avatar"
           src={profile.avatar}
-          width="88"
-          height="88"
+          width="144"
+          height="144"
           alt="Anas Nasuha profile image"
           fetchpriority="high"
         />
-        <div>
-          <span class="eyebrow">Hello, I'm Anas</span>
-          <span class="hero-role">Computer Science Student at IPB University</span>
-        </div>
       </div>
-      <h1>
-        {profile.name}
-        <span class="hero-heading-detail">
-          Software Engineering
-          <br class="desktop-break" /> &amp; Cybersecurity.
-        </span>
-      </h1>
       <p class="intro-copy">{profile.introduction}</p>
       <div class="hero-bottom">
         <div class="actions">
