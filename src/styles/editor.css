@@ -469,3 +469,31 @@
     height: 40px;
   }
 }
+
+.image-upload-placeholder {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 100%;
+  padding: 0.75rem;
+  border: 1px dashed var(--input);
+  border-radius: var(--radius);
+  color: var(--muted-foreground);
+  font-size: 0.8rem;
+}
+.image-upload-placeholder img {
+  max-height: 160px;
+  opacity: 0.6;
+  object-fit: contain;
+}
+.tiptap img.ProseMirror-selectednode {
+  outline: 2px solid var(--outline);
+  outline-offset: 4px;
+}
+.editor-prose img,
+.article-prose img {
+  max-width: 100%;
+  height: auto;
+  margin-block: 1.5rem;
+  border-radius: 0.5rem;
+}

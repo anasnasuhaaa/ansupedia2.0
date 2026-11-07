@@ -17,6 +17,7 @@ import '../starwind/prose/styles.css';
 import '../../styles/editor.css';
 import EditorDialog from './EditorDialog';
 import EditorToolbar from './EditorToolbar';
+import { ImageUploads, uploadKey, uploadPosition } from './image-upload';
 type Post = {
   id?: string;
   title: string;
@@ -109,6 +110,9 @@ export default function Editor({
   const [categorySearch, setCategorySearch] = useState('');
   const [dirty, setDirty] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const uploadInFlight = useRef(false);
+  const uploadHandler = useRef<(file: File, pos?: number) => void>(() => {});
   const [message, setMessage] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [modal, setModal] = useState<'link' | 'image' | 'unpublish' | null>(null);
@@ -127,6 +131,7 @@ export default function Editor({
   const editor = useEditor({
     extensions: [
       ...extensions({ codeBlock: false }),
+      ImageUploads,
       CodeBlockLowlight.configure({ lowlight, defaultLanguage: 'plaintext' }),
       Placeholder.configure({
         placeholder: 'Start writing. Share what you learned, one thought at a time…',
@@ -136,7 +141,33 @@ export default function Editor({
     immediatelyRender: false,
     shouldRerenderOnTransaction: true,
     onUpdate: () => setDirty(true),
+    onTransaction: ({ transaction }) => {
+      if (selection.current && transaction.docChanged) {
+        selection.current = {
+          from: transaction.mapping.map(selection.current.from),
+          to: transaction.mapping.map(selection.current.to),
+        };
+      }
+    },
     editorProps: {
+      handlePaste: (_view, event) => {
+        const file = Array.from(event.clipboardData?.files || []).find((file) =>
+          file.type.startsWith('image/'),
+        );
+        if (!file || !uploadsEnabled) return false;
+        event.preventDefault();
+        uploadHandler.current(file);
+        return true;
+      },
+      handleDrop: (view, event, _slice, moved) => {
+        const file = event.dataTransfer?.files[0];
+        if (moved || !file || !uploadsEnabled) return false;
+        const pos = view.posAtCoords({ left: event.clientX, top: event.clientY })?.pos;
+        if (pos === undefined) return false;
+        event.preventDefault();
+        uploadHandler.current(file, pos);
+        return true;
+      },
       attributes: {
         class: 'sw-prose prose editor-prose',
         role: 'textbox',
@@ -147,13 +178,13 @@ export default function Editor({
   });
   useEffect(() => {
     const beforeUnload = (event: BeforeUnloadEvent) => {
-      if (dirty && !allowLeave.current) {
+      if ((dirty || uploading) && !allowLeave.current) {
         event.preventDefault();
       }
     };
     window.addEventListener('beforeunload', beforeUnload);
     return () => window.removeEventListener('beforeunload', beforeUnload);
-  }, [dirty]);
+  }, [dirty, uploading]);
   useEffect(() => {
     if (new URL(location.href).searchParams.has('saved')) toast.success('Article saved.');
   }, []);
@@ -179,7 +210,7 @@ export default function Editor({
   });
   async function save(status: 'draft' | 'published') {
     const form = formRef.current;
-    if (!editor || !form || busy || !form.reportValidity()) return;
+    if (!editor || !form || busy || uploading || !form.reportValidity()) return;
     if (cover && !safeUrl(cover, true)) {
       setErrors({ coverImageUrl: 'Use an HTTPS image URL.' });
       document.getElementById('cover')?.focus();
@@ -251,39 +282,81 @@ export default function Editor({
       setBusy(false);
     }
   }
-  async function upload(file: File | undefined, target: 'cover' | 'inline') {
-    if (!file || busy) return;
-    if (
-      file.size > 3 * 1024 * 1024 ||
-      !['image/png', 'image/jpeg', 'image/webp'].includes(file.type)
-    ) {
+  async function upload(file: File | undefined, target: 'cover' | 'inline', position?: number) {
+    if (!file || busy || uploadInFlight.current || !editor) return;
+    if (file.size > 3_000_000 || !['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
       const text = 'Choose a PNG, JPEG, or WebP image up to 3 MB.';
-      if (target === 'inline') setModalError(text);
-      else setErrors({ coverImageUrl: text });
+      if (target === 'inline') {
+        setModal('image');
+        setModalError(text);
+      } else setErrors({ coverImageUrl: text });
+      toast.error(text);
       return;
     }
-    setBusy(true);
+    const id = crypto.randomUUID();
+    const preview = URL.createObjectURL(file);
+    const alt =
+      imageAlt.trim() ||
+      file.name
+        .replace(/\.[^.]+$/, '')
+        .replace(/[-_]/g, ' ')
+        .slice(0, 300) ||
+      'Article image';
+    if (target === 'inline') {
+      const pos = position ?? selection.current?.from ?? editor.state.selection.from;
+      editor.view.dispatch(editor.state.tr.setMeta(uploadKey, { add: { id, pos, preview } }));
+      setModal(null);
+    }
+    uploadInFlight.current = true;
+    setUploading(true);
+    setModalError('');
     try {
       const data = new FormData();
       data.set('file', file);
       const response = await fetch('/api/admin/upload', { method: 'POST', body: data });
       const result = await response.json();
-      if (!response.ok) throw Error(result.error);
+      if (!response.ok || !safeUrl(result.url, true))
+        throw Error(result.error || 'Image upload failed. Try again.');
+      if (editor.isDestroyed) return;
       if (target === 'cover') {
         setCover(result.url);
         setCoverFailed(false);
         setDirty(true);
-      } else setImageUrl(result.url);
-      toast.success('Image uploaded.');
+      } else {
+        const pos = uploadPosition(editor, id);
+        if (pos === undefined)
+          throw Error('The insertion location was removed. Choose the image again to retry.');
+        editor
+          .chain()
+          .insertContentAt(
+            pos,
+            { type: 'image', attrs: { src: result.url, alt } },
+            { updateSelection: false },
+          )
+          .setMeta(uploadKey, { remove: id })
+          .run();
+      }
+      toast.success(target === 'inline' ? 'Image uploaded and inserted.' : 'Cover image uploaded.');
     } catch (error) {
-      const text = error instanceof Error ? error.message : 'Upload failed.';
-      if (target === 'inline') setModalError(text);
-      else setErrors({ coverImageUrl: text });
+      const text =
+        error instanceof Error ? error.message : 'Upload failed. Choose the file again to retry.';
+      if (target === 'inline') {
+        setModal('image');
+        setModalError(text);
+      } else setErrors({ coverImageUrl: text });
       toast.error(text);
     } finally {
-      setBusy(false);
+      if (!editor.isDestroyed)
+        editor.view.dispatch(editor.state.tr.setMeta(uploadKey, { remove: id }));
+      URL.revokeObjectURL(preview);
+      uploadInFlight.current = false;
+      setUploading(false);
     }
   }
+  uploadHandler.current = (file, pos) => {
+    selection.current = null;
+    void upload(file, 'inline', pos ?? editor?.state.selection.from);
+  };
   function openInsertion(kind: 'link' | 'image') {
     if (!editor) return;
     selection.current = { from: editor.state.selection.from, to: editor.state.selection.to };
@@ -316,7 +389,15 @@ export default function Editor({
         setModalError('Add alternative text describing this image.');
         return;
       }
-      restoreSelection()?.setImage({ src: imageUrl, alt: imageAlt.trim() }).run();
+      if (editor)
+        editor
+          .chain()
+          .focus()
+          .insertContentAt(selection.current?.from ?? editor.state.selection.from, {
+            type: 'image',
+            attrs: { src: imageUrl, alt: imageAlt.trim() },
+          })
+          .run();
     }
     setModal(null);
   }
@@ -409,7 +490,7 @@ export default function Editor({
                     editor={editor}
                     openLink={() => openInsertion('link')}
                     openImage={() => openInsertion('image')}
-                    disabled={busy}
+                    disabled={busy || uploading}
                   />
                 ) : (
                   <p className="notice" role="status">
@@ -646,21 +727,23 @@ export default function Editor({
         </fieldset>
         <div className="editor-save-bar">
           <div className="editor-save-state" role="status" aria-live="polite">
-            {busy
-              ? 'Working…'
-              : message ||
-                (dirty
-                  ? 'Unsaved changes'
-                  : post?.id
-                    ? 'All changes saved'
-                    : 'New draft · not saved yet')}
+            {uploading
+              ? 'Uploading image… You can keep writing.'
+              : busy
+                ? 'Working…'
+                : message ||
+                  (dirty
+                    ? 'Unsaved changes'
+                    : post?.id
+                      ? 'All changes saved'
+                      : 'New draft · not saved yet')}
             <span className={dirty ? 'unsaved-dot' : 'saved-dot'} aria-hidden="true" />
           </div>
           <div className="actions">
             <button
               className={button({ variant: 'ghost', size: 'sm' })}
               type="button"
-              disabled={busy || !editor}
+              disabled={busy || uploading || !editor}
               ref={previewTrigger}
               onClick={() => void showPreview()}
             >
@@ -672,7 +755,7 @@ export default function Editor({
                 <button
                   className={button({ variant: 'outline', size: 'sm' })}
                   type="button"
-                  disabled={busy}
+                  disabled={busy || uploading}
                   onClick={() => {
                     setModalError('');
                     setModal('unpublish');
@@ -683,7 +766,7 @@ export default function Editor({
                 <button
                   className={button({ variant: 'primary', size: 'sm' })}
                   type="submit"
-                  disabled={busy || !editor}
+                  disabled={busy || uploading || !editor}
                 >
                   <Save size={16} aria-hidden="true" />
                   Update article
@@ -694,7 +777,7 @@ export default function Editor({
                 <button
                   className={button({ variant: 'outline', size: 'sm' })}
                   type="submit"
-                  disabled={busy || !editor}
+                  disabled={busy || uploading || !editor}
                 >
                   <Save size={16} aria-hidden="true" />
                   Save draft
@@ -702,7 +785,7 @@ export default function Editor({
                 <button
                   className={button({ variant: 'primary', size: 'sm' })}
                   type="button"
-                  disabled={busy || !editor}
+                  disabled={busy || uploading || !editor}
                   onClick={() => void save('published')}
                 >
                   Publish
@@ -774,15 +857,15 @@ export default function Editor({
               {uploadsEnabled && (
                 <Field
                   id="inline-upload"
-                  label="Upload image"
-                  hint="PNG, JPEG, or WebP. Up to 3 MB."
+                  label="Upload from device"
+                  hint="PNG, JPEG, or WebP up to 3 MB. Inserts automatically; add alternative text first, or the filename is used. Choose the file again to retry a failed upload."
                 >
                   <input
                     className={input()}
                     type="file"
                     id="inline-upload"
                     accept="image/png,image/jpeg,image/webp"
-                    disabled={busy}
+                    disabled={busy || uploading}
                     onChange={(event) => void upload(event.target.files?.[0], 'inline')}
                   />
                 </Field>
@@ -799,7 +882,7 @@ export default function Editor({
               <button
                 className={button({ variant: 'ghost', size: 'sm' })}
                 type="button"
-                disabled={busy}
+                disabled={busy || uploading}
                 onClick={() => {
                   restoreSelection()?.extendMarkRange('link').unsetLink().run();
                   setModal(null);
@@ -811,7 +894,7 @@ export default function Editor({
             <button
               className={button({ variant: 'outline', size: 'sm' })}
               type="button"
-              disabled={busy}
+              disabled={busy || uploading}
               onClick={() => setModal(null)}
             >
               Cancel
@@ -819,7 +902,7 @@ export default function Editor({
             <button
               className={button({ variant: 'primary', size: 'sm' })}
               type="submit"
-              disabled={busy}
+              disabled={busy || uploading}
             >
               {modal === 'link' ? 'Apply link' : 'Insert image'}
             </button>
@@ -845,7 +928,7 @@ export default function Editor({
           <button
             className={button({ variant: 'primary', size: 'sm' })}
             type="button"
-            disabled={busy}
+            disabled={busy || uploading}
             onClick={() => {
               setModal(null);
               void save('draft');

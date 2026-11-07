@@ -1,9 +1,8 @@
 import type { APIRoute } from 'astro';
-import { put } from '@vercel/blob';
+import { storeImage, uploadsEnabled } from '../../../lib/uploads/storage';
 import { readLimitedBody } from '../../../lib/api';
-import { env } from '../../../lib/env';
 export const POST: APIRoute = async ({ request }) => {
-  if (!env('BLOB_READ_WRITE_TOKEN'))
+  if (!uploadsEnabled())
     return Response.json(
       { error: 'Uploads are disabled. Use an HTTPS image URL.' },
       { status: 503 },
@@ -21,7 +20,14 @@ export const POST: APIRoute = async ({ request }) => {
       return Response.json({ error: 'Choose an image under 3 MB.' }, { status: 400 });
     const b = new Uint8Array(await file.arrayBuffer());
     const type =
-      b[0] === 137 && b[1] === 80 && b[2] === 78 && b[3] === 71
+      b[0] === 137 &&
+      b[1] === 80 &&
+      b[2] === 78 &&
+      b[3] === 71 &&
+      b[4] === 13 &&
+      b[5] === 10 &&
+      b[6] === 26 &&
+      b[7] === 10
         ? 'image/png'
         : b[0] === 255 && b[1] === 216 && b[2] === 255
           ? 'image/jpeg'
@@ -34,12 +40,7 @@ export const POST: APIRoute = async ({ request }) => {
         { error: 'Only valid PNG, JPEG and WebP images are supported.' },
         { status: 400 },
       );
-    const blob = await put(
-      `articles/${crypto.randomUUID()}.${type.split('/')[1]}`,
-      Buffer.from(b),
-      { access: 'public', contentType: type, token: env('BLOB_READ_WRITE_TOKEN') },
-    );
-    return Response.json({ url: blob.url });
+    return Response.json({ url: await storeImage(b, type) });
   } catch {
     console.error('Image upload failed');
     return Response.json({ error: 'Image upload failed. Try again.' }, { status: 500 });

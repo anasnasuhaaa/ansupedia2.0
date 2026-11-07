@@ -2,7 +2,7 @@
 import AdminLayout from '../../../layouts/AdminLayout.astro';
 import Editor from '../../../components/admin/Editor';
 import { getPost, listCategories } from '../../../db/queries/blog';
-import { env } from '../../../lib/env';
+import { uploadsEnabled } from '../../../lib/uploads/storage';
 import { z } from 'zod';
 const id = z.uuid().safeParse(Astro.params.id);
 const post = id.success ? await getPost(id.data, true) : null;
@@ -23,12 +23,7 @@ const categories = await listCategories();
           Article saved.
         </p>
       )}
-      <Editor
-        client:load
-        post={post}
-        categories={categories}
-        uploadsEnabled={!!env('BLOB_READ_WRITE_TOKEN')}
-      />
+      <Editor client:load post={post} categories={categories} uploadsEnabled={uploadsEnabled()} />
     </>
   ) : (
     <h1>Article not found.</h1>
