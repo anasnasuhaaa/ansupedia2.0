@@ -11,7 +11,7 @@ export const skills: SkillCategory[] = [
   { name: 'Frontend', technologies: ['Astro', 'React', 'Next.js', 'Vue', 'Tailwind CSS'] },
   { name: 'Backend', technologies: ['Node.js', 'Laravel', 'FastAPI'] },
   {
-    name: 'Databases & data',
+    name: 'Databases & ORM',
     technologies: ['PostgreSQL', 'MySQL', 'Supabase', 'Neon', 'Prisma', 'Drizzle'],
   },
   {
