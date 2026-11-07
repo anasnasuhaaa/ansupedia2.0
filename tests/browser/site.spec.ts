@@ -102,6 +102,10 @@ test('theme preference persists across routes and follows the system setting', a
   await page.emulateMedia({ colorScheme: 'dark' });
   await page.goto('/');
   await expect(page.locator('html')).toHaveClass(/dark/);
+  await page.emulateMedia({ colorScheme: 'light' });
+  await expect(page.locator('html')).not.toHaveClass(/dark/);
+  await page.emulateMedia({ colorScheme: 'dark' });
+  await expect(page.locator('html')).toHaveClass(/dark/);
   await page.getByRole('button', { name: 'Color theme', exact: true }).click();
   await page.getByRole('menuitem', { name: 'Light', exact: true }).click();
   await expect(page.locator('html')).not.toHaveClass(/dark/);
@@ -110,12 +114,13 @@ test('theme preference persists across routes and follows the system setting', a
     await expect(page.locator('html')).not.toHaveClass(/dark/);
   }
   await page.getByRole('button', { name: 'Color theme', exact: true }).click();
-  await page.getByRole('menuitem', { name: 'System', exact: true }).click();
-  await expect(page.locator('html')).toHaveClass(/dark/);
+  await expect(page.getByRole('menuitem')).toHaveCount(2);
+  await expect(page.getByText('Appearance', { exact: true })).toHaveCount(0);
+  await page.getByRole('menuitem', { name: 'Dark', exact: true }).click();
   await page.emulateMedia({ colorScheme: 'light' });
-  await expect(page.locator('html')).not.toHaveClass(/dark/);
+  await expect(page.locator('html')).toHaveClass(/dark/);
   await page.reload();
-  await expect(page.locator('html')).not.toHaveClass(/dark/);
+  await expect(page.locator('html')).toHaveClass(/dark/);
 });
 
 test('public accessibility in both themes, navigation and appearance menus', async ({ page }) => {
