@@ -935,16 +935,23 @@ fieldset legend {
 }
 .category-filters {
   display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
   gap: 0.5rem;
-  overflow-x: auto;
-  padding: 0.2rem 0.1rem 0.6rem;
-  scrollbar-width: thin;
+}
+.category-filters > form {
+  min-width: 0;
+  max-width: 100%;
 }
 .category-chip {
-  padding: 0.55rem 1rem;
+  max-width: 100%;
+  height: auto;
+  padding: 0.5rem 0.85rem;
   min-height: 42px;
-  white-space: nowrap;
-  flex-shrink: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: left;
+  line-height: 1.5;
   font-size: 0.76rem;
   border-radius: 999px;
   font-weight: 500;
@@ -1199,6 +1206,19 @@ fieldset legend {
   text-decoration-color: var(--outline);
 }
 @media (max-width: 700px) {
+  .category-filters {
+    gap: 0.4rem;
+  }
+  .category-chip {
+    min-height: 40px;
+    padding: 0.4rem 0.65rem;
+    font-size: 0.75rem;
+    gap: 0.35rem;
+  }
+  .category-check {
+    width: 12px;
+    height: 12px;
+  }
   .writing-grid {
     grid-template-columns: minmax(0, 1fr);
   }
