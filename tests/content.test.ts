@@ -66,6 +66,25 @@ describe('article content safety', () => {
     expect(html).toContain('noopener noreferrer');
     expect(html).not.toContain('evil');
   });
+  it('renders all supported heading levels and rejects unsupported levels', () => {
+    for (const level of [1, 2, 3, 4]) {
+      expect(
+        renderContent({
+          type: 'doc',
+          content: [
+            {
+              type: 'heading',
+              attrs: { level },
+              content: [{ type: 'text', text: `Heading ${level}` }],
+            },
+          ],
+        }),
+      ).toContain(`<h${level}>Heading ${level}</h${level}>`);
+    }
+    expect(() =>
+      validateContent({ type: 'doc', content: [{ type: 'heading', attrs: { level: 5 } }] }),
+    ).toThrow();
+  });
   it('restricts image URLs and highlights code safely', () => {
     expect(safeUrl('data:image/svg+xml,x', true)).toBe(false);
     expect(safeUrl('//evil.test', true)).toBe(false);

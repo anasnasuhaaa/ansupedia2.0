@@ -19,9 +19,11 @@ body {
   background-repeat: no-repeat;
   -webkit-font-smoothing: antialiased;
 }
-a {
-  color: inherit;
-  text-decoration: none;
+@layer base {
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
 }
 button,
 input,

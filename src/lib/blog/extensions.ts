@@ -1,9 +1,10 @@
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
-export function extensions() {
+export function extensions({ codeBlock = true }: { codeBlock?: boolean } = {}) {
   return [
     StarterKit.configure({
-      heading: { levels: [2, 3, 4] },
+      codeBlock: codeBlock ? {} : false,
+      heading: { levels: [1, 2, 3, 4] },
       underline: false,
       link: { openOnClick: false, protocols: ['https', 'http', 'mailto'] },
     }),

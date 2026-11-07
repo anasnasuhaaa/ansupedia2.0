@@ -3,6 +3,8 @@ import { renderToHTMLString } from '@tiptap/static-renderer/pm/html-string';
 import sanitizeHtml from 'sanitize-html';
 import hljs from 'highlight.js';
 import { extensions } from './extensions';
+import { safeUrl } from './urls';
+export { safeUrl } from './urls';
 const nodes = new Set([
   'doc',
   'paragraph',
@@ -18,15 +20,6 @@ const nodes = new Set([
   'image',
 ]);
 const marks = new Set(['bold', 'italic', 'strike', 'code', 'link']);
-export function safeUrl(value: unknown, image = false): boolean {
-  if (typeof value !== 'string') return false;
-  try {
-    const url = new URL(value);
-    return (image ? ['https:'] : ['https:', 'http:', 'mailto:']).includes(url.protocol);
-  } catch {
-    return false;
-  }
-}
 export function validateContent(value: unknown): JSONContent {
   if (JSON.stringify(value)?.length > 500_000) throw new Error('Article exceeds 500 KB.');
   let count = 0;
@@ -53,8 +46,8 @@ export function validateContent(value: unknown): JSONContent {
               : [];
     if (n.attrs && Object.keys(n.attrs).some((k) => !allowed.includes(k)))
       throw new Error('Unsupported node attribute.');
-    if (n.type === 'heading' && ![2, 3, 4].includes(n.attrs?.level))
-      throw new Error('Use headings H2–H4.');
+    if (n.type === 'heading' && ![1, 2, 3, 4].includes(n.attrs?.level))
+      throw new Error('Use headings H1–H4.');
     if (n.type === 'image' && !safeUrl(n.attrs?.src, true))
       throw new Error('Images require an HTTPS URL.');
     if (n.marks) {
@@ -90,6 +83,7 @@ export function renderContent(value: unknown): string {
   return sanitizeHtml(html, {
     allowedTags: [
       'p',
+      'h1',
       'h2',
       'h3',
       'h4',

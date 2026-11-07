@@ -35,13 +35,21 @@ export async function readJson(request: Request) {
 export function apiError(error: unknown): Response {
   if (error instanceof ZodError)
     return Response.json(
-      { error: error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ') },
+      {
+        error: 'Please check the highlighted fields.',
+        fieldErrors: Object.fromEntries(
+          error.issues.map((issue) => [String(issue.path[0] || 'contentJson'), issue.message]),
+        ),
+      },
       { status: 400 },
     );
   const e = error as { code?: string; cause?: { code?: string }; message?: string };
   if (e.code === '23505' || e.cause?.code === '23505')
     return Response.json(
-      { error: 'This slug is already in use. Choose another.' },
+      {
+        error: 'This slug is already in use. Choose another.',
+        fieldErrors: { slug: 'This slug is already in use. Choose another.' },
+      },
       { status: 409 },
     );
   if (e.code === '23503' || e.cause?.code === '23503')
