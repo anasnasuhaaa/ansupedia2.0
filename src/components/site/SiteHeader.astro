@@ -10,11 +10,13 @@ import Briefcase from '@tabler/icons/outline/briefcase.svg';
 import Award from '@tabler/icons/outline/award.svg';
 import Notebook from '@tabler/icons/outline/notebook.svg';
 import Mail from '@tabler/icons/outline/mail.svg';
+import { experiences } from '../../data/experiences';
+import { certifications } from '../../data/certifications';
 const links = [
   { label: 'About', href: '/#about', Icon: User },
   { label: 'Projects', href: '/#projects', Icon: Projects },
-  { label: 'Experience', href: '/#experience', Icon: Briefcase },
-  { label: 'Credentials', href: '/#credentials', Icon: Award },
+  ...(experiences.length ? [{ label: 'Experience', href: '/#experience', Icon: Briefcase }] : []),
+  ...(certifications.length ? [{ label: 'Credentials', href: '/#credentials', Icon: Award }] : []),
   { label: 'Blog', href: '/blog', Icon: Notebook },
   { label: 'Contact', href: '/#contact', Icon: Mail },
 ];

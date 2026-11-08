@@ -15,7 +15,7 @@ const { post, featured = false } = Astro.props;
   class:list={['post-card-wrap', { 'featured-post': featured }]}
   aria-labelledby={`post-${post.id}-${featured ? 'featured' : 'card'}`}
 >
-  <Card.Root class="post-card">
+  <Card.Root class="post-card ring-0">
     {post.coverImageUrl && (
       <a href={`/blog/${post.slug}`} class="post-cover" tabindex="-1" aria-hidden="true">
         <img

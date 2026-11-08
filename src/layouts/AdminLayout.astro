@@ -44,11 +44,6 @@ const active = (href: string) => (href === '/admin' ? path === href : path.start
         <Logout aria-hidden="true" />
         Sign out
       </Button>
-      <span class="admin-sidebar-note meta">
-        A space to think,
-        <br />
-        write, and share.
-      </span>
     </aside>
     <div class="admin-main">
       <div class="admin-topline">
@@ -79,7 +74,7 @@ const active = (href: string) => (href === '/admin' ? path === href : path.start
           <Sheet.Content class="mobile-sheet">
             <Sheet.Header>
               <Sheet.Title>Your workspace</Sheet.Title>
-              <Sheet.Description>Make room for your next idea.</Sheet.Description>
+              <Sheet.Description class="sr-only">Choose an administration page.</Sheet.Description>
             </Sheet.Header>
             <nav aria-label="Mobile administration" class="admin-nav">
               {navigation.map(({ href, label, icon: Icon }) => (

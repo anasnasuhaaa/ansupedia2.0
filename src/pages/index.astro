@@ -1,7 +1,4 @@
 ---
-import Card from '../components/starwind/card';
-import Briefcase from '@tabler/icons/outline/briefcase.svg';
-import Award from '@tabler/icons/outline/award.svg';
 import Notebook from '@tabler/icons/outline/notebook.svg';
 import { button } from '../components/starwind/button/variants';
 import Button from '../components/starwind/button/Button.astro';
@@ -98,12 +95,12 @@ try {
           ))}
       </div>
     </section>
-    <section id="experience" class="section">
-      <div class="section-head">
-        <h2>Experience</h2>
-      </div>
-      {experiences.length ? (
-        experiences.map((item) => (
+    {experiences.length > 0 && (
+      <section id="experience" class="section">
+        <div class="section-head">
+          <h2>Experience</h2>
+        </div>
+        {experiences.map((item) => (
           <article class="timeline-item">
             <span class="meta">{item.period}</span>
             <h3>
@@ -111,27 +108,15 @@ try {
             </h3>
             <p>{item.description}</p>
           </article>
-        ))
-      ) : (
-        <Card.Root class="milestone-empty">
-          <Card.Content>
-            <span class="empty-icon">
-              <Briefcase class="size-5" aria-hidden="true" />
-            </span>
-            <p>My work so far is best explored through the projects above.</p>
-            <a href="#projects" class="text-link">
-              Explore the projects <ArrowUpRight aria-hidden="true" />
-            </a>
-          </Card.Content>
-        </Card.Root>
-      )}
-    </section>
-    <section id="credentials" class="section">
-      <div class="section-head">
-        <h2>Certifications &amp; Achievements</h2>
-      </div>
-      {certifications.length ? (
-        certifications.map((item) => (
+        ))}
+      </section>
+    )}
+    {certifications.length > 0 && (
+      <section id="credentials" class="section">
+        <div class="section-head">
+          <h2>Certifications &amp; Achievements</h2>
+        </div>
+        {certifications.map((item) => (
           <article class="timeline-item">
             <span class="meta">
               {item.date} · {item.type}
@@ -142,18 +127,9 @@ try {
             </p>
             {item.credentialUrl && <a href={item.credentialUrl}>View credential ↗</a>}
           </article>
-        ))
-      ) : (
-        <Card.Root class="milestone-empty">
-          <Card.Content>
-            <span class="empty-icon">
-              <Award class="size-5" aria-hidden="true" />
-            </span>
-            <p>No certifications or achievements listed yet.</p>
-          </Card.Content>
-        </Card.Root>
-      )}
-    </section>
+        ))}
+      </section>
+    )}
     <section id="blog" class="section">
       <div class="section-head">
         <h2>Latest Writing</h2>

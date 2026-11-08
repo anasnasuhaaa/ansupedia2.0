@@ -8,9 +8,7 @@ const categories = await listCategories();
 
 <AdminLayout title="New article">
   <header class="admin-page-heading">
-    <span class="eyebrow">The writing room</span>
     <h1>A new thought.</h1>
-    <p>Write, refine, and share when you’re ready.</p>
   </header>
   <Editor client:load categories={categories} uploadsEnabled={uploadsEnabled()} />
 </AdminLayout>

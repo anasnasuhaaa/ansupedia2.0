@@ -13,8 +13,13 @@ const destination = project.liveUrl || project.githubUrl;
 ---
 
 <article aria-labelledby={`project-${project.id}`}>
-  <Card.Root class="project-card">
-    <a class="project-cover" href={destination} tabindex="-1" aria-hidden="true">
+  <Card.Root class="project-card ring-0">
+    <a
+      class:list={['project-cover', { 'project-title-cover': project.image.endsWith('.svg') }]}
+      href={destination}
+      tabindex="-1"
+      aria-hidden="true"
+    >
       <img src={project.image} alt={project.imageAlt} width="800" height="500" loading="lazy" />
       <span class="project-cover-arrow">
         <Arrow class="size-5" />

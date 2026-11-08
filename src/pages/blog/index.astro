@@ -39,6 +39,7 @@ const filterUrl = (page?: number) => {
 };
 const hasFilters = !!q || selectedCategories.length > 0;
 const showFeatured = featured && result.items.some((post) => post.id === featured.id);
+const articles = result.items.filter((post) => !showFeatured || post.id !== featured?.id);
 const categoryOptions = [
   { name: 'All Articles', selected: !selectedCategories.length, slugs: [] as string[] },
   ...categories.map((category) => ({
@@ -107,26 +108,26 @@ const categoryOptions = [
       )}
     </div>
     {showFeatured && featured && <PostRow post={featured} featured />}
-    <div class="writing-heading">
-      <h2>{hasFilters ? 'Search results' : 'All writing'}</h2>
-      <span class="meta">
-        {result.total} {result.total === 1 ? 'article' : 'articles'}
-        {q && ` matching “${q}”`}
-      </span>
-    </div>
+    {(failed || articles.length > 0 || !showFeatured) && (
+      <div class="writing-heading">
+        <h2>{hasFilters ? 'Search results' : 'All writing'}</h2>
+        <span class="meta">
+          {result.total} {result.total === 1 ? 'article' : 'articles'}
+          {q && ` matching “${q}”`}
+        </span>
+      </div>
+    )}
     {failed ? (
       <div class="notice" role="status">
         Writing is temporarily unavailable. Please try again later.
       </div>
-    ) : result.items.length ? (
+    ) : articles.length ? (
       <div class="writing-grid">
-        {result.items
-          .filter((post) => !showFeatured || post.id !== featured?.id)
-          .map((post) => (
-            <PostRow post={post} />
-          ))}
+        {articles.map((post) => (
+          <PostRow post={post} />
+        ))}
       </div>
-    ) : (
+    ) : !showFeatured ? (
       <div class="empty blog-empty">
         <span class="empty-icon">
           <Notebook class="size-5" aria-hidden="true" />
@@ -143,7 +144,7 @@ const categoryOptions = [
           </Button>
         )}
       </div>
-    )}
+    ) : null}
     <PagePagination page={result.page} pages={result.pages} pageUrl={(page) => filterUrl(page)} />
   </div>
 </BaseLayout>
