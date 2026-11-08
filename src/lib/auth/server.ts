@@ -11,7 +11,12 @@ function createAuth() {
     database: drizzleAdapter(getDb(), { provider: 'pg', schema }),
     emailAndPassword: { enabled: true, disableSignUp: true, minPasswordLength: 12 },
     user: { additionalFields: { role: { type: 'string', defaultValue: 'user', input: false } } },
-    trustedOrigins: [new URL(settings.baseURL).origin],
+    trustedOrigins: [
+      new URL(settings.baseURL).origin,
+      // Both production domains serve the same app; browsers send distinct origins.
+      'https://ansupedia.my.id',
+      'https://www.ansupedia.my.id',
+    ],
     session: { expiresIn: 60 * 60 * 24, updateAge: 60 * 60 },
     rateLimit: {
       enabled: true,

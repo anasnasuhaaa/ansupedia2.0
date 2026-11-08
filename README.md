@@ -87,6 +87,8 @@ No remote changes are performed by development or build commands.
 4. Bootstrap the production administrator once through a secure local environment, then remove seed credentials. Do not run bootstrap during builds.
 5. Build with `pnpm build`; deploy only when you choose. Verify login, publication, feeds and media in the deployed environment.
 
+Better Auth explicitly trusts both `https://ansupedia.my.id` and `https://www.ansupedia.my.id`, alongside the configured `BETTER_AUTH_URL` origin. Set `BETTER_AUTH_URL` and `PUBLIC_SITE_URL` to your preferred canonical HTTPS domain. The browser origin includes `www`, so these two domains are distinct even when they serve the same deployment. An `Invalid origin` error means the request was rejected by the origin check before credentials were validated. After changing production environment variables or this configuration, redeploy Vercel for the changes to take effect.
+
 postgres.js uses a small pool, idle/connect timeouts and `prepare:false` for compatibility with transaction poolers. A single official Vercel Node function serves SSR routes. Database queries are parameterized and category changes occur transactionally with article edits. Schema uses timezone-aware timestamps and cascading junction foreign keys.
 
 ## Content and architecture
