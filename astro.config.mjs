@@ -7,9 +7,15 @@ export default defineConfig({
   adapter: vercel(),
   integrations: [react()],
   vite: {
-    plugins: [tailwindcss()],
-    // sanitize-html uses require() for the ESM-only htmlparser2. Bundle both so
-    // Vercel doesn't need runtime require(ESM) support to load the sanitizer.
-    ssr: { noExternal: ['sanitize-html', 'htmlparser2'] },
+    plugins: [
+      tailwindcss(),
+      {
+        name: 'bundle-sanitizer-for-production',
+        apply: 'build',
+        // Bundle CommonJS and ESM together for Vercel. In dev, let Node load
+        // sanitize-html natively so Vite doesn't evaluate require() as ESM.
+        config: () => ({ ssr: { noExternal: ['sanitize-html', 'htmlparser2'] } }),
+      },
+    ],
   },
 });

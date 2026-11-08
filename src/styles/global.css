@@ -466,6 +466,13 @@ fieldset legend {
   align-items: center;
   gap: 1.25rem;
 }
+.footer-socials {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 0.25rem;
+  margin-left: auto;
+}
 .footer-brand {
   color: var(--foreground);
   font-weight: 650;

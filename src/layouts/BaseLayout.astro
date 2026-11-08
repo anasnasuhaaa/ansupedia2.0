@@ -10,6 +10,11 @@ import '../styles/global.css';
 import ThemeControl from '../components/site/ThemeControl.astro';
 import SiteHeader from '../components/site/SiteHeader.astro';
 import NotificationHost from '../components/notifications/NotificationHost';
+import Button from '../components/starwind/button/Button.astro';
+import Github from '@tabler/icons/outline/brand-github.svg';
+import Linkedin from '@tabler/icons/outline/brand-linkedin.svg';
+import Instagram from '@tabler/icons/outline/brand-instagram.svg';
+import { profile } from '../data/profile';
 import { ThemeInitScript } from '@starwind-ui/astro/theme';
 interface Props {
   title?: string;
@@ -82,9 +87,35 @@ const canonical = new URL(Astro.url.pathname, site);
           </a>
           <span>© {new Date().getFullYear()} Anas Nasuha</span>
         </div>
-        <a href="/rss.xml" class="text-link">
-          RSS feed <span aria-hidden="true">↗</span>
-        </a>
+        <nav class="footer-socials" aria-label="Footer social profiles">
+          <Button
+            href={profile.github}
+            variant="ghost"
+            size="icon"
+            aria-label="GitHub"
+            title="GitHub"
+          >
+            <Github class="size-4.5" aria-hidden="true" />
+          </Button>
+          <Button
+            href={profile.linkedin}
+            variant="ghost"
+            size="icon"
+            aria-label="LinkedIn"
+            title="LinkedIn"
+          >
+            <Linkedin class="size-4.5" aria-hidden="true" />
+          </Button>
+          <Button
+            href={profile.instagram}
+            variant="ghost"
+            size="icon"
+            aria-label="Instagram"
+            title="Instagram"
+          >
+            <Instagram class="size-4.5" aria-hidden="true" />
+          </Button>
+        </nav>
       </div>
     </footer>
     {(workspace || Astro.url.pathname === '/admin/login') && <NotificationHost client:load />}
