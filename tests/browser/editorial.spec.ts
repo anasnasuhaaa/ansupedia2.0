@@ -250,9 +250,14 @@ test('draft, preview, publish, update, unpublish and delete preserve the complet
   await page
     .getByLabel('Excerpt', { exact: true })
     .fill('Temporary publishing workflow verification.');
-  await page
-    .getByRole('textbox', { name: 'Article content', exact: true })
-    .fill('A safe paragraph from the browser test.');
+  const content = page.getByRole('textbox', { name: 'Article content', exact: true });
+  await content.fill('A safe paragraph from the browser test.');
+  await content.press('ControlOrMeta+a');
+  await page.getByRole('button', { name: 'Insert or edit link', exact: true }).click();
+  const link = page.getByRole('dialog', { name: 'Insert a link' });
+  await link.getByLabel('Link URL').fill('https://example.com');
+  await link.getByRole('button', { name: 'Apply link', exact: true }).click();
+  await expect(content.locator('a')).toHaveAttribute('href', 'https://example.com');
   for (const category of fixture.categories)
     await page.getByLabel(category.name, { exact: true }).check();
   await expect(page.getByText('2 selected', { exact: true })).toBeVisible();
@@ -260,6 +265,9 @@ test('draft, preview, publish, update, unpublish and delete preserve the complet
   await expect(page.getByRole('region', { name: 'Article preview' })).toContainText(
     'A safe paragraph',
   );
+  await expect(
+    page.getByRole('region', { name: 'Article preview' }).getByRole('link'),
+  ).toHaveAttribute('href', 'https://example.com');
   await page.getByRole('button', { name: 'Close preview', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Preview', exact: true })).toBeFocused();
   await page.getByRole('button', { name: 'Save draft', exact: true }).click();
@@ -267,6 +275,7 @@ test('draft, preview, publish, update, unpublish and delete preserve the complet
   await expect(page.locator('[data-sonner-toast]')).toHaveText(/Article created successfully/);
   id = page.url().split('/').pop()!.split('?')[0];
   try {
+    await expect(content.locator('a')).toHaveAttribute('href', 'https://example.com');
     expect((await request.get(`/blog/${slug}`)).status()).toBe(404);
     for (const category of fixture.categories)
       await expect(page.getByLabel(category.name, { exact: true })).toBeChecked();
@@ -284,6 +293,9 @@ test('draft, preview, publish, update, unpublish and delete preserve the complet
       'Article published successfully.',
     );
     expect((await request.get(`/blog/${slug}`)).status()).toBe(200);
+    expect(await (await request.get(`/blog/${slug}`)).text()).toContain(
+      '<a href="https://example.com" rel="noopener noreferrer">',
+    );
     expect(await (await request.get('/rss.xml')).text()).toContain(slug);
     expect(await (await request.get('/sitemap.xml')).text()).toContain(slug);
     await page.getByLabel('Excerpt', { exact: true }).fill('Updated while remaining published.');

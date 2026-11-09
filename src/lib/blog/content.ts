@@ -58,7 +58,9 @@ export function validateContent(value: unknown): JSONContent {
         if (m.type === 'link') {
           if (
             !safeUrl(m.attrs?.href) ||
-            Object.keys(m.attrs || {}).some((k) => !['href', 'target', 'rel', 'class'].includes(k))
+            Object.keys(m.attrs || {}).some(
+              (k) => !['href', 'target', 'rel', 'class', 'title'].includes(k),
+            )
           )
             throw new Error('Invalid link.');
         } else if (m.attrs && Object.keys(m.attrs).length)

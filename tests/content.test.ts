@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
+import { getSchema } from '@tiptap/core';
 import { validateContent, renderContent, safeUrl, readingTime } from '../src/lib/blog/content';
+import { extensions } from '../src/lib/blog/extensions';
 import { slugSchema, postInput } from '../src/lib/validation/post';
 import { isAdmin, isSameOrigin } from '../src/lib/auth/guards';
 const document = {
@@ -7,6 +9,52 @@ const document = {
   content: [{ type: 'paragraph', content: [{ type: 'text', text: '<script>alert(1)</script>' }] }],
 };
 describe('article content safety', () => {
+  it.each([
+    { href: 'https://example.com', title: null },
+    { href: 'http://example.com', title: null },
+    { href: 'mailto:hello@example.com', title: 'Email' },
+  ])(
+    'accepts editor-generated links through validation and rendering: $href',
+    ({ href, title }) => {
+      const schema = getSchema(extensions());
+      const link = schema.marks.link.create({ href, title });
+      const content = schema
+        .node('doc', null, [schema.node('paragraph', null, [schema.text('Link', [link])])])
+        .toJSON();
+
+      expect(link.toJSON().attrs).toHaveProperty('title', title);
+      expect(validateContent(content)).toEqual(content);
+      expect(validateContent(validateContent(content))).toEqual(content);
+      expect(
+        postInput.parse({
+          title: 'Linked article',
+          slug: 'linked-article',
+          excerpt: '',
+          contentJson: content,
+          status: 'draft',
+          isFeatured: false,
+          categoryIds: [],
+        }).contentJson,
+      ).toEqual(content);
+      expect(renderContent(content)).toContain(`href="${href}"`);
+    },
+  );
+  it.each([
+    { href: 'javascript:alert(1)', title: null },
+    { href: 'https://example.com', title: null, onclick: 'alert(1)' },
+  ])('rejects unsafe links and unsupported link attributes: %j', (attrs) => {
+    expect(() =>
+      validateContent({
+        type: 'doc',
+        content: [
+          {
+            type: 'paragraph',
+            content: [{ type: 'text', text: 'Link', marks: [{ type: 'link', attrs }] }],
+          },
+        ],
+      }),
+    ).toThrow('Invalid link.');
+  });
   it('escapes text and rejects scripts and unsafe links', () => {
     expect(renderContent(document)).toContain('&lt;script&gt;');
     expect(renderContent(document)).not.toContain('<script>');
