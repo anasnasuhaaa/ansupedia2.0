@@ -335,6 +335,111 @@ test('draft, preview, publish, update, unpublish and delete preserve the complet
   }
 });
 
+for (const width of [1440, 390]) {
+  test(`updating an article preserves scroll, selection and undo at ${width}px`, async ({
+    page,
+    editorial,
+  }) => {
+    const post = editorial!.posts[0];
+    await page.setViewportSize({ width, height: 900 });
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto(`/admin/posts/${post.id}`);
+    const content = page.getByRole('textbox', { name: 'Article content', exact: true });
+    const text = Array.from(
+      { length: 120 },
+      (_, i) => `Writing at ${width}px, paragraph ${i + 1}.`,
+    ).join(' ');
+    await content.fill(text);
+    await content.press('ControlOrMeta+End');
+    await content.press('ArrowLeft');
+    const element = await content.elementHandle();
+    const selection = () =>
+      page.evaluate(() => {
+        const selection = window.getSelection();
+        return { anchor: selection?.anchorOffset, focus: selection?.focusOffset };
+      });
+    const initialSelection = await selection();
+    const initialScroll = await page.evaluate(() => window.scrollY);
+    expect(initialScroll).toBeGreaterThan(300);
+    const navigations: string[] = [];
+    page.on('framenavigated', (frame) => {
+      if (frame === page.mainFrame()) navigations.push(frame.url());
+    });
+
+    await page.getByRole('button', { name: 'Update article', exact: true }).click();
+    await expect(page.getByText('All changes saved', { exact: true })).toBeVisible();
+    expect(navigations).toEqual([]);
+    expect(await element!.evaluate((el) => el.isConnected)).toBe(true);
+    expect(await page.evaluate(() => window.scrollY)).toBeCloseTo(initialScroll, 0);
+    expect(await selection()).toEqual(initialSelection);
+    await expect(page.locator('[data-sonner-toast][data-type=success]')).toContainText(
+      'Article updated successfully.',
+    );
+    expect(await (await page.request.get(`/blog/${post.slug}`)).text()).toContain(text);
+
+    // Saving must retain editing history and track the next edits as unsaved.
+    await page.getByRole('button', { name: 'Undo', exact: true }).click();
+    await expect(content).not.toHaveText(text);
+    await expect(page.getByText('Unsaved changes', { exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Redo', exact: true }).click();
+    await expect(content).toHaveText(text);
+    await page.getByRole('button', { name: 'Update article', exact: true }).click();
+    await expect(page.getByText('All changes saved', { exact: true })).toBeVisible();
+  });
+}
+
+test('edits during an update stay unsaved and subsequent edits still warn before leaving', async ({
+  page,
+  editorial,
+}) => {
+  const post = editorial!.posts[1];
+  await page.goto(`/admin/posts/${post.id}`);
+  const content = page.getByRole('textbox', { name: 'Article content', exact: true });
+  await content.fill('Saved snapshot.');
+  let finish!: () => void;
+  const pending = new Promise<void>((resolve) => {
+    finish = resolve;
+  });
+  await page.route('**/api/admin/posts', async (route) => {
+    await pending;
+    await route.continue();
+  });
+  try {
+    await page.getByRole('button', { name: 'Update article', exact: true }).click();
+    await expect(page.getByRole('button', { name: 'Update article', exact: true })).toBeDisabled();
+    await content.press('ControlOrMeta+End');
+    await page.keyboard.insertText(' Continued while saving.');
+    finish();
+    await expect(page.locator('[data-sonner-toast][data-type=success]')).toContainText(
+      'Article updated successfully.',
+    );
+    await expect(page.getByText('Unsaved changes', { exact: true })).toBeVisible();
+    await expect(content).toHaveText('Saved snapshot. Continued while saving.');
+    const saved = await (await page.request.get(`/blog/${post.slug}`)).text();
+    expect(saved).toContain('Saved snapshot.');
+    expect(saved).not.toContain('Continued while saving.');
+
+    await page.getByRole('button', { name: 'Update article', exact: true }).click();
+    await expect(page.getByText('All changes saved', { exact: true })).toBeVisible();
+    expect(await (await page.request.get(`/blog/${post.slug}`)).text()).toContain(
+      'Continued while saving.',
+    );
+    await content.press('ControlOrMeta+End');
+    await page.keyboard.insertText(' Unsaved again.');
+    await expect(page.getByText('Unsaved changes', { exact: true })).toBeVisible();
+    await Promise.all([
+      page.waitForEvent('dialog').then(async (dialog) => {
+        expect(dialog.type()).toBe('beforeunload');
+        await dialog.dismiss();
+      }),
+      page.evaluate(() => window.location.assign('/admin/posts')),
+    ]);
+    await expect(content).toContainText('Unsaved again.');
+  } finally {
+    finish();
+  }
+});
+
 test('server validation appears beside the relevant article field', async ({ page, editorial }) => {
   const fixture = editorial!;
   await page.goto('/admin/posts/new');

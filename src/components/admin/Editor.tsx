@@ -13,7 +13,7 @@ import { input } from '../starwind/input/variants';
 import { textarea } from '../starwind/textarea/variants';
 import { nativeSelect } from '../starwind/native-select/variants';
 import { card, cardContent, cardHeader } from '../starwind/card/variants';
-import { toast, redirectWithNotice } from '../../lib/notifications';
+import { toast, redirectWithNotice, flashMessages } from '../../lib/notifications';
 import '../starwind/prose/styles.css';
 import '../../styles/editor.css';
 import EditorDialog from './EditorDialog';
@@ -219,6 +219,7 @@ export default function Editor({
     setMessage('Saving your article…');
     const notice = toast.loading('Saving article…');
     const data = new FormData(form);
+    const savedContent = editor.state.doc;
     try {
       const response = await fetch('/api/admin/posts', {
         method: 'POST',
@@ -228,7 +229,7 @@ export default function Editor({
           title,
           slug,
           excerpt: data.get('excerpt'),
-          contentJson: editor.getJSON(),
+          contentJson: savedContent.toJSON(),
           coverImageUrl: cover,
           coverImageAlt: data.get('coverImageAlt'),
           seoTitle: data.get('seoTitle'),
@@ -242,6 +243,17 @@ export default function Editor({
       if (!response.ok) {
         setErrors(result.fieldErrors || {});
         throw Error(result.error || 'Unable to save.');
+      }
+      if (post?.id && status === post.status) {
+        // Keep the editor, selection and undo history mounted for continued writing.
+        // Edits made while the request was pending still need to be saved.
+        setDirty(!editor.state.doc.eq(savedContent));
+        setMessage('');
+        toast.success(
+          status === 'published' ? flashMessages.articleUpdated : flashMessages.draftSaved,
+          { id: notice },
+        );
+        return;
       }
       allowLeave.current = true;
       setDirty(false);
