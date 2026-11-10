@@ -19,7 +19,7 @@ const { default: app } = await import(new URL(handler, functionRoot).href);
 assert.equal(typeof app.fetch, 'function');
 
 for (const [path, expectedStatus, expectedContent] of [
-  ['/', 200, 'Technical Skills'],
+  ['/', 200, 'Tech Stack'],
   ['/blog', 200, "Ansupedia's Blog"],
   ['/rss.xml', 200, '<rss'],
   ['/admin/login', 200, 'Sign in'],
