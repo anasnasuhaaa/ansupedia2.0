@@ -3,13 +3,12 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 import ConfirmDelete from '../../components/admin/ConfirmDelete.astro';
 import CategoryDialog from '../../components/admin/CategoryDialog.astro';
 import Table from '../../components/starwind/table';
-import Badge from '../../components/starwind/badge/Badge.astro';
 import Input from '../../components/starwind/input/Input.astro';
 import Button from '../../components/starwind/button/Button.astro';
 import Search from '@tabler/icons/outline/search.svg';
 import { listCategoryStats } from '../../db/queries/blog';
 const all = await listCategoryStats();
-const q = (Astro.url.searchParams.get('q') || '').slice(0, 80);
+const q = (Astro.url.searchParams.get('q') || '').trim().slice(0, 80);
 const categories = all.filter((c) => `${c.name} ${c.slug}`.toLowerCase().includes(q.toLowerCase()));
 ---
 
@@ -27,7 +26,14 @@ const categories = all.filter((c) => `${c.name} ${c.slug}`.toLowerCase().include
       <label class="sr-only" for="category-search">
         Search categories
       </label>
-      <Input id="category-search" type="search" name="q" value={q} placeholder="Find a category…" />
+      <Input
+        id="category-search"
+        type="search"
+        name="q"
+        maxlength="80"
+        value={q}
+        placeholder="Find a category…"
+      />
     </div>
     <Button type="submit" variant="outline" size="sm">
       Search
@@ -57,9 +63,9 @@ const categories = all.filter((c) => `${c.name} ${c.slug}`.toLowerCase().include
                 <code class="meta">{c.slug}</code>
               </Table.Cell>
               <Table.Cell data-label="Articles">
-                <Badge variant="outline" class="category-badge">
+                <span class="meta">
                   {c.articleCount} {c.articleCount === 1 ? 'article' : 'articles'}
-                </Badge>
+                </span>
               </Table.Cell>
               <Table.Cell class="table-actions">
                 <div class="actions">
@@ -74,7 +80,7 @@ const categories = all.filter((c) => `${c.name} ${c.slug}`.toLowerCase().include
     </div>
   ) : (
     <div class="empty">
-      <h2>{q ? 'No matching categories.' : 'Give your ideas a home.'}</h2>
+      <h2>{q ? 'No matching categories.' : 'No categories yet.'}</h2>
       <p>
         {q
           ? 'Try another search.'

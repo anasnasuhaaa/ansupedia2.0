@@ -26,10 +26,13 @@ export const POST: APIRoute = async ({ request }) => {
 export const DELETE: APIRoute = async ({ request }) => {
   try {
     const body = await readJson(request);
-    await getDb()
+    const deleted = await getDb()
       .delete(categories)
-      .where(eq(categories.id, z.uuid().parse(body.id)));
-    return Response.json({ ok: true });
+      .where(eq(categories.id, z.uuid().parse(body.id)))
+      .returning({ id: categories.id });
+    return deleted.length
+      ? Response.json({ ok: true })
+      : Response.json({ error: 'Category not found' }, { status: 404 });
   } catch (e) {
     return apiError(e);
   }

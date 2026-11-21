@@ -8,7 +8,7 @@ import AdminLayout from '../../../layouts/AdminLayout.astro';
 import ArticleTable from '../../../components/admin/ArticleTable.astro';
 import PagePagination from '../../../components/site/PagePagination.astro';
 import { listPosts } from '../../../db/queries/blog';
-const q = (Astro.url.searchParams.get('q') || '').slice(0, 200);
+const q = (Astro.url.searchParams.get('q') || '').trim().slice(0, 200);
 const status = Astro.url.searchParams.get('status');
 const page = Math.max(1, Number(Astro.url.searchParams.get('page')) || 1);
 const result = await listPosts({
@@ -19,6 +19,7 @@ const result = await listPosts({
 });
 const pageUrl = (p: number) =>
   `/admin/posts?${new URLSearchParams({ q, status: status || '', page: String(p) })}`;
+if (result.page > result.pages) return Astro.redirect(pageUrl(result.pages));
 ---
 
 <AdminLayout title="Articles">
@@ -37,7 +38,14 @@ const pageUrl = (p: number) =>
       <label class="sr-only" for="q">
         Search articles
       </label>
-      <Input id="q" name="q" type="search" value={q} placeholder="Search by title…" />
+      <Input
+        id="q"
+        name="q"
+        type="search"
+        maxlength="200"
+        value={q}
+        placeholder="Search by title…"
+      />
     </div>
     <label class="sr-only" for="status">
       Status
@@ -73,7 +81,7 @@ const pageUrl = (p: number) =>
       <p>
         {q || status
           ? 'Try a different title or status filter.'
-          : 'Your next article starts with a simple idea.'}
+          : 'Create a draft to start writing.'}
       </p>
       <Button href={q || status ? '/admin/posts' : '/admin/posts/new'} variant="outline" size="sm">
         {q || status ? 'Clear filters' : 'Create an article'}
