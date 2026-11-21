@@ -571,12 +571,32 @@ fieldset legend {
     gap: 0.75rem;
     align-items: start;
   }
-  .hero-identity { display: contents; }
-  .hero-heading h1 { align-self: center; }
-  .hero-heading .avatar { grid-area: 1 / 2; }
-  .hero-heading-detail, .intro-copy { grid-column: 1 / -1; }
-  .hero-heading-detail { margin: 0.25rem 0; }
-  .hero-heading-detail br { display: none; }
+  .hero-identity {
+    display: contents;
+  }
+  .hero-heading h1 {
+    align-self: center;
+  }
+  .hero-heading .avatar {
+    grid-area: 1 / 2;
+  }
+  .hero-heading-detail,
+  .intro-copy {
+    grid-column: 1 / -1;
+  }
+  .hero-heading-detail {
+    margin: 0.25rem 0;
+  }
+  .hero-heading-detail br {
+    display: none;
+  }
+  .hero-bottom .actions {
+    gap: 0.5rem;
+  }
+  .hero-bottom .actions a {
+    font-size: 0.875rem;
+    padding-inline: 0.85rem;
+  }
   .footer-inner {
     flex-wrap: wrap;
     gap: 1rem;
@@ -797,18 +817,58 @@ fieldset legend {
   border-radius: var(--radius);
   background: var(--foreground);
 }
-.contact-surface h2 { margin: 0 0 0.35rem; color: var(--background); }
-.contact-surface p { margin: 0; color: var(--background); }
+.contact-surface h2 {
+  margin: 0 0 0.35rem;
+  color: var(--background);
+}
+.contact-surface p {
+  margin: 0;
+  color: var(--background);
+}
 .contact-surface [data-slot='button'] {
   background: var(--background);
   color: var(--foreground);
 }
-.contact-surface a:hover { text-decoration: underline; }
-.footer-brand:hover { text-decoration: underline; text-underline-offset: 0.2em; }
+.contact-surface a:hover {
+  text-decoration: underline;
+}
+.footer-brand:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
 @media (max-width: 900px) {
   .skills-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1.5rem;
+  }
+}
+@media (min-width: 1280px) {
+  .project-grid > .project-lead:first-child {
+    grid-column: span 3;
+  }
+  .project-lead:first-child .project-card {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    grid-template-rows: 1fr auto;
+  }
+  .project-lead:first-child .project-cover {
+    grid-row: span 2;
+    aspect-ratio: auto;
+    border: 0;
+  }
+  .project-lead:first-child .project-cover img {
+    position: absolute;
+    inset: 0;
+    object-position: 45% center;
+  }
+  .project-lead:first-child .project-body {
+    justify-content: center;
+  }
+  .project-lead:first-child .project-body h3 {
+    font-size: 2rem;
+  }
+  .project-lead:first-child .project-technologies {
+    margin-top: 1rem;
   }
 }
 @media (max-width: 1279px) {
@@ -1585,7 +1645,10 @@ fieldset legend {
     color: var(--muted-foreground);
     font-size: 0.8125rem;
   }
-  .table-actions :is(button, a) { min-height: 44px; min-width: 44px; }
+  .table-actions :is(button, a) {
+    min-height: 44px;
+    min-width: 44px;
+  }
   .table-actions .actions {
     justify-content: flex-start;
     margin-top: 0.25rem;

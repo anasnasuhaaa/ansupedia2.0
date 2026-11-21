@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Toaster } from 'sonner';
 import { consumeFlash } from '../../lib/notifications';
 
-export default function NotificationHost() {
+export default function NotificationHost({ editing = false }: { editing?: boolean }) {
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [mobile, setMobile] = useState(false);
   useEffect(() => {
@@ -20,10 +20,16 @@ export default function NotificationHost() {
       window.removeEventListener('resize', sync);
     };
   }, []);
+  // Keep feedback clear of the sticky save and publish controls.
+  const offset = editing ? { top: 'calc(var(--header-height) + 0.75rem)' } : undefined;
   return (
     <Toaster
       theme={theme}
-      position={mobile ? 'bottom-center' : 'bottom-right'}
+      position={
+        editing ? (mobile ? 'top-center' : 'top-right') : mobile ? 'bottom-center' : 'bottom-right'
+      }
+      offset={offset}
+      mobileOffset={offset}
       duration={2800}
       closeButton
       richColors={false}

@@ -34,7 +34,9 @@ async function refresh() {
 
 export async function getGitHubStats() {
   if (Date.now() >= refreshAfter) {
-    pending ??= refresh().finally(() => { pending = undefined; });
+    pending ??= refresh().finally(() => {
+      pending = undefined;
+    });
     await pending;
   }
   return snapshot;

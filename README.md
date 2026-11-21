@@ -54,16 +54,20 @@ The bootstrap uses Better Auth's password hashing and a transaction with an advi
 
 Better Auth validates secure cookie sessions. An explicit stored administrator role is required for every admin page and API mutation. Same-origin checks protect mutations. Authentication endpoints are allowlisted. Sign-in is limited to five attempts per minute, stored in PostgreSQL so the limit is shared across serverless instances. Client IP is overwritten from Astro's server request context; maintain a trusted ingress when self-hosting.
 
+## Portfolio statistics
+
+The homepage reads public repository and follower counts from GitHub. Each warm server instance caches a successful response for one hour and retries failures after five minutes. A failed refresh keeps the last dated response. The public API works anonymously, with optional server-side `GITHUB_STATS_TOKEN` support.
+
 ## Writing
 
-- `/admin`: counts and recent articles.
+- `/admin`: publication counts and the five most recently edited articles.
 - `/admin/posts`: search, filter, edit, view, and delete with confirmation.
 - `/admin/posts/new`, `/admin/posts/[id]`: Tiptap editor, metadata, categories, cover image, preview, draft and publish actions.
 - `/admin/categories`: create, rename, change slug, and delete categories. Deletion removes category associations, never articles.
-- `/blog`: title search, category filter, featured article and pagination.
+- `/blog`: literal title search, multi-category filters, featured writing and pagination.
 - `/blog/[slug]`: published articles with related writing, reading time and structured metadata. Drafts return 404 and are excluded from feeds and sitemap.
 
-Content is JSONB, validated against an allowlist and ProseMirror's schema. The same Tiptap static renderer and HTML sanitizer power preview and public pages. Links and image schemes are restricted. Code is escaped and highlighted. The editor indicates unsaved changes. Use Save draft or Publish for a draft, and Update article for published writing. Saving updates keeps the article published; Unpublish is a separate confirmation. Publication dates are set on first publish and retained on subsequent edits.
+Content is JSONB, validated against an allowlist and ProseMirror's schema. The same Tiptap static renderer and HTML sanitizer power preview and public pages. Underline, links and code languages survive saving and reopening. Select an inline image and choose Edit image to change its description or source. Preview includes the current excerpt, categories, cover and reading time. Links and image schemes are restricted. Code is escaped and highlighted. The editor indicates unsaved changes. Use Save draft or Publish for a draft, and Update article for published writing. Saving updates keeps the article published; Unpublish is a separate confirmation. Publication dates are set on first publish and retained on subsequent edits.
 
 ## Images
 

@@ -5,6 +5,7 @@ import ArrowRight from '@tabler/icons/outline/arrow-right.svg';
 import ArrowUpRight from '@tabler/icons/outline/arrow-up-right.svg';
 import Github from '@tabler/icons/outline/brand-github.svg';
 import Linkedin from '@tabler/icons/outline/brand-linkedin.svg';
+import { databaseConfigured } from '../lib/env';
 import { listPosts } from '../db/queries/blog';
 import PostRow from '../components/blog/PostRow.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
@@ -19,6 +20,7 @@ import { certifications } from '../data/certifications';
 let recent: Awaited<ReturnType<typeof listPosts>>['items'] = [];
 let blogError = false;
 try {
+  if (!databaseConfigured()) throw new Error('Blog database unavailable');
   recent = (await listPosts({ limit: 3 })).items;
 } catch {
   console.error('Recent articles unavailable');
@@ -32,7 +34,10 @@ try {
       <div class="hero-heading">
         <div class="hero-identity">
           <h1>{profile.name}</h1>
-          <p class="hero-heading-detail">Software Engineering<br /> &amp; Cybersecurity</p>
+          <p class="hero-heading-detail">
+            Software Engineering
+            <br /> &amp; Cybersecurity
+          </p>
           <p class="intro-copy">{profile.introduction}</p>
         </div>
         <img
@@ -160,7 +165,9 @@ try {
           <h2>Get in touch</h2>
           <p>For messages about my work, reach me on LinkedIn.</p>
         </div>
-        <Button href={profile.linkedin}>Connect on LinkedIn <ArrowUpRight aria-hidden="true" /></Button>
+        <Button href={profile.linkedin}>
+          Connect on LinkedIn <ArrowUpRight aria-hidden="true" />
+        </Button>
       </div>
     </section>
   </div>

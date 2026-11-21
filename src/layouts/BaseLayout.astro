@@ -118,6 +118,8 @@ const canonical = new URL(Astro.url.pathname, site);
         </nav>
       </div>
     </footer>
-    {(workspace || Astro.url.pathname === '/admin/login') && <NotificationHost client:load />}
+    {(workspace || Astro.url.pathname === '/admin/login') && (
+      <NotificationHost editing={Astro.url.pathname.startsWith('/admin/posts/')} client:load />
+    )}
   </body>
 </html>

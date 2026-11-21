@@ -175,6 +175,7 @@ test('a failed cover upload can retry the same file without leaving stale valida
       }),
     );
     const picker = page.getByLabel('Upload cover image', { exact: true });
+    await expect(picker).toBeEnabled();
     const file = { name: 'retry.png', mimeType: 'image/png', buffer: png };
     await picker.setInputFiles(file);
     await expect(page.locator('#cover-error')).toContainText('Image upload failed.');

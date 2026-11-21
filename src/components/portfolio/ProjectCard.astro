@@ -11,11 +11,12 @@ const { project } = Astro.props;
 const destination = project.liveUrl || project.githubUrl;
 ---
 
-<article aria-labelledby={`project-${project.id}`}>
+<article
+  class:list={{ 'project-lead': project.featured && !project.image.endsWith('.svg') }}
+  aria-labelledby={`project-${project.id}`}
+>
   <Card.Root class="project-card ring-0">
-    <div
-      class:list={['project-cover', { 'project-title-cover': project.image.endsWith('.svg') }]}
-    >
+    <div class:list={['project-cover', { 'project-title-cover': project.image.endsWith('.svg') }]}>
       <img src={project.image} alt={project.imageAlt} width="800" height="500" loading="lazy" />
     </div>
     <Card.Content class="project-body">
