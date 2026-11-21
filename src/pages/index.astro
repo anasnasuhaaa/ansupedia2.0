@@ -10,6 +10,7 @@ import { listPosts } from '../db/queries/blog';
 import PostRow from '../components/blog/PostRow.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ProjectCard from '../components/portfolio/ProjectCard.astro';
+import GitHubStats from '../components/portfolio/GitHubStats.astro';
 import TechTag from '../components/portfolio/TechTag.astro';
 import { profile } from '../data/profile';
 import { projects } from '../data/projects';
@@ -92,6 +93,7 @@ try {
           ))}
       </div>
     </section>
+    <GitHubStats />
     {experiences.length > 0 && (
       <section id="experience" class="section">
         <div class="section-head">

@@ -1,0 +1,39 @@
+---
+import { getGitHubStats } from '../../lib/github';
+import { profile } from '../../data/profile';
+import Arrow from '@tabler/icons/outline/arrow-up-right.svg';
+const stats = await getGitHubStats();
+---
+<section class="github-summary" aria-labelledby="github-title">
+  <div>
+    <h2 id="github-title">GitHub</h2>
+    <a class="text-link" href={profile.github}>@anasnasuhaaa <Arrow aria-hidden="true" /></a>
+  </div>
+  {stats ? (
+    <div>
+      <dl>
+        <div><dt>Public repositories</dt><dd>{stats.public_repos}</dd></div>
+        <div><dt>Followers</dt><dd>{stats.followers}</dd></div>
+      </dl>
+      <small class="meta">Checked <time datetime={stats.checkedAt}>{new Date(stats.checkedAt).toLocaleDateString('en-US', { dateStyle: 'medium', timeZone: 'UTC' })}</time></small>
+    </div>
+  ) : <p>GitHub statistics are temporarily unavailable.</p>}
+</section>
+<style>
+  .github-summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1.25rem 3rem;
+    margin-bottom: var(--section-space);
+    padding: var(--panel-padding);
+    border-inline-start: 3px solid var(--foreground);
+    background: var(--muted);
+  }
+  h2, p { margin: 0; }
+  dl { display: flex; flex-wrap: wrap; gap: 1rem clamp(2rem, 5vw, 5rem); margin: 0 0 0.4rem; }
+  dl div { display: flex; flex-direction: column-reverse; }
+  dt { color: var(--muted-foreground); font-size: 0.875rem; }
+  dd { margin: 0; font: 600 2rem/1.2 var(--font-heading); }
+</style>

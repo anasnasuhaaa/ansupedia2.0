@@ -1,6 +1,6 @@
 # Content provenance
 
-Reviewed 7 November 2026. Project metadata is maintained locally; no request-time GitHub fetching is used.
+Reviewed 7 November 2026. Project metadata is maintained locally; the GitHub overview reads public repository and follower counts from the official user endpoint. Each warm server instance caches the last successful response for an hour and retries failed refreshes after five minutes. The displayed date identifies the last successful check. GITHUB_STATS_TOKEN is optional and server-only.
 
 ## Identity
 
