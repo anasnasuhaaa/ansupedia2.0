@@ -89,6 +89,9 @@ importers:
       highlight.js:
         specifier: ^11.12.0
         version: 11.12.0
+      htmlparser2:
+        specifier: 12.0.0
+        version: 12.0.0
       lowlight:
         specifier: ^3.3.0
         version: 3.3.0

@@ -9,7 +9,7 @@ html {
 body {
   margin: 0;
   font-family: var(--font-body);
-  font-size: 1rem;
+  font-size: 0.9375rem;
   line-height: 1.7;
   -webkit-font-smoothing: antialiased;
 }
@@ -73,7 +73,7 @@ h1 {
   font-size: clamp(2.2rem, 4.6vw, 3.5rem);
 }
 h2 {
-  font-size: clamp(1.65rem, 3vw, 2.4rem);
+  font-size: clamp(1.6rem, 2.8vw, 2rem);
   text-wrap: balance;
 }
 h3 {
@@ -495,13 +495,13 @@ fieldset legend {
 }
 .hero h1 {
   margin: 0;
-  font-size: clamp(3rem, 7.5vw, 6.5rem);
+  font-size: clamp(2.5rem, 5.2vw, 4.2rem);
   line-height: 1.02;
-  letter-spacing: -0.075em;
+  letter-spacing: -0.055em;
 }
 .hero-heading-detail {
   margin-block: 0.85rem 1.25rem;
-  font: 550 clamp(1.4rem, 3vw, 2.7rem)/1.13 var(--font-heading);
+  font: 550 clamp(1.2rem, 2.5vw, 2.1rem)/1.13 var(--font-heading);
   letter-spacing: -0.045em;
 }
 .avatar {
@@ -513,7 +513,7 @@ fieldset legend {
 }
 .intro-copy {
   max-width: 56ch;
-  font-size: clamp(1rem, 1.5vw, 1.1rem);
+  font-size: 0.95rem;
   margin: 0;
 }
 .hero-bottom {
@@ -525,6 +525,9 @@ fieldset legend {
   padding-top: 1.25rem;
   margin-top: 2rem;
   border-top: 1px solid var(--border);
+}
+.hero-bottom [data-slot='button'] {
+  font-size: 0.85rem;
 }
 .hero-socials {
   display: flex;
@@ -587,6 +590,9 @@ fieldset legend {
   .hero-heading-detail {
     margin: 0.25rem 0;
   }
+  .intro-copy {
+    font-size: 0.88rem;
+  }
   .hero-heading-detail br {
     display: none;
   }
@@ -594,7 +600,6 @@ fieldset legend {
     gap: 0.5rem;
   }
   .hero-bottom .actions a {
-    font-size: 0.875rem;
     padding-inline: 0.85rem;
   }
   .footer-inner {
@@ -621,7 +626,7 @@ fieldset legend {
 .skill-group h3 {
   color: var(--foreground);
   font-family: var(--font-body);
-  font-size: 1rem;
+  font-size: 0.85rem;
   font-weight: 600;
   letter-spacing: 0;
   line-height: 1.5;
@@ -725,7 +730,7 @@ fieldset legend {
 }
 .project-body h3 {
   margin: 0 0 0.5rem;
-  font-size: clamp(1.12rem, 1.6vw, 1.4rem);
+  font-size: 1.05rem;
   font-weight: 650;
   line-height: 1.4;
   overflow-wrap: anywhere;
@@ -865,7 +870,7 @@ fieldset legend {
     justify-content: center;
   }
   .project-lead:first-child .project-body h3 {
-    font-size: 2rem;
+    font-size: 1.35rem;
   }
   .project-lead:first-child .project-technologies {
     margin-top: 1rem;
@@ -877,6 +882,9 @@ fieldset legend {
   }
 }
 @media (max-width: 767px) {
+  .hero h1 {
+    font-size: clamp(1.65rem, 5.5vw, 2.8rem);
+  }
   .project-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.75rem;
@@ -918,7 +926,6 @@ fieldset legend {
   margin-bottom: 1.75rem;
 }
 .blog-heading h1 {
-  font-size: clamp(2.75rem, 6vw, 5rem);
   letter-spacing: -0.065em;
   margin-bottom: 0;
 }
@@ -1097,7 +1104,7 @@ fieldset legend {
   margin-bottom: 0.75rem;
 }
 .post-card h2 {
-  font-size: clamp(1.25rem, 2.1vw, 1.65rem);
+  font-size: 1.2rem;
   line-height: 1.25;
   margin-bottom: 0.7rem;
 }
@@ -1143,7 +1150,7 @@ fieldset legend {
 }
 .featured-post h2 {
   max-width: 25ch;
-  font-size: clamp(1.65rem, 3.5vw, 3rem);
+  font-size: 1.7rem;
 }
 .featured-post .post-card-content {
   padding: 2rem;
@@ -1183,14 +1190,14 @@ fieldset legend {
   border-bottom: 1px solid var(--border);
 }
 .article-heading h1 {
-  font-size: clamp(2.15rem, 5vw, 3.75rem);
+  font-size: clamp(2rem, 4.5vw, 3rem);
   text-wrap: balance;
   line-height: 1.2;
   overflow-wrap: anywhere;
   margin-block: 1rem 0.9rem;
 }
 .article-excerpt {
-  font-size: clamp(1.05rem, 2vw, 1.25rem);
+  font-size: 1rem;
   line-height: 1.75;
   margin-bottom: 1.25rem;
 }
@@ -1236,9 +1243,6 @@ fieldset legend {
   --prose-color: var(--foreground);
   max-width: none;
   font-size: 1rem;
-}
-.article-prose {
-  font-size: clamp(1rem, 1.5vw, 1.125rem);
 }
 .sw-prose p {
   color: var(--foreground);
@@ -1449,7 +1453,7 @@ fieldset legend {
 .stat strong {
   display: block;
   font-variant-numeric: tabular-nums;
-  font-size: clamp(2rem, 3.5vw, 3rem);
+  font-size: 2rem;
   line-height: 1.35;
   font-family: var(--font-heading);
   font-weight: 600;
@@ -1473,7 +1477,7 @@ fieldset legend {
 }
 .editorial-table {
   width: 100%;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
 }
 .editorial-table th {
   background: var(--muted);

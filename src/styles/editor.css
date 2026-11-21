@@ -273,7 +273,7 @@
   max-width: calc(var(--reading-width) + 5rem);
   margin-inline: auto;
   outline: none;
-  font-size: clamp(1rem, 1.5vw, 1.125rem);
+  font-size: 0.94rem;
 }
 .tiptap.editor-prose > :first-child {
   margin-top: 0;

@@ -1,68 +1,132 @@
 ---
-import { getGitHubStats } from '../../lib/github';
+import { getGitHubContributionCalendar, getGitHubStats } from '../../lib/github';
 import { profile } from '../../data/profile';
 import Arrow from '@tabler/icons/outline/arrow-up-right.svg';
-const stats = await getGitHubStats();
+import Github from '@tabler/icons/outline/brand-github.svg';
+const [stats, calendar] = await Promise.all([getGitHubStats(), getGitHubContributionCalendar()]);
+const days = calendar?.days ?? [];
+const firstDay = days[0] ? new Date(days[0].date).getUTCDay() : 0;
+const weekCount = Math.ceil((days.length + firstDay) / 7);
+const monthFormat = new Intl.DateTimeFormat('en-US', { month: 'short', timeZone: 'UTC' });
+const months = days.flatMap(({ date }, index) => {
+  if (!date.endsWith('-01')) return [];
+  const week = Math.floor((index + firstDay) / 7) + 1;
+  return week < weekCount - 1 ? [{ label: monthFormat.format(new Date(date)), week }] : [];
+});
 ---
 
 <section class="github-summary" aria-labelledby="github-title">
-  <div>
-    <h2 id="github-title">GitHub</h2>
-    <a class="text-link" href={profile.github}>
-      @anasnasuhaaa <Arrow aria-hidden="true" />
-    </a>
-  </div>
-  {stats ? (
-    <div>
-      <dl>
+  <header class="github-header">
+    <div class="github-identity">
+      <h2 id="github-title">
+        <Github aria-hidden="true" /> GitHub
+      </h2>
+      <a class="text-link" href={profile.github}>
+        @anasnasuhaaa <Arrow aria-hidden="true" />
+      </a>
+    </div>
+    {stats ? (
+      <dl class="github-metrics">
         <div>
           <dt>Public repositories</dt>
-          <dd>{stats.public_repos}</dd>
+          <dd>{stats.public_repos.toLocaleString('en-US')}</dd>
         </div>
         <div>
           <dt>Followers</dt>
-          <dd>{stats.followers}</dd>
+          <dd>{stats.followers.toLocaleString('en-US')}</dd>
         </div>
       </dl>
-      <small class="meta">
-        Checked{' '}
-        <time datetime={stats.checkedAt}>
-          {new Date(stats.checkedAt).toLocaleDateString('en-US', {
-            dateStyle: 'medium',
-            timeZone: 'UTC',
-          })}
-        </time>
-      </small>
-    </div>
+    ) : (
+      <p>Repository and follower counts are temporarily unavailable.</p>
+    )}
+  </header>
+  {calendar ? (
+    <figure
+      class="contribution-calendar"
+      style={`--weeks: ${weekCount}; --first-day: ${firstDay + 1}`}
+    >
+      <figcaption>
+        <strong>{calendar.total.toLocaleString('en-US')}</strong>{' '}
+        {calendar.total === 1 ? 'contribution' : 'contributions'} in the last year
+      </figcaption>
+      <div class="contribution-months" aria-hidden="true">
+        {months.map(({ label, week }) => (
+          <span style={`grid-column: ${week}`}>{label}</span>
+        ))}
+      </div>
+      <div
+        class="contribution-days"
+        role="img"
+        aria-label="Daily GitHub activity. Shades of green indicate the number of contributions."
+      >
+        {firstDay > 0 && <span class="contribution-padding" aria-hidden="true"></span>}
+        {days.map(({ date, level, label }) => (
+          <span
+            class="contribution-day"
+            data-level={level}
+            title={label || date}
+            aria-hidden="true"
+          ></span>
+        ))}
+      </div>
+      <div class="contribution-legend" aria-hidden="true">
+        Less
+        {[0, 1, 2, 3, 4].map((level) => (
+          <span class="contribution-day" data-level={level}></span>
+        ))}
+        More
+      </div>
+    </figure>
   ) : (
-    <p>GitHub statistics are temporarily unavailable.</p>
+    <p class="calendar-unavailable">Contribution calendar is temporarily unavailable.</p>
   )}
 </section>
 <style>
   .github-summary {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 1.25rem 3rem;
     margin-bottom: var(--section-space);
-    padding: var(--panel-padding);
-    border-inline-start: 3px solid var(--foreground);
-    background: var(--muted);
+    padding: clamp(1rem, 2.5vw, 1.75rem);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--card);
   }
-  h2,
+  .github-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem 2rem;
+    margin-bottom: 1.25rem;
+  }
   p {
     margin: 0;
   }
-  dl {
+  .github-identity h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    margin: 0;
+  }
+  .github-identity h2 svg {
+    width: 0.9em;
+    height: 0.9em;
+  }
+  .github-identity a {
+    color: var(--muted-foreground);
+  }
+  .github-identity a:hover {
+    color: var(--foreground);
+  }
+  .github-metrics {
     display: flex;
     flex-wrap: wrap;
-    gap: 1rem clamp(2rem, 5vw, 5rem);
-    margin: 0 0 0.4rem;
+    gap: 0.5rem clamp(1rem, 3vw, 2rem);
+    margin: 0;
   }
-  dl div {
+  .github-metrics > div {
     display: flex;
     flex-direction: column-reverse;
+    padding-inline-start: clamp(0.75rem, 2vw, 1.25rem);
+    border-inline-start: 1px solid var(--border);
   }
   dt {
     color: var(--muted-foreground);
@@ -70,6 +134,103 @@ const stats = await getGitHubStats();
   }
   dd {
     margin: 0;
-    font: 600 2rem/1.2 var(--font-heading);
+    font: 650 1.5rem/1.2 var(--font-heading);
+    font-variant-numeric: tabular-nums;
+  }
+  .contribution-calendar,
+  .calendar-unavailable {
+    min-width: 0;
+    margin: 0;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+  }
+  .contribution-calendar {
+    --level-0: var(--border);
+    --level-1: #9be9a8;
+    --level-2: #40c463;
+    --level-3: #30a14e;
+    --level-4: #216e39;
+    --cell-gap: clamp(1px, 0.3vw, 4px);
+  }
+  :global(.dark) .contribution-calendar {
+    --level-1: #0e4429;
+    --level-2: #006d32;
+    --level-3: #26a641;
+    --level-4: #39d353;
+  }
+  figcaption {
+    margin-bottom: 0.65rem;
+    color: var(--muted-foreground);
+    font-size: 0.875rem;
+  }
+  figcaption strong {
+    color: var(--foreground);
+    font-size: 1rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .contribution-months,
+  .contribution-days {
+    display: grid;
+    grid-template-columns: repeat(var(--weeks), minmax(0, 1fr));
+    gap: var(--cell-gap);
+  }
+  .contribution-months {
+    margin-bottom: 0.25rem;
+    color: var(--muted-foreground);
+    font-size: 0.7rem;
+    white-space: nowrap;
+  }
+  .contribution-months span {
+    grid-row: 1;
+  }
+  .contribution-days {
+    grid-template-rows: repeat(7, auto);
+    grid-auto-flow: column;
+  }
+  .contribution-padding {
+    grid-row: 1 / var(--first-day);
+    grid-column: 1;
+  }
+  .contribution-day {
+    aspect-ratio: 1;
+    border-radius: min(2px, 22%);
+    background: var(--level-0);
+  }
+  .contribution-day[data-level='1'] {
+    background: var(--level-1);
+  }
+  .contribution-day[data-level='2'] {
+    background: var(--level-2);
+  }
+  .contribution-day[data-level='3'] {
+    background: var(--level-3);
+  }
+  .contribution-day[data-level='4'] {
+    background: var(--level-4);
+  }
+  .contribution-legend {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.25rem;
+    margin-top: 0.5rem;
+    color: var(--muted-foreground);
+    font-size: 0.7rem;
+  }
+  .contribution-legend .contribution-day {
+    width: 0.65rem;
+  }
+  @media (max-width: 550px) {
+    .github-identity {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.25rem 0.75rem;
+      width: 100%;
+    }
+    .contribution-months span:nth-child(even) {
+      display: none;
+    }
   }
 </style>

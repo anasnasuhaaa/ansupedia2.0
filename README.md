@@ -56,7 +56,7 @@ Better Auth validates secure cookie sessions. An explicit stored administrator r
 
 ## Portfolio statistics
 
-The homepage reads public repository and follower counts from GitHub. Each warm server instance caches a successful response for one hour and retries failures after five minutes. A failed refresh keeps the last dated response. The public API works anonymously, with optional server-side `GITHUB_STATS_TOKEN` support.
+The homepage shows repository and follower counts from the GitHub API and a contribution calendar from the public GitHub profile. The calendar uses the profile’s total and daily activity for the last year. Each warm server instance caches the two sources independently for one hour and retries failures after five minutes. A failed refresh keeps the last successful response. The calendar works without credentials. The public API also works anonymously, with optional server-side `GITHUB_STATS_TOKEN` support for repository and follower counts.
 
 ## Writing
 
