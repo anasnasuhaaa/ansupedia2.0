@@ -1,6 +1,5 @@
 ---
 import type { Project } from '../../data/projects';
-import TechTag from './TechTag.astro';
 import Card from '../starwind/card';
 import Button from '../starwind/button/Button.astro';
 import Github from '@tabler/icons/outline/brand-github.svg';
@@ -14,27 +13,21 @@ const destination = project.liveUrl || project.githubUrl;
 
 <article aria-labelledby={`project-${project.id}`}>
   <Card.Root class="project-card ring-0">
-    <a
+    <div
       class:list={['project-cover', { 'project-title-cover': project.image.endsWith('.svg') }]}
-      href={destination}
-      tabindex="-1"
-      aria-hidden="true"
     >
       <img src={project.image} alt={project.imageAlt} width="800" height="500" loading="lazy" />
-      <span class="project-cover-arrow">
-        <Arrow class="size-5" />
-      </span>
-    </a>
+    </div>
     <Card.Content class="project-body">
       <h3 id={`project-${project.id}`}>
         <a href={destination}>{project.name}</a>
       </h3>
       <p>{project.description}</p>
-      <div class="tags project-technologies">
+      <ul class="tags project-technologies" aria-label="Technologies">
         {project.technologies.map((name) => (
-          <TechTag name={name} />
+          <li>{name}</li>
         ))}
-      </div>
+      </ul>
     </Card.Content>
     <Card.Footer class="project-links">
       {project.githubUrl && (

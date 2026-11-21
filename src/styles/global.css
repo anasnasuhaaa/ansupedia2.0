@@ -672,12 +672,12 @@ fieldset legend {
 }
 .project-card:hover,
 .project-card:focus-within {
-  transform: translateY(-3px);
+  transform: translateY(-2px);
   box-shadow: var(--shadow-raised);
   border-color: var(--input);
 }
 .project-cover {
-  aspect-ratio: 16/9;
+  aspect-ratio: 16/10;
   position: relative;
   display: block;
   overflow: hidden;
@@ -692,40 +692,20 @@ fieldset legend {
 }
 .project-title-cover img {
   object-fit: contain;
-  transform: scale(1.4);
-  transform-origin: left center;
+  background: #ededeb;
 }
-.project-card:hover .project-cover img {
+.project-card:is(:hover, :focus-within) .project-cover img {
   transform: scale(1.025);
 }
-.project-card:hover .project-title-cover img {
-  transform: scale(1.425);
-}
-.project-cover-arrow {
-  position: absolute;
-  right: 1rem;
-  bottom: 0.8rem;
-  width: 30px;
-  height: 30px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  background: #ffffffdd;
-  color: #18181b;
-  transition: transform var(--transition-duration);
-}
-.project-card:hover .project-cover-arrow {
-  transform: rotate(5deg) translate(1px, -1px);
-}
 .project-body {
-  padding: 1rem;
+  padding: var(--panel-padding);
   display: flex;
   flex: 1;
   flex-direction: column;
 }
 .project-body h3 {
   margin: 0 0 0.5rem;
-  font-size: 1.05rem;
+  font-size: clamp(1.12rem, 1.6vw, 1.4rem);
   font-weight: 650;
   line-height: 1.4;
   overflow-wrap: anywhere;
@@ -739,22 +719,16 @@ fieldset legend {
   margin-bottom: 1rem;
 }
 .project-technologies {
-  margin-top: auto;
-  gap: 0.4rem;
-}
-.project-technologies .tech-tag {
-  gap: 0.35rem;
+  margin: auto 0 0;
+  padding: 0;
+  list-style: none;
+  gap: 0.3rem 0.65rem;
+  color: var(--muted-foreground);
+  font-family: var(--font-code);
   font-size: 0.72rem;
-  padding: 0.25rem 0.45rem;
-  background: var(--muted);
-  border: 0;
 }
-.project-technologies .tech-tag:hover {
-  background: var(--accent);
-}
-.project-technologies .tech-icon {
-  width: 16px;
-  height: 16px;
+.project-technologies li {
+  border-bottom: 1px solid var(--border);
 }
 .project-links {
   padding: 0.5rem;
@@ -859,33 +833,6 @@ fieldset legend {
   .project-body p {
     font-size: 0.8rem;
     line-height: 1.65;
-    display: -webkit-box;
-    -webkit-line-clamp: 4;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-  .project-technologies {
-    gap: 0.3rem;
-  }
-  .project-technologies .tech-tag {
-    max-width: 100%;
-    overflow-wrap: anywhere;
-    font-size: 0.7rem;
-    padding: 0.2rem 0.3rem;
-  }
-  .project-technologies .tech-icon {
-    width: 15px;
-    height: 15px;
-  }
-  .project-cover-arrow {
-    width: 24px;
-    height: 24px;
-    right: 0.5rem;
-    bottom: 0.5rem;
-  }
-  .project-cover-arrow svg {
-    width: 16px;
-    height: 16px;
   }
   .project-links {
     padding: 0.4rem;
@@ -1058,7 +1005,7 @@ fieldset legend {
 }
 .post-card:hover,
 .post-card:focus-within {
-  transform: translateY(-3px);
+  transform: translateY(-2px);
   box-shadow: var(--shadow-raised);
   border-color: var(--input);
 }
@@ -1418,7 +1365,7 @@ fieldset legend {
     box-shadow var(--transition-duration);
 }
 .stat-link:hover .stat {
-  transform: translateY(-3px);
+  transform: translateY(-2px);
   box-shadow: var(--shadow-raised);
 }
 .stat .meta {
