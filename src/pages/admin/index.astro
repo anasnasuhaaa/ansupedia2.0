@@ -5,19 +5,14 @@ import Button from '../../components/starwind/button/Button.astro';
 import ArticleTable from '../../components/admin/ArticleTable.astro';
 import Plus from '@tabler/icons/outline/plus.svg';
 import Notebook from '@tabler/icons/outline/notebook.svg';
-import { listPosts, listCategories } from '../../db/queries/blog';
-const [all, published, drafts, categories] = await Promise.all([
-  listPosts({ admin: true, limit: 5 }),
-  listPosts({ admin: true, status: 'published', limit: 1 }),
-  listPosts({ admin: true, status: 'draft', limit: 1 }),
-  listCategories(),
-]);
+import { editorialOverview } from '../../db/queries/blog';
+const { recent, drafts, published, categories } = await editorialOverview();
 ---
 
 <AdminLayout>
   <header class="section-head admin-page-heading">
     <div>
-      <h1>Your writing, at a glance.</h1>
+      <h1>Publishing overview</h1>
     </div>
     <Button href="/admin/posts/new" size="sm">
       <Plus aria-hidden="true" />
@@ -26,17 +21,16 @@ const [all, published, drafts, categories] = await Promise.all([
   </header>
   <div class="stats">
     {[
-      ['Total articles', all.total, '/admin/posts'],
-      ['Published', published.total, '/admin/posts?status=published'],
-      ['Drafts', drafts.total, '/admin/posts?status=draft'],
-      ['Categories', categories.length, '/admin/categories'],
+      ['Total articles', published + drafts, '/admin/posts'],
+      ['Published', published, '/admin/posts?status=published'],
+      ['Drafts', drafts, '/admin/posts?status=draft'],
+      ['Categories', categories, '/admin/categories'],
     ].map(([label, value, href]) => (
       <a href={String(href)} class="stat-link">
         <Card.Root class="stat">
           <Card.Content>
             <span class="meta">{label}</span>
             <strong>{value}</strong>
-            <span class="stat-caption">Manage {String(label).toLowerCase()} ↗</span>
           </Card.Content>
         </Card.Root>
       </a>
@@ -44,20 +38,20 @@ const [all, published, drafts, categories] = await Promise.all([
   </div>
   <section class="admin-section">
     <div class="section-head">
-      <h2>Recent articles</h2>
+      <h2>Recently edited</h2>
       <Button href="/admin/posts" variant="ghost" size="sm">
         View all ↗
       </Button>
     </div>
-    {all.items.length ? (
-      <ArticleTable items={all.items} compact />
+    {recent.length ? (
+      <ArticleTable items={recent} compact />
     ) : (
       <div class="empty">
         <span class="empty-icon">
           <Notebook class="size-5" aria-hidden="true" />
         </span>
-        <h3>Your notebook is ready.</h3>
-        <p>Start with a thought, a lesson, or something you built.</p>
+        <h3>No articles yet</h3>
+
         <Button href="/admin/posts/new" variant="outline" size="sm">
           Write your first article
         </Button>

@@ -75,7 +75,7 @@ test('admin dashboard and category manager dialogs work at desktop and mobile si
 }, testInfo) => {
   const fixture = editorial!;
   await page.goto('/admin');
-  await expect(page.getByRole('heading', { name: 'Your writing, at a glance.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Publishing overview' })).toBeVisible();
   await page.addStyleTag({ content: 'astro-dev-toolbar{display:none}' });
   await page.screenshot({ path: testInfo.outputPath('admin-desktop.png'), fullPage: true });
   await page

@@ -26,7 +26,6 @@ const active = (href: string) => (href === '/admin' ? path === href : path.start
 <BaseLayout title={`${title} — Ansupedia Admin`} noindex workspace>
   <div class="container admin-frame">
     <aside class="admin-sidebar">
-      <span class="eyebrow">Workspace</span>
       <nav aria-label="Administration" class="admin-nav">
         {navigation.map(({ href, label, icon: Icon }) => (
           <a href={href} aria-current={active(href) ? 'page' : undefined}>

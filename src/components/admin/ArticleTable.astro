@@ -3,9 +3,9 @@ import Table from '../starwind/table';
 import Badge from '../starwind/badge/Badge.astro';
 import Button from '../starwind/button/Button.astro';
 import ConfirmDelete from './ConfirmDelete.astro';
-import type { listPosts } from '../../db/queries/blog';
+import type { editorialOverview } from '../../db/queries/blog';
 interface Props {
-  items: Awaited<ReturnType<typeof listPosts>>['items'];
+  items: Awaited<ReturnType<typeof editorialOverview>>['recent'];
   compact?: boolean;
 }
 const { items, compact = false } = Astro.props;

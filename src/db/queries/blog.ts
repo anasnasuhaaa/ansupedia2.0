@@ -110,6 +110,31 @@ export async function listPosts(options: PostListOptions = {}) {
     pages: Math.max(1, Math.ceil(totals[0].value / limit)),
   };
 }
+export async function editorialOverview() {
+  const db = getDb();
+  const [recent, byStatus, [categoryCount]] = await Promise.all([
+    db
+      .select({
+        id: posts.id,
+        title: posts.title,
+        slug: posts.slug,
+        status: posts.status,
+        updatedAt: posts.updatedAt,
+      })
+      .from(posts)
+      .orderBy(desc(posts.updatedAt), posts.id)
+      .limit(5),
+    db.select({ status: posts.status, total: count() }).from(posts).groupBy(posts.status),
+    db.select({ total: count() }).from(categories),
+  ]);
+  const totals = Object.fromEntries(byStatus.map(({ status, total }) => [status, total]));
+  return {
+    recent: await withCategories(recent),
+    drafts: totals.draft ?? 0,
+    published: totals.published ?? 0,
+    categories: categoryCount.total,
+  };
+}
 export async function getPost(value: string, admin = false) {
   if (!databaseConfigured()) return null;
   const [post] = await getDb()
