@@ -4,7 +4,7 @@ export const button = tv({
   base: [
     "inline-flex items-center justify-center gap-1.5 rounded-md font-medium whitespace-nowrap",
     "[&_svg]:pointer-events-none [&_svg]:shrink-0",
-    "transition-all outline-none focus-visible:ring-3",
+    "outline-none focus-visible:ring-3 motion-safe:active:translate-y-px",
     "disabled:pointer-events-none disabled:opacity-50",
     "data-disabled:pointer-events-none data-disabled:opacity-50",
     "aria-invalid:border-error aria-invalid:focus-visible:ring-error/40",

@@ -9,7 +9,7 @@ html {
 body {
   margin: 0;
   font-family: var(--font-body);
-  font-size: 15px;
+  font-size: 1rem;
   line-height: 1.7;
   -webkit-font-smoothing: antialiased;
 }
@@ -73,7 +73,8 @@ h1 {
   font-size: clamp(2.2rem, 4.6vw, 3.5rem);
 }
 h2 {
-  font-size: clamp(1.6rem, 2.8vw, 2rem);
+  font-size: clamp(1.65rem, 3vw, 2.4rem);
+  text-wrap: balance;
 }
 h3 {
   font-size: 1.15rem;
@@ -103,7 +104,7 @@ svg {
   min-height: 70vh;
 }
 .reading-width {
-  max-width: 700px;
+  max-width: var(--reading-width);
   margin-inline: auto;
 }
 .page-heading {
@@ -125,6 +126,7 @@ svg {
   margin-bottom: 1rem;
 }
 .meta {
+  font-variant-numeric: tabular-nums;
   letter-spacing: -0.01em;
 }
 .section {
@@ -132,6 +134,7 @@ svg {
   border-top: 1px solid var(--border);
 }
 .section-head {
+  flex-wrap: wrap;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -540,7 +543,7 @@ fieldset legend {
   gap: 0.25rem;
 }
 .portfolio .section {
-  padding-block: clamp(3rem, 5vw, 4.25rem);
+  padding-block: var(--section-space);
 }
 .portfolio .section-head {
   margin-bottom: clamp(1.5rem, 3vw, 2rem);
