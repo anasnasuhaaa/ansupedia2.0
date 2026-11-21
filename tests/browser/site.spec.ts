@@ -99,7 +99,7 @@ for (const width of [1440, 1280, 1024, 768, 390, 375, 320])
       const dialog = page.getByRole('dialog', { name: 'Menu', exact: true });
       await expect(dialog).toBeVisible();
       const panel = (await dialog.boundingBox())!;
-      expect(panel.width).toBeCloseTo(Math.min(280, Math.max(210, width * 0.55)), 2);
+      expect(panel.width).toBeCloseTo(Math.min(304, Math.max(224, width * 0.64)), 2);
       expect(panel.y + panel.height).toBeLessThanOrEqual(900);
       expect(
         await dialog
@@ -109,12 +109,10 @@ for (const width of [1440, 1280, 1024, 768, 390, 375, 320])
       await expect(dialog.getByRole('navigation').getByRole('link')).toHaveText([
         'About',
         'Projects',
-        'Experience',
-        'Credentials',
         'Blog',
         'Contact',
       ]);
-      await expect(dialog.locator('.mobile-nav svg')).toHaveCount(6);
+      await expect(dialog.locator('.mobile-nav svg')).toHaveCount(4);
       await expect(dialog.locator('[data-slot="sheet-footer"]')).toHaveCount(0);
       expect(await dialog.innerText()).not.toContain(
         'Software, security, and the things in between.',

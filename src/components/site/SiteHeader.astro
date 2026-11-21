@@ -84,13 +84,16 @@ const isBlog = Astro.url.pathname.startsWith('/blog');
 </header>
 <script>
   const links = document.querySelectorAll<HTMLAnchorElement>('[data-section-link]');
+  const header = document.querySelector<HTMLElement>('.site-header');
   const sections = Array.from(document.querySelectorAll<HTMLElement>('main section[id]'));
   if (location.pathname === '/' && sections.length) {
     let scheduled = false;
     const update = () => {
-      const active =
-        sections.filter((section) => section.getBoundingClientRect().top <= 150).at(-1)?.id ||
-        'about';
+      const threshold = (header?.offsetHeight ?? 0) + 20;
+      const atEnd = Math.ceil(scrollY + innerHeight) >= document.documentElement.scrollHeight;
+      const active = atEnd
+        ? sections.at(-1)?.id
+        : sections.filter((section) => section.getBoundingClientRect().top <= threshold).at(-1)?.id ?? 'about';
       links.forEach((link) => {
         const selected = link.dataset.sectionLink === active;
         link.toggleAttribute('data-active', selected);
@@ -109,6 +112,8 @@ const isBlog = Astro.url.pathname.startsWith('/blog');
       },
       { passive: true },
     );
+    window.addEventListener('resize', update);
+    window.addEventListener('pageshow', update);
     update();
   }
 </script>
