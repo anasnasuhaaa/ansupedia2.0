@@ -1,6 +1,5 @@
 ---
 import Notebook from '@tabler/icons/outline/notebook.svg';
-import { button } from '../components/starwind/button/variants';
 import Button from '../components/starwind/button/Button.astro';
 import ArrowRight from '@tabler/icons/outline/arrow-right.svg';
 import ArrowUpRight from '@tabler/icons/outline/arrow-up-right.svg';
@@ -150,26 +149,18 @@ try {
           <p>
             {blogError
               ? 'Writing is temporarily unavailable. Please try again later.'
-              : 'Software, security, and lessons learned while building. Notes will appear here as they are published.'}
+              : 'No articles published yet.'}
           </p>
         </div>
       )}
     </section>
     <section id="contact" class="section contact-section">
       <div class="contact-surface">
-        <h2>Contact</h2>
-        <p>
-          Have a project to discuss or something interesting to share? Find me on GitHub or connect
-          on LinkedIn.
-        </p>
-        <div class="actions">
-          <a class={button({ variant: 'primary' })} href={profile.linkedin}>
-            Connect on LinkedIn ↗
-          </a>
-          <a class={button({ variant: 'outline' })} href={profile.github}>
-            Find me on GitHub ↗
-          </a>
+        <div>
+          <h2>Get in touch</h2>
+          <p>For messages about my work, reach me on LinkedIn.</p>
         </div>
+        <Button href={profile.linkedin}>Connect on LinkedIn <ArrowUpRight aria-hidden="true" /></Button>
       </div>
     </section>
   </div>

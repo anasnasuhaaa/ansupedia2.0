@@ -788,26 +788,23 @@ fieldset legend {
   border-top: 0;
 }
 .contact-surface {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1.25rem;
   padding: clamp(1.5rem, 4vw, 3rem);
-  border: 1px solid var(--border);
-  border-radius: 1.25rem;
-  background: var(--card);
-  box-shadow: var(--shadow-soft);
+  border-radius: var(--radius);
+  background: var(--foreground);
 }
-.contact-surface h2 {
-  margin-bottom: 1rem;
+.contact-surface h2 { margin: 0 0 0.35rem; color: var(--background); }
+.contact-surface p { margin: 0; color: var(--background); }
+.contact-surface [data-slot='button'] {
+  background: var(--background);
+  color: var(--foreground);
 }
-.contact-surface p {
-  max-width: 540px;
-  font-size: 0.9rem;
-}
-.contact-surface .actions {
-  margin-top: 1.5rem;
-}
-.contact-surface [data-slot='button'],
-.contact-surface a {
-  font-size: 0.82rem;
-}
+.contact-surface a:hover { text-decoration: underline; }
+.footer-brand:hover { text-decoration: underline; text-underline-offset: 0.2em; }
 @media (max-width: 900px) {
   .skills-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
