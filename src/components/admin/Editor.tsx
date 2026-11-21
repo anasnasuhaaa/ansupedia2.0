@@ -135,7 +135,7 @@ export default function Editor({
       ImageUploads,
       CodeBlockLowlight.configure({ lowlight, defaultLanguage: 'plaintext' }),
       Placeholder.configure({
-        placeholder: 'Start writing. Share what you learned, one thought at a time…',
+        placeholder: 'Write your article…',
       }),
     ],
     content: post?.contentJson || { type: 'doc', content: [{ type: 'paragraph' }] },
@@ -216,10 +216,12 @@ export default function Editor({
     }
     setBusy(true);
     setErrors({});
-    setMessage('Saving your article…');
+    setMessage(status === 'published' && post?.status !== 'published' ? 'Publishing…' : 'Saving…');
     const notice = toast.loading('Saving article…');
     const data = new FormData(form);
     const savedContent = editor.state.doc;
+    const willNavigate = !post?.id || status !== post.status;
+    if (willNavigate) editor.setEditable(false, false);
     try {
       const response = await fetch('/api/admin/posts', {
         method: 'POST',
@@ -244,7 +246,7 @@ export default function Editor({
         setErrors(result.fieldErrors || {});
         throw Error(result.error || 'Unable to save.');
       }
-      if (post?.id && status === post.status) {
+      if (!willNavigate) {
         // Keep the editor, selection and undo history mounted for continued writing.
         // Edits made while the request was pending still need to be saved.
         setDirty(!editor.state.doc.eq(savedContent));
@@ -271,6 +273,7 @@ export default function Editor({
               : 'articleCreated',
       );
     } catch (error) {
+      if (willNavigate) editor.setEditable(true, false);
       const text = error instanceof Error ? error.message : 'Unable to save. Please try again.';
       setMessage(text);
       toast.error(text, { id: notice });
@@ -281,6 +284,7 @@ export default function Editor({
   async function showPreview() {
     if (!editor || busy || uploading) return;
     setBusy(true);
+    setMessage('Preparing preview…');
     const notice = toast.loading('Preparing preview…');
     try {
       const response = await fetch('/api/admin/preview', {
@@ -298,6 +302,7 @@ export default function Editor({
         alt: String(formData.get('coverImageAlt') || ''),
         cover: safeUrl(cover, true) ? cover : '',
       });
+      setMessage('');
       toast.success('Preview ready.', { id: notice });
     } catch (error) {
       const text = error instanceof Error ? error.message : 'Preview failed.';
@@ -467,7 +472,15 @@ export default function Editor({
       <form
         ref={formRef}
         className="article-editor"
-        onChange={() => setDirty(true)}
+        onChange={(event) => {
+          const field = event.target;
+          if (
+            field instanceof HTMLInputElement &&
+            (field.type === 'search' || field.type === 'file')
+          )
+            return;
+          setDirty(true);
+        }}
         onSubmit={(event) => {
           event.preventDefault();
           void save(status);
@@ -477,10 +490,7 @@ export default function Editor({
           <legend className="sr-only">Article editor</legend>
           <div className="editor-layout">
             <div className="editor-sections">
-              <Panel
-                title="The essentials"
-                description="A clear title. A little context. Your words."
-              >
+              <Panel title="Article details">
                 <Field id="title" label="Title" error={errors.title}>
                   <input
                     className={input()}
@@ -488,7 +498,7 @@ export default function Editor({
                     name="title"
                     required
                     maxLength={200}
-                    placeholder="Give your idea a title…"
+                    placeholder="Article title"
                     value={title}
                     {...attrs('title')}
                     onChange={(event) => {
@@ -531,7 +541,7 @@ export default function Editor({
                     name="excerpt"
                     rows={3}
                     maxLength={500}
-                    placeholder="What will the reader take away?"
+                    placeholder="Summarize the article…"
                     defaultValue={post?.excerpt}
                     {...attrs('excerpt')}
                   />
@@ -600,7 +610,6 @@ export default function Editor({
                 )}
                 <div className="editor-word-count meta">
                   {editor?.getText().trim().split(/\s+/).filter(Boolean).length || 0} words
-                  <span>Saved only when you choose an action below</span>
                 </div>
               </section>
               <Panel title="Cover image">
@@ -793,7 +802,7 @@ export default function Editor({
             {uploading
               ? 'Uploading image… You can keep writing.'
               : busy
-                ? 'Working…'
+                ? message
                 : message ||
                   (dirty
                     ? 'Unsaved changes'
@@ -945,7 +954,7 @@ export default function Editor({
             </p>
           )}
           <div className="actions dialog-actions">
-            {modal === 'link' && (
+            {modal === 'link' && editor?.isActive('link') && (
               <button
                 className={button({ variant: 'ghost', size: 'sm' })}
                 type="button"
