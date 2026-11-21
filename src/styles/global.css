@@ -524,7 +524,6 @@ fieldset legend {
   gap: 1rem;
   padding-top: 1.25rem;
   margin-top: 2rem;
-  border-top: 1px solid var(--border);
 }
 .hero-bottom [data-slot='button'] {
   font-size: 0.85rem;
