@@ -3,6 +3,7 @@ import type { LucideIcon } from 'lucide-react';
 import {
   Bold,
   Italic,
+  Underline,
   Strikethrough,
   Code,
   SquareCode,
@@ -108,6 +109,12 @@ export default function EditorToolbar({
             editor.isActive('italic'),
           )}
           {tool(
+            'Underline (Ctrl/⌘ U)',
+            Underline,
+            () => editor.chain().focus().toggleUnderline().run(),
+            editor.isActive('underline'),
+          )}
+          {tool(
             'Strikethrough',
             Strikethrough,
             () => editor.chain().focus().toggleStrike().run(),
@@ -150,7 +157,7 @@ export default function EditorToolbar({
         <Toolbar.Separator className="editor-toolbar-separator" />
         <div role="group" aria-label="Insert content">
           {tool('Insert or edit link', Link, openLink, editor.isActive('link'))}
-          {tool('Insert image', Image, openImage)}
+          {tool(editor.isActive('image') ? 'Edit image' : 'Insert image', Image, openImage)}
           {tool('Horizontal rule', Minus, () => editor.chain().focus().setHorizontalRule().run())}
         </div>
         <Toolbar.Separator className="editor-toolbar-separator" />

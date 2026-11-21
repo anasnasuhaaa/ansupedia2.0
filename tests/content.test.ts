@@ -147,9 +147,20 @@ describe('article content safety', () => {
         },
       ],
     });
-    expect(code).toContain('hljs');
+    expect(code).toContain('hljs language-javascript');
     expect(code).toContain('<pre tabindex="0">');
     expect(readingTime(document)).toBe(1);
+    const unknown = renderContent({
+      type: 'doc',
+      content: [
+        {
+          type: 'codeBlock',
+          attrs: { language: 'unknown language' },
+          content: [{ type: 'text', text: '<sample>' }],
+        },
+      ],
+    });
+    expect(unknown).toContain('<code class="hljs language-plaintext">&lt;sample&gt;</code>');
   });
 });
 describe('validation and authorization', () => {

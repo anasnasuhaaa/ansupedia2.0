@@ -394,14 +394,10 @@
   width: min(900px, calc(100vw - 32px));
 }
 .preview-content {
-  max-width: 700px;
+  max-width: var(--reading-width);
   margin: 2rem auto 0;
   padding-top: 1.5rem;
   border-top: 1px solid var(--border);
-}
-.preview-content h1 {
-  font-size: clamp(1.8rem, 4vw, 2.8rem);
-  overflow-wrap: anywhere;
 }
 .editor-tooltip {
   padding: 0.4rem 0.6rem;

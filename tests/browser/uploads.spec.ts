@@ -82,6 +82,11 @@ test('file uploads map through edits and preserve image order through save, reop
     await page.reload();
     await expect(content.locator('img')).toHaveAttribute('src', src);
     expect(await order()).toEqual(['Updated Paragraph one.', 'image', 'Paragraph two.']);
+    await content.locator('img').click();
+    await page.getByRole('button', { name: 'Edit image', exact: true }).click();
+    const editImage = page.getByRole('dialog', { name: 'Edit image', exact: true });
+    await editImage.getByLabel('Image alternative text').fill('One verification pixel');
+    await editImage.getByRole('button', { name: 'Update image' }).click();
     await page.getByRole('button', { name: 'Publish', exact: true }).click();
     await expect(page.getByRole('button', { name: 'Update article', exact: true })).toBeVisible();
     await page.goto(`/blog/${slug}`);
@@ -92,6 +97,10 @@ test('file uploads map through edits and preserve image order through save, reop
         .filter(Boolean),
     );
     expect(publicOrder).toEqual(['Updated Paragraph one.', 'image', 'Paragraph two.']);
+    await expect(page.locator('.article-prose img')).toHaveAttribute(
+      'alt',
+      'One verification pixel',
+    );
     await expect(page.locator('.article-prose img')).toHaveJSProperty('naturalWidth', 1);
   } finally {
     finish();

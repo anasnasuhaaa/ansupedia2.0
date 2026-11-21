@@ -19,7 +19,7 @@ const nodes = new Set([
   'horizontalRule',
   'image',
 ]);
-const marks = new Set(['bold', 'italic', 'strike', 'code', 'link']);
+const marks = new Set(['bold', 'italic', 'underline', 'strike', 'code', 'link']);
 export function validateContent(value: unknown): JSONContent {
   if (JSON.stringify(value)?.length > 500_000) throw new Error('Article exceeds 500 KB.');
   let count = 0;
@@ -91,6 +91,7 @@ export function renderContent(value: unknown): string {
       'h4',
       'strong',
       'em',
+      'u',
       's',
       'code',
       'pre',
@@ -115,13 +116,17 @@ export function renderContent(value: unknown): string {
     allowedSchemesByTag: { img: ['https'] },
     allowProtocolRelative: false,
     transformTags: {
+      code: (_tag, attrs) => ({
+        tagName: 'code',
+        attribs: { class: /^language-[\w+-]{1,50}$/.test(attrs.class || '') ? attrs.class : '' },
+      }),
       a: (_tag, attrs) => ({
         tagName: 'a',
         attribs: { href: attrs.href || '', rel: 'noopener noreferrer' },
       }),
     },
   }).replace(
-    /<pre><code(?: class="language-([\w+-]+)")?>([\s\S]*?)<\/code><\/pre>/g,
+    /<pre><code(?: class="(?:language-([\w+-]+))?")?>([\s\S]*?)<\/code><\/pre>/g,
     (_match, language, code) => {
       const decoded = code
         .replace(/&lt;/g, '<')
@@ -129,11 +134,9 @@ export function renderContent(value: unknown): string {
         .replace(/&quot;/g, '"')
         .replace(/&#39;/g, "'")
         .replace(/&amp;/g, '&');
-      const highlighted =
-        language && hljs.getLanguage(language)
-          ? hljs.highlight(decoded, { language }).value
-          : hljs.highlight(decoded, { language: 'plaintext' }).value;
-      return `<pre tabindex="0"><code class="hljs">${highlighted}</code></pre>`;
+      const syntax = language && hljs.getLanguage(language) ? language : 'plaintext';
+      const highlighted = hljs.highlight(decoded, { language: syntax }).value;
+      return `<pre tabindex="0"><code class="hljs language-${syntax}">${highlighted}</code></pre>`;
     },
   );
 }

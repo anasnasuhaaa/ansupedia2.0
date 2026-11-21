@@ -29,6 +29,7 @@ type Post = {
   coverImageAlt: string | null;
   status: 'draft' | 'published';
   isFeatured: boolean;
+  publishedAt: Date | null;
   seoTitle: string | null;
   seoDescription: string | null;
   categories: { id: string }[];
@@ -121,8 +122,10 @@ export default function Editor({
   const [linkUrl, setLinkUrl] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [imageAlt, setImageAlt] = useState('');
+  const editingImage = useRef(false);
   const [preview, setPreview] = useState<{
     html: string;
+    minutes: number;
     title: string;
     excerpt: string;
     alt: string;
@@ -284,6 +287,7 @@ export default function Editor({
   async function showPreview() {
     if (!editor || busy || uploading) return;
     setBusy(true);
+    const formData = new FormData(formRef.current!);
     setMessage('Preparing preview…');
     const notice = toast.loading('Preparing preview…');
     try {
@@ -294,9 +298,9 @@ export default function Editor({
       });
       const data = await response.json();
       if (!response.ok) throw Error(data.error);
-      const formData = new FormData(formRef.current!);
       setPreview({
         html: data.html,
+        minutes: data.minutes,
         title,
         excerpt: String(formData.get('excerpt') || ''),
         alt: String(formData.get('coverImageAlt') || ''),
@@ -416,16 +420,20 @@ export default function Editor({
     }
   }
   uploadHandler.current = (file, pos) => {
+    editingImage.current = false;
+    setImageUrl('');
+    setImageAlt('');
     selection.current = null;
     void upload(file, 'inline', pos ?? editor?.state.selection.from);
   };
   function openInsertion(kind: 'link' | 'image') {
     if (!editor) return;
     selection.current = { from: editor.state.selection.from, to: editor.state.selection.to };
+    editingImage.current = kind === 'image' && editor.isActive('image');
     if (kind === 'link') setLinkUrl(editor.getAttributes('link').href || '');
     else {
-      setImageUrl('');
-      setImageAlt('');
+      setImageUrl(editingImage.current ? editor.getAttributes('image').src : '');
+      setImageAlt(editingImage.current ? editor.getAttributes('image').alt || '' : '');
     }
     setModalError('');
     setModal(kind);
@@ -451,15 +459,18 @@ export default function Editor({
         setModalError('Add alternative text describing this image.');
         return;
       }
-      if (editor)
-        editor
-          .chain()
-          .focus()
-          .insertContentAt(selection.current?.from ?? editor.state.selection.from, {
-            type: 'image',
-            attrs: { src: imageUrl, alt: imageAlt.trim() },
-          })
-          .run();
+      if (!editor) return;
+      const pos = selection.current?.from ?? editor.state.selection.from;
+      const attrs = { src: imageUrl, alt: imageAlt.trim() };
+      if (editingImage.current) {
+        if (editor.state.doc.nodeAt(pos)?.type.name !== 'image') {
+          setModalError('Select the image again to edit it.');
+          return;
+        }
+        editor.chain().focus().setNodeSelection(pos).updateAttributes('image', attrs).run();
+      } else {
+        editor.chain().focus().insertContentAt(pos, { type: 'image', attrs }).run();
+      }
     }
     setModal(null);
   }
@@ -873,7 +884,13 @@ export default function Editor({
         onOpenChange={(open) => {
           if (!open) setModal(null);
         }}
-        title={modal === 'link' ? 'Insert a link' : 'Insert an image'}
+        title={
+          modal === 'link'
+            ? 'Insert a link'
+            : editingImage.current
+              ? 'Edit image'
+              : 'Insert an image'
+        }
         description={
           modal === 'link'
             ? 'Apply a link to the text you selected.'
@@ -908,7 +925,8 @@ export default function Editor({
                 <input
                   className={input()}
                   id="inline-image"
-                  type="url"
+                  type="text"
+                  inputMode="url"
                   required
                   value={imageUrl}
                   onChange={(event) => setImageUrl(event.target.value)}
@@ -926,7 +944,7 @@ export default function Editor({
                   placeholder="Describe this image…"
                 />
               </Field>
-              {uploadsEnabled && (
+              {uploadsEnabled && !editingImage.current && (
                 <Field
                   id="inline-upload"
                   label="Upload from device"
@@ -980,7 +998,11 @@ export default function Editor({
               type="submit"
               disabled={busy || uploading}
             >
-              {modal === 'link' ? 'Apply link' : 'Insert image'}
+              {modal === 'link'
+                ? 'Apply link'
+                : editingImage.current
+                  ? 'Update image'
+                  : 'Insert image'}
             </button>
           </div>
         </form>
@@ -1029,8 +1051,28 @@ export default function Editor({
       >
         {preview && (
           <section aria-label="Article preview" className="preview-content">
-            <h1>{preview.title || 'Untitled article'}</h1>
-            <p>{preview.excerpt}</p>
+            <header className="article-heading">
+              <div className="tags">
+                {categories
+                  .filter((category) => selected.includes(category.id))
+                  .map((category) => (
+                    <span key={category.id} className="category-badge">
+                      {category.name}
+                    </span>
+                  ))}
+              </div>
+              <h1>{preview.title || 'Untitled article'}</h1>
+              {preview.excerpt && <p className="article-excerpt">{preview.excerpt}</p>}
+              <div className="meta article-meta">
+                <span>
+                  {post?.status === 'published' && post.publishedAt
+                    ? new Date(post.publishedAt).toLocaleDateString('en-US', { dateStyle: 'long' })
+                    : 'Unpublished draft'}
+                </span>
+                <span aria-hidden="true">·</span>
+                <span>{preview.minutes} min read</span>
+              </div>
+            </header>
             {preview.cover && <img className="cover" src={preview.cover} alt={preview.alt} />}
             <article
               className="sw-prose prose article-prose"

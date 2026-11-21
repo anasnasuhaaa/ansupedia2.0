@@ -253,6 +253,7 @@ test('draft, preview, publish, update, unpublish and delete preserve the complet
   const content = page.getByRole('textbox', { name: 'Article content', exact: true });
   await content.fill('A safe paragraph from the browser test.');
   await content.press('ControlOrMeta+a');
+  await page.getByRole('button', { name: 'Underline (Ctrl/⌘ U)' }).click();
   await page.getByRole('button', { name: 'Insert or edit link', exact: true }).click();
   const link = page.getByRole('dialog', { name: 'Insert a link' });
   await link.getByLabel('Link URL').fill('https://example.com');
@@ -263,11 +264,14 @@ test('draft, preview, publish, update, unpublish and delete preserve the complet
   await expect(page.getByText('2 selected', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Preview', exact: true }).click();
   await expect(page.getByRole('region', { name: 'Article preview' })).toContainText(
-    'A safe paragraph',
+    'Temporary publishing workflow verification.',
   );
   await expect(
     page.getByRole('region', { name: 'Article preview' }).getByRole('link'),
   ).toHaveAttribute('href', 'https://example.com');
+  await expect(page.locator('.preview-content u')).toHaveText(
+    'A safe paragraph from the browser test.',
+  );
   await page.getByRole('button', { name: 'Close preview', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Preview', exact: true })).toBeFocused();
   await page.getByRole('button', { name: 'Save draft', exact: true }).click();
@@ -312,6 +316,9 @@ test('draft, preview, publish, update, unpublish and delete preserve the complet
     await expect(page.getByRole('button', { name: 'Save draft', exact: true })).toBeVisible();
     await expect(page.locator('[data-sonner-toast]')).toContainText('Article unpublished');
     expect((await request.get(`/blog/${slug}`)).status()).toBe(404);
+    await page.getByRole('button', { name: 'Publish', exact: true }).click();
+    await expect(page.getByRole('button', { name: 'Update article', exact: true })).toBeVisible();
+    expect(await (await request.get(`/blog/${slug}`)).text()).toContain('<u>');
     await page.goto(`/admin/posts?q=${encodeURIComponent(`${fixture.prefix} Workflow`)}`);
     await page
       .getByRole('button', { name: `Delete article: ${fixture.prefix} Workflow`, exact: true })

@@ -5,7 +5,6 @@ export function extensions({ codeBlock = true }: { codeBlock?: boolean } = {}) {
     StarterKit.configure({
       codeBlock: codeBlock ? {} : false,
       heading: { levels: [1, 2, 3, 4] },
-      underline: false,
       link: { openOnClick: false, protocols: ['https', 'http', 'mailto'] },
     }),
     Image.configure({ allowBase64: false }),
