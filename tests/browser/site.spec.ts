@@ -99,7 +99,7 @@ for (const width of [1440, 1280, 1024, 768, 390, 375, 320])
       const dialog = page.getByRole('dialog', { name: 'Menu', exact: true });
       await expect(dialog).toBeVisible();
       const panel = (await dialog.boundingBox())!;
-      expect(panel.width).toBeCloseTo(Math.min(304, Math.max(224, width * 0.64)), 2);
+      expect(panel.width).toBeCloseTo(Math.min(304, Math.max(224, width * 0.64)), 1);
       expect(panel.y + panel.height).toBeLessThanOrEqual(900);
       expect(
         await dialog

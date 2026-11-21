@@ -30,23 +30,20 @@ try {
   <div class="portfolio">
     <section id="about" class="hero">
       <div class="hero-heading">
-        <h1>
-          {profile.name}
-          <span class="hero-heading-detail">
-            Software Engineering
-            <br class="desktop-break" /> &amp; Cybersecurity
-          </span>
-        </h1>
+        <div class="hero-identity">
+          <h1>{profile.name}</h1>
+          <p class="hero-heading-detail">Software Engineering<br /> &amp; Cybersecurity</p>
+          <p class="intro-copy">{profile.introduction}</p>
+        </div>
         <img
           class="avatar"
           src={profile.avatar}
-          width="144"
-          height="144"
-          alt="Anas Nasuha profile image"
+          width="400"
+          height="400"
+          alt="Anas Nasuha’s geometric profile mark"
           fetchpriority="high"
         />
       </div>
-      <p class="intro-copy">{profile.introduction}</p>
       <div class="hero-bottom">
         <div class="actions">
           <Button href="#projects">
