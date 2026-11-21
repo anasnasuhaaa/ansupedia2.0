@@ -7,24 +7,28 @@ import Notebook from '@tabler/icons/outline/notebook.svg';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PostRow from '../../components/blog/PostRow.astro';
 import PagePagination from '../../components/site/PagePagination.astro';
-import { listPosts, listCategories, featuredPost } from '../../db/queries/blog';
+import { listPosts, listCategories } from '../../db/queries/blog';
+import { databaseConfigured } from '../../lib/env';
 import { normalizeCategorySlugs } from '../../lib/blog/filters';
-const q = (Astro.url.searchParams.get('q') || '').slice(0, 200);
+const q = (Astro.url.searchParams.get('q') || '').trim().slice(0, 200);
 const requestedCategories = normalizeCategorySlugs(Astro.url.searchParams.getAll('category'));
 let selectedCategories: string[] = [];
 const page = Math.max(1, Number(Astro.url.searchParams.get('page')) || 1);
 let failed = false;
 let result: Awaited<ReturnType<typeof listPosts>> = { items: [], total: 0, page: 1, pages: 1 };
 let categories: Awaited<ReturnType<typeof listCategories>> = [];
-let featured: Awaited<ReturnType<typeof featuredPost>> = null;
+
 try {
+  if (!databaseConfigured()) throw new Error('Blog database unavailable');
   categories = await listCategories();
   const knownSlugs = new Set(categories.map((category) => category.slug));
   selectedCategories = requestedCategories.filter((slug) => knownSlugs.has(slug));
-  [result, featured] = await Promise.all([
-    listPosts({ q, category: selectedCategories, page }),
-    !q && !selectedCategories.length && page === 1 ? featuredPost() : Promise.resolve(null),
-  ]);
+  result = await listPosts({
+    q,
+    category: selectedCategories,
+    page,
+    featuredFirst: !q && !selectedCategories.length,
+  });
 } catch {
   console.error('Public article listing failed');
   failed = true;
@@ -38,8 +42,10 @@ const filterUrl = (page?: number) => {
   return `/blog${params.size ? `?${params}` : ''}`;
 };
 const hasFilters = !!q || selectedCategories.length > 0;
-const showFeatured = featured && result.items.some((post) => post.id === featured.id);
-const articles = result.items.filter((post) => !showFeatured || post.id !== featured?.id);
+if (!failed && result.page > result.pages) return Astro.redirect(filterUrl(result.pages));
+const featured =
+  !hasFilters && result.page === 1 && result.items[0]?.isFeatured ? result.items[0] : null;
+const articles = result.items.filter((post) => post.id !== featured?.id);
 const categoryOptions = [
   { name: 'All Articles', selected: !selectedCategories.length, slugs: [] as string[] },
   ...categories.map((category) => ({
@@ -107,8 +113,8 @@ const categoryOptions = [
         </Button>
       )}
     </div>
-    {showFeatured && featured && <PostRow post={featured} featured />}
-    {(failed || articles.length > 0 || !showFeatured) && (
+    {featured && <PostRow post={featured} featured />}
+    {!failed && (articles.length > 0 || !featured) && (
       <div class="writing-heading">
         <h2>{hasFilters ? 'Search results' : 'All writing'}</h2>
         <span class="meta">
@@ -127,17 +133,13 @@ const categoryOptions = [
           <PostRow post={post} />
         ))}
       </div>
-    ) : !showFeatured ? (
+    ) : !featured ? (
       <div class="empty blog-empty">
         <span class="empty-icon">
           <Notebook class="size-5" aria-hidden="true" />
         </span>
-        <h2>{hasFilters ? 'No matching notes.' : 'A fresh page.'}</h2>
-        <p>
-          {hasFilters
-            ? 'Try another search or explore a different category.'
-            : 'Articles will appear here as they are published. There is always something new to learn.'}
-        </p>
+        <h2>{hasFilters ? 'No matching articles' : 'No articles published yet'}</h2>
+        {hasFilters && <p>{'Try another search or explore a different category.'}</p>}
         {hasFilters && (
           <Button href="/blog" variant="outline" size="sm">
             Show all articles

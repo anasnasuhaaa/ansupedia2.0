@@ -57,6 +57,7 @@ interface PostListOptions {
   admin?: boolean;
   status?: 'draft' | 'published';
   limit?: number;
+  featuredFirst?: boolean;
 }
 
 export function postListWhere(options: PostListOptions = {}) {
@@ -92,7 +93,12 @@ export async function listPosts(options: PostListOptions = {}) {
       .select()
       .from(posts)
       .where(where)
-      .orderBy(desc(posts.publishedAt), desc(posts.updatedAt))
+      .orderBy(
+        ...(options.featuredFirst ? [desc(posts.isFeatured)] : []),
+        desc(posts.publishedAt),
+        desc(posts.updatedAt),
+        posts.id,
+      )
       .limit(limit)
       .offset((page - 1) * limit),
     getDb().select({ value: count() }).from(posts).where(where),
@@ -177,14 +183,4 @@ export async function relatedPosts(id: string, categoryIds: string[]) {
     .orderBy(desc(posts.publishedAt))
     .limit(3);
   return withCategories(items);
-}
-export async function featuredPost() {
-  if (!databaseConfigured()) return null;
-  const items = await getDb()
-    .select()
-    .from(posts)
-    .where(and(published(), eq(posts.isFeatured, true)))
-    .orderBy(desc(posts.publishedAt))
-    .limit(1);
-  return (await withCategories(items))[0] || null;
 }

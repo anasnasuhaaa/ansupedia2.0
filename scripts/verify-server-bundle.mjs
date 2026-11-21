@@ -20,7 +20,7 @@ assert.equal(typeof app.fetch, 'function');
 
 for (const [path, expectedStatus, expectedContent] of [
   ['/', 200, 'Tech Stack'],
-  ['/blog', 200, "Ansupedia's Blog"],
+  ['/blog', 503, 'Writing is temporarily unavailable'],
   ['/rss.xml', 200, '<rss'],
   ['/admin/login', 200, 'Sign in'],
 ]) {

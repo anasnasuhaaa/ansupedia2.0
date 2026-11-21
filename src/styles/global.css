@@ -858,6 +858,8 @@ fieldset legend {
   margin-bottom: 1.75rem;
 }
 .blog-heading h1 {
+  font-size: clamp(2.75rem, 6vw, 5rem);
+  letter-spacing: -0.065em;
   margin-bottom: 0;
 }
 .blog-filter-panel {
@@ -1035,8 +1037,8 @@ fieldset legend {
   margin-bottom: 0.75rem;
 }
 .post-card h2 {
-  font-size: 1.2rem;
-  line-height: 1.4;
+  font-size: clamp(1.25rem, 2.1vw, 1.65rem);
+  line-height: 1.25;
   margin-bottom: 0.7rem;
 }
 .post-card h2 a {
@@ -1067,7 +1069,8 @@ fieldset legend {
 }
 .featured-post .post-card {
   flex-direction: row;
-  background: var(--card);
+  background: var(--muted);
+  border-inline-start: 3px solid var(--foreground);
 }
 .featured-post .post-cover {
   width: 42%;
@@ -1079,7 +1082,8 @@ fieldset legend {
   height: 100%;
 }
 .featured-post h2 {
-  font-size: 1.7rem;
+  max-width: 25ch;
+  font-size: clamp(1.65rem, 3.5vw, 3rem);
 }
 .featured-post .post-card-content {
   padding: 2rem;
