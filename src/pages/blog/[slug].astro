@@ -63,7 +63,7 @@ const site = import.meta.env.PUBLIC_SITE_URL || 'http://localhost:4321';
                     <span>
                       Updated{' '}
                       <time datetime={post.updatedAt.toISOString()}>
-                        {post.updatedAt.toLocaleDateString('en-US')}
+                        {post.updatedAt.toLocaleDateString('en-US', { dateStyle: 'long' })}
                       </time>
                     </span>
                   </>
@@ -84,6 +84,9 @@ const site = import.meta.env.PUBLIC_SITE_URL || 'http://localhost:4321';
               <Fragment set:html={html} />
             </Prose>
           </article>
+          <nav class="article-end" aria-label="Article navigation">
+            <a href="/blog" class="text-link"><ArrowLeft aria-hidden="true" /> All articles</a>
+          </nav>
           {related.length > 0 && (
             <section class="section related-section">
               <h2>Keep reading</h2>

@@ -1118,16 +1118,19 @@ fieldset legend {
   transform: translateX(-2px);
 }
 .article-heading {
-  margin-block: 1.25rem 2rem;
+  margin-block: 1.75rem 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border);
 }
-.article-page .page-heading h1 {
-  font-size: clamp(2rem, 4.5vw, 3rem);
+.article-heading h1 {
+  font-size: clamp(2.15rem, 5vw, 3.75rem);
+  text-wrap: balance;
   line-height: 1.2;
   overflow-wrap: anywhere;
   margin-block: 1rem 0.9rem;
 }
 .article-excerpt {
-  font-size: 1rem;
+  font-size: clamp(1.05rem, 2vw, 1.25rem);
   line-height: 1.75;
   margin-bottom: 1.25rem;
 }
@@ -1140,6 +1143,11 @@ fieldset legend {
 }
 .article-page .cover {
   margin-block: 0 2rem;
+}
+.article-end {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
 }
 .related-section {
   margin-top: 3rem;
@@ -1154,7 +1162,7 @@ fieldset legend {
 }
 .article-prose,
 .editor-prose {
-  --prose-line-height: 1.75;
+  --prose-line-height: 1.8;
   --prose-spacing: 1.15em;
   --prose-heading-spacing: 1.75em;
   --prose-list-indent: 1.5em;
@@ -1169,10 +1177,15 @@ fieldset legend {
   max-width: none;
   font-size: 1rem;
 }
+.article-prose {
+  font-size: clamp(1rem, 1.5vw, 1.125rem);
+}
 .sw-prose p {
   color: var(--foreground);
 }
 .sw-prose pre {
+  overflow-x: auto;
+  tab-size: 4;
   max-width: 100%;
   white-space: pre;
   overflow-wrap: normal;
