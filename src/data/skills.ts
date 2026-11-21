@@ -18,7 +18,7 @@ export const skills: SkillCategory[] = [
     name: 'Tools & infrastructure',
     technologies: ['Docker', 'Git', 'Linux', 'Cloudflare', 'Vercel'],
   },
-  { name: 'Security interests', technologies: ['Reverse Engineering', 'Web Exploitation', 'CTF'] },
+  { name: 'Security interests', technologies: ['Reverse Engineering', 'Binary Exploitation', 'Capture The Flag (CTF)'] },
 ];
 // Tabler icon filenames. Keep this explicit so arbitrary content cannot select asset paths.
 export const technologyIcons: Record<string, string> = {
@@ -49,6 +49,6 @@ export const technologyIcons: Record<string, string> = {
   Cloudflare: 'brand-cloudflare',
   Vercel: 'brand-vercel',
   'Reverse Engineering': 'binary',
-  'Web Exploitation': 'shield-code',
-  CTF: 'flag',
+  'Binary Exploitation': 'shield-code',
+  'Capture The Flag (CTF)': 'flag',
 };
