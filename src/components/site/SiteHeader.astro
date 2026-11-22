@@ -10,6 +10,7 @@ import Briefcase from '@tabler/icons/outline/briefcase.svg';
 import Award from '@tabler/icons/outline/award.svg';
 import Notebook from '@tabler/icons/outline/notebook.svg';
 import Mail from '@tabler/icons/outline/mail.svg';
+import { profile } from '../../data/profile';
 import { experiences } from '../../data/experiences';
 import { certifications } from '../../data/certifications';
 const links = [
@@ -26,8 +27,8 @@ const isBlog = Astro.url.pathname.startsWith('/blog');
 <header class="site-header">
   <div class="container header-inner">
     <a class="brand" href="/" aria-label="Ansupedia home">
-      ansu<span>pedia</span>
-      <span class="brand-dot">.</span>
+      <img src={profile.avatar} alt="" width="32" height="32" />
+      <span class="wordmark">ansu<span>pedia</span><span class="brand-dot">.</span></span>
     </a>
     <NavigationMenu.Root aria-label="Main navigation" class="desktop-nav" size="sm">
       <NavigationMenu.List>

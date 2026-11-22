@@ -1,1 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540" role="img" aria-label="AngkasaKost project title card"><rect width="960" height="540" fill="#ededeb"/><path d="M64 80H896M64 460H896" stroke="#cdcdca"/><text x="64" y="124" fill="#737373" font-family="monospace" font-size="16">SELECTED PROJECT / 06</text><text x="64" y="275" fill="#171717" font-family="Arial,sans-serif" font-size="48" letter-spacing="-2">AngkasaKost</text><text x="64" y="320" fill="#737373" font-family="monospace" font-size="17" letter-spacing="2">STUDENT HOUSING</text><text x="64" y="430" fill="#737373" font-family="monospace" font-size="14">ANSUPEDIA</text><path d="M832 392h40v40m-40 0 40-40" stroke="#171717" stroke-width="2" fill="none"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" role="img" aria-label="AngkasaKost illustrated project cover">
+  <defs>
+    <pattern id="dots" width="14" height="14" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.5" fill="#536537" opacity=".24"/></pattern>
+  </defs>
+  <rect width="800" height="500" fill="#e3eac4"/>
+  <rect width="800" height="500" fill="url(#dots)"/>
+  <g stroke="#536537" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+    <path d="m183 236 111-67 119 23 105-64 96 150-111 68-118-23-111 67z" fill="#c3d396"/>
+    <path d="m294 169 91 154 118 23-90-154z" fill="#eef2d9"/>
+    <path d="m216 288 108-63 122 27 105-66m-307 148 104-65 117 25 112-64" fill="none" stroke="#81995d" stroke-width="8"/>
+    <path d="m294 169 91 154m28-131 90 154" fill="none"/>
+    <ellipse cx="410" cy="270" rx="41" ry="13" fill="#849a66" stroke="none"/>
+    <path d="M408 264s-65-75-65-124a65 65 0 1 1 130 0c0 49-65 124-65 124z" fill="#8daf62"/>
+    <circle cx="408" cy="139" r="25" fill="#e9f2d2"/>
+  </g>
+  <text x="38" y="451" font-size="23" font-weight="600" letter-spacing="2" font-family="monospace" fill="#536537">HOUSING DISCOVERY</text>
+</svg>

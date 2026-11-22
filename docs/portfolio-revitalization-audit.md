@@ -38,3 +38,16 @@ The blog orders featured writing before pagination, keeps literal search and OR 
 Browser verification used temporary localhost accounts, articles, categories and the development upload adapter. It exercised sign-in, rate limiting, session guards, logout, category CRUD, image insertion by upload, paste and drop, publication and republication, related articles, feeds and draft privacy. During verification, a notification overlapped the sticky save controls and a local image URL failed native URL-field validation. Both were corrected. The GitHub request is server-only, and the published client assets contain neither its endpoint nor its token setting. Production hosting, production PostgreSQL and Vercel Blob delivery were outside this local verification.
 
 All 37 distinct Playwright scenarios passed across the initial run and targeted reruns. The broad run stopped during the cover-upload scenario. The public-route, notification, media and rate-limit checks were run separately to finish verification. The upload retry test now waits for its file picker to become enabled after React hydration.
+
+## Public portfolio audit, 22 November 2026
+
+| Observation | Change |
+| --- | --- |
+| The grayscale hero obscured the green in the original profile mark. Its social links sat far from the introduction on desktop. | Bring the identity, introduction and actions together. Use the four shapes in the owner's mark to build a layered chip with short pulses along its traces. Pointer movement shifts the chip slightly. |
+| The primary action promised projects, but six groups of technologies came before the work. Five nearly identical title cards made the gallery difficult to scan. | Place projects immediately after the introduction. Keep the HydroGig-Mesh screenshot and give each of the other five projects an illustration of its subject. A keyboard-operable filter exposes the two public sites. All six projects render with JavaScript disabled. |
+| Narrow project columns pushed descriptions into long stacks of short lines, and the mobile links lost their labels. | Use one column through 560 px, with visible action labels. Keep the denser layouts where the cards have room. |
+| Scroll position and interaction had little visual feedback. | Give sections a short entrance, distinguish the active navigation destination, and show reading progress on articles in browsers with scroll-driven animation support. Honor the system's reduced-motion preference. |
+
+The gallery illustrations are editorial artwork. The HydroGig-Mesh image retains its original attribution in the project assets.
+
+The production build and its SSR smoke check passed. Astro reported zero diagnostics and all 34 unit tests passed. The 23 public browser scenarios covered layouts from 320 to 1440 px, light and dark themes, keyboard navigation, project filtering, reduced motion, access to project links without JavaScript, and automated accessibility checks. In Chromium the article progress bar moved from zero at page entry to full width at the final lines.

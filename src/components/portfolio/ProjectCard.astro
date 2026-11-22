@@ -13,13 +13,20 @@ const destination = project.liveUrl || project.githubUrl;
 
 <article
   class:list={{ 'project-lead': project.featured && !project.image.endsWith('.svg') }}
+  data-live={project.liveUrl ? 'true' : 'false'}
   aria-labelledby={`project-${project.id}`}
 >
   <Card.Root class="project-card ring-0">
-    <div class:list={['project-cover', { 'project-title-cover': project.image.endsWith('.svg') }]}>
+    <a
+      href={destination}
+      tabindex="-1"
+      aria-label={`Open ${project.name}`}
+      class:list={['project-cover', { 'project-title-cover': project.image.endsWith('.svg') }]}
+    >
       <img src={project.image} alt={project.imageAlt} width="800" height="500" loading="lazy" />
-    </div>
+    </a>
     <Card.Content class="project-body">
+      {project.kind && <span class="project-kind">{project.kind}</span>}
       <h3 id={`project-${project.id}`}>
         <a href={destination}>{project.name}</a>
       </h3>

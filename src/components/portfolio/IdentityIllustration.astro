@@ -1,0 +1,303 @@
+---
+/* Project the four pieces of the profile mark onto the face of a layered chip. */
+type Point = [number, number];
+const project = (x: number, y: number, height: number): Point => [
+  290 + (x - y) * 0.94,
+  227 + (x + y) * 0.43 - height,
+];
+const face = (points: Point[], height: number) =>
+  points.map(([x, y]) => project(x, y, height).join(',')).join(' ');
+const edgeFace = (start: Point, end: Point, top: number, bottom: number) =>
+  [
+    project(...start, top),
+    project(...end, top),
+    project(...end, bottom),
+    project(...start, bottom),
+  ].join(' ');
+const plate: Point[] = [
+  [-105, -119],
+  [105, -119],
+  [119, -105],
+  [119, 105],
+  [105, 119],
+  [-105, 119],
+  [-119, 105],
+  [-119, -105],
+];
+const blocks: Point[][] = [
+  [
+    [-70, -76],
+    [3, -76],
+    [3, 3],
+    [-24, 3],
+    [-24, 29],
+    [-70, 29],
+  ],
+  [
+    [25, -76],
+    [70, -76],
+    [70, -32],
+    [25, -32],
+  ],
+  [
+    [3, 3],
+    [70, 3],
+    [70, 76],
+    [-23, 76],
+    [-23, 43],
+    [3, 43],
+  ],
+  [
+    [-70, 43],
+    [-38, 43],
+    [-38, 76],
+    [-70, 76],
+  ],
+];
+const layers = [
+  { height: -44, thickness: 9, top: '#224037', side: '#12251f', rim: '#587669' },
+  { height: -22, thickness: 5, top: '#75f0a1', side: '#22764f', rim: '#9bffbb' },
+  { height: 2, thickness: 16, top: 'url(#chip-top)', side: '#172f28', rim: '#769682' },
+];
+const pins = Array.from({ length: 26 }, (_, i) => {
+  const offset = -99 + i * 7.8;
+  return `M${project(offset, 119, 0)}v7 M${project(119, offset, 0)}v7`;
+}).join(' ');
+const traces = [
+  'M264 315l-48 22h-72l-36 17H42',
+  'M209 292l-42 20h-64l-29-14H17',
+  'M133 258l-45 21H25',
+  'M152 216l-56-26H49l-27-13',
+  'M234 181l-78-36v-20l-59-27H58',
+  'M323 171l87-40h38l26-13h50',
+  'M396 203l57-27h56l36-17',
+  'M471 250l51 23h39',
+  'M369 301l55 26h43l35 16h43',
+  'M316 326l58 27v12l35 16h46',
+];
+const stars = [
+  [75, 152, 3],
+  [463, 101, 4.5],
+  [525, 222, 3],
+  [137, 342, 4],
+  [346, 94, 2.5],
+];
+---
+
+<div class="identity-art">
+  <svg
+    class="avatar"
+    viewBox="0 0 580 420"
+    role="img"
+    aria-label="Anas Nasuha’s green geometric profile mark built into a layered isometric chip"
+  >
+    <defs>
+      <linearGradient id="chip-top" x2="1" y2="1" gradientUnits="objectBoundingBox">
+        <stop stop-color="#345547" />
+        <stop offset=".47" stop-color="#172b23" />
+        <stop offset="1" stop-color="#071913" />
+      </linearGradient>
+      <linearGradient id="mark-top" x1="0" y1="0" x2="1" y2="1">
+        <stop stop-color="#ccff8d" />
+        <stop offset=".5" stop-color="#83f7a1" />
+        <stop offset="1" stop-color="#32cd8c" />
+      </linearGradient>
+      <pattern
+        id="microgrid"
+        width="7"
+        height="7"
+        patternUnits="userSpaceOnUse"
+        patternTransform="matrix(.94 .43 -.94 .43 0 0)"
+      >
+        <path d="M0 0h7M0 0v7" fill="none" stroke="#b9ebcf" stroke-width=".7" opacity=".22" />
+      </pattern>
+      <pattern id="board-dots" width="12" height="12" patternUnits="userSpaceOnUse">
+        <circle cx="1" cy="1" r=".95" fill="currentColor" />
+      </pattern>
+      <radialGradient id="art-mask">
+        <stop offset=".55" stop-color="white" />
+        <stop offset="1" stop-color="black" />
+      </radialGradient>
+      <mask id="dot-fade">
+        <ellipse cx="290" cy="212" rx="300" ry="196" fill="url(#art-mask)" />
+      </mask>
+      <filter id="chip-shadow" x="-.5" y="-1" width="2" height="3">
+        <feGaussianBlur stdDeviation="12" />
+      </filter>
+    </defs>
+    <rect class="art-dots" width="580" height="420" fill="url(#board-dots)" mask="url(#dot-fade)" />
+    <g class="board-traces" fill="none" stroke-linejoin="round">
+      {traces.map((d) => (
+        <path d={d} />
+      ))}
+    </g>
+    <g class="signals" fill="none" stroke-linecap="round">
+      {traces.map((d, i) => (
+        <path d={d} pathLength="100" style={`--delay:${(i % 4) * 180}ms`} />
+      ))}
+    </g>
+    <ellipse
+      cx="293"
+      cy="286"
+      rx="140"
+      ry="46"
+      fill="#194533"
+      opacity=".25"
+      filter="url(#chip-shadow)"
+    />
+    <g class="chip-position">
+      <g class="chip-assembly">
+        {layers.map(({ height, thickness, top, side, rim }) => (
+          <g>
+            {plate.map((p, i) => {
+              const q = plate[(i + 1) % plate.length];
+              return (
+                <polygon
+                  points={edgeFace(p, q, height, height - thickness)}
+                  fill={side}
+                  stroke={side}
+                  stroke-width=".8"
+                />
+              );
+            })}
+            <polygon points={face(plate, height)} fill={top} stroke={rim} stroke-width="1.4" />
+            <polygon points={face(plate, height)} fill="url(#microgrid)" />
+            {height === 2 && <path d={pins} stroke="#789c88" stroke-width="2" />}
+          </g>
+        ))}
+        <g class="mark-pieces">
+          {blocks.map((points) => (
+            <g>
+              <polygon points={face(points, 4)} fill="#02180c" />
+              {points.map((p, i) => {
+                const q = points[(i + 1) % points.length];
+                return (
+                  <polygon
+                    points={edgeFace(p, q, 18, 4)}
+                    fill={q[1] === p[1] ? '#398860' : '#206543'}
+                  />
+                );
+              })}
+              <polygon
+                points={face(points, 18)}
+                fill="url(#mark-top)"
+                stroke="#b7ffce"
+                stroke-width=".9"
+              />
+            </g>
+          ))}
+        </g>
+      </g>
+    </g>
+    <g class="art-sparks">
+      {stars.map(([x, y, r], i) => (
+        <path
+          transform={`translate(${x} ${y})`}
+          style={`--delay:${i * 210}ms`}
+          d={`M0 ${-r * 1.8} Q0 0 ${r * 1.5} 0 Q0 0 0 ${r * 1.8} Q0 0 ${-r * 1.5} 0 Q0 0 0 ${-r * 1.8}Z`}
+        />
+      ))}
+    </g>
+  </svg>
+</div>
+
+<style>
+  .identity-art {
+    min-width: 0;
+    color: var(--art-ink);
+    background: radial-gradient(ellipse closest-side, var(--art-glow), transparent 98%);
+  }
+  .avatar {
+    width: 100%;
+    display: block;
+    overflow: visible;
+  }
+  .art-dots {
+    opacity: 0.38;
+  }
+  .board-traces {
+    stroke: currentColor;
+    opacity: 0.52;
+    stroke-width: 1;
+  }
+  .signals {
+    stroke: var(--signal);
+    stroke-width: 2;
+    stroke-dasharray: 6 100;
+    stroke-dashoffset: 8;
+  }
+  .art-sparks {
+    fill: var(--signal);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .chip-position {
+      transform: translate(var(--chip-x, 0px), var(--chip-y, 0px));
+      transition: transform 0.28s ease-out;
+    }
+    .chip-assembly {
+      animation: lift 2.4s ease-in-out 2;
+    }
+    .signals path,
+    .art-sparks path {
+      animation-duration: 1.9s;
+      animation-delay: var(--delay);
+      animation-iteration-count: 2;
+    }
+    .signals path {
+      animation-name: carry;
+    }
+    .art-sparks path {
+      animation-name: glint;
+    }
+    .identity-art[data-pulse] .signals path {
+      animation-name: carry-again;
+    }
+    .identity-art[data-pulse] .art-sparks path {
+      animation-name: glint-again;
+    }
+    @keyframes lift {
+      50% {
+        transform: translateY(-7px);
+      }
+    }
+    @keyframes carry {
+      to {
+        stroke-dashoffset: -100;
+      }
+    }
+    @keyframes carry-again {
+      to {
+        stroke-dashoffset: -100;
+      }
+    }
+    @keyframes glint {
+      45% {
+        opacity: 0.18;
+      }
+    }
+    @keyframes glint-again {
+      45% {
+        opacity: 0.18;
+      }
+    }
+  }
+</style>
+<script>
+  const art = document.querySelector<HTMLElement>('.identity-art');
+  if (art) {
+    const pointerMotion = matchMedia(
+      '(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)',
+    );
+    art.addEventListener('pointerenter', () => art.toggleAttribute('data-pulse'));
+    art.addEventListener('pointermove', (event) => {
+      if (!pointerMotion.matches) return;
+      const box = art.getBoundingClientRect();
+      art.style.setProperty('--chip-x', `${((event.clientX - box.left) / box.width - 0.5) * 14}px`);
+      art.style.setProperty('--chip-y', `${((event.clientY - box.top) / box.height - 0.5) * 10}px`);
+    });
+    art.addEventListener('pointerleave', () => {
+      art.style.removeProperty('--chip-x');
+      art.style.removeProperty('--chip-y');
+    });
+  }
+</script>

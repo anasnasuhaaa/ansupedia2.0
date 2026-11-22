@@ -1,1 +1,31 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540" role="img" aria-label="Nexus project title card"><rect width="960" height="540" fill="#ededeb"/><path d="M64 80H896M64 460H896" stroke="#cdcdca"/><text x="64" y="124" fill="#737373" font-family="monospace" font-size="16">SELECTED PROJECT / 05</text><text x="64" y="275" fill="#171717" font-family="Arial,sans-serif" font-size="48" letter-spacing="-2">Nexus</text><text x="64" y="320" fill="#737373" font-family="monospace" font-size="17" letter-spacing="2">ORGANIZATIONAL TOOLS</text><text x="64" y="430" fill="#737373" font-family="monospace" font-size="14">ANSUPEDIA</text><path d="M832 392h40v40m-40 0 40-40" stroke="#171717" stroke-width="2" fill="none"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" role="img" aria-label="Nexus illustrated project cover">
+  <defs>
+    <pattern id="dots" width="14" height="14" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.5" fill="#315f5f" opacity=".24"/></pattern>
+  </defs>
+  <rect width="800" height="500" fill="#cae2df"/>
+  <rect width="800" height="500" fill="url(#dots)"/>
+  <g stroke="#315f5f" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+    <ellipse cx="400" cy="367" rx="145" ry="17" fill="#315f5f" opacity=".15" stroke="none"/>
+    <path d="M400 71 275 161" fill="none" stroke-width="7"/>
+    <path d="M400 71 524 161" fill="none" stroke-width="7"/>
+    <path d="M400 71 400 218" fill="none" stroke-width="7"/>
+    <path d="M275 161 524 161" fill="none" stroke-width="7"/>
+    <path d="M275 161 249 264" fill="none" stroke-width="7"/>
+    <path d="M524 161 552 264" fill="none" stroke-width="7"/>
+    <path d="M275 161 400 218" fill="none" stroke-width="7"/>
+    <path d="M524 161 400 218" fill="none" stroke-width="7"/>
+    <path d="M249 264 400 218" fill="none" stroke-width="7"/>
+    <path d="M552 264 400 218" fill="none" stroke-width="7"/>
+    <path d="M249 264 400 357" fill="none" stroke-width="7"/>
+    <path d="M552 264 400 357" fill="none" stroke-width="7"/>
+    <path d="M400 357 400 218" fill="none" stroke-width="7"/>
+    <g transform="translate(400 71) scale(1.00)"><path d="m0-25 26 14v26L0 29l-26-14v-26z" fill="#b5ebdd"/><path d="m-26-11 26 14 26-14M0 3v26" fill="none"/><path d="M0 3 26-11v26L0 29z" fill="#64a8a1"/></g>
+    <g transform="translate(275 161) scale(1.00)"><path d="m0-25 26 14v26L0 29l-26-14v-26z" fill="#b5ebdd"/><path d="m-26-11 26 14 26-14M0 3v26" fill="none"/><path d="M0 3 26-11v26L0 29z" fill="#64a8a1"/></g>
+    <g transform="translate(524 161) scale(1.00)"><path d="m0-25 26 14v26L0 29l-26-14v-26z" fill="#b5ebdd"/><path d="m-26-11 26 14 26-14M0 3v26" fill="none"/><path d="M0 3 26-11v26L0 29z" fill="#64a8a1"/></g>
+    <g transform="translate(249 264) scale(1.00)"><path d="m0-25 26 14v26L0 29l-26-14v-26z" fill="#b5ebdd"/><path d="m-26-11 26 14 26-14M0 3v26" fill="none"/><path d="M0 3 26-11v26L0 29z" fill="#64a8a1"/></g>
+    <g transform="translate(552 264) scale(1.00)"><path d="m0-25 26 14v26L0 29l-26-14v-26z" fill="#b5ebdd"/><path d="m-26-11 26 14 26-14M0 3v26" fill="none"/><path d="M0 3 26-11v26L0 29z" fill="#64a8a1"/></g>
+    <g transform="translate(400 357) scale(1.00)"><path d="m0-25 26 14v26L0 29l-26-14v-26z" fill="#b5ebdd"/><path d="m-26-11 26 14 26-14M0 3v26" fill="none"/><path d="M0 3 26-11v26L0 29z" fill="#64a8a1"/></g>
+    <g transform="translate(400 218) scale(1.48)"><path d="m0-25 26 14v26L0 29l-26-14v-26z" fill="#b5ebdd"/><path d="m-26-11 26 14 26-14M0 3v26" fill="none"/><path d="M0 3 26-11v26L0 29z" fill="#64a8a1"/></g>
+  </g>
+  <text x="38" y="451" font-size="23" font-weight="600" letter-spacing="2" font-family="monospace" fill="#315f5f">ORGANIZATION MANAGEMENT</text>
+</svg>

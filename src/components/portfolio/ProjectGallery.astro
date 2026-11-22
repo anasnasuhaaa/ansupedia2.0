@@ -1,0 +1,45 @@
+---
+import { projects } from '../../data/projects';
+import ProjectCard from './ProjectCard.astro';
+const ordered = [...projects].sort((a, b) => a.order - b.order);
+---
+
+<section id="projects" class="section">
+  <div class="section-head">
+    <h2>Selected Projects</h2>
+    <div class="project-filters" role="group" aria-label="Filter projects" hidden>
+      <button type="button" aria-controls="project-gallery" aria-pressed="true" data-filter="all">
+        All projects
+      </button>
+      <button type="button" aria-controls="project-gallery" aria-pressed="false" data-filter="live">
+        Live sites
+      </button>
+    </div>
+  </div>
+  <p class="sr-only" role="status" data-project-count></p>
+  <div class="project-grid" id="project-gallery">
+    {ordered.map((project) => (
+      <ProjectCard project={project} />
+    ))}
+  </div>
+</section>
+<script>
+  const filters = document.querySelector<HTMLElement>('.project-filters');
+  if (filters) {
+    const buttons = filters.querySelectorAll<HTMLButtonElement>('button');
+    const cards = document.querySelectorAll<HTMLElement>('#project-gallery > article');
+    filters.hidden = false;
+    buttons.forEach((button) =>
+      button.addEventListener('click', () => {
+        let count = 0;
+        buttons.forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
+        cards.forEach((card) => {
+          card.hidden = button.dataset.filter === 'live' && card.dataset.live !== 'true';
+          if (!card.hidden) count++;
+        });
+        const status = document.querySelector('[data-project-count]');
+        if (status) status.textContent = `${count} projects shown.`;
+      }),
+    );
+  }
+</script>

@@ -171,7 +171,11 @@ const categoryNav = (page: Page) => page.getByRole('navigation', { name: 'Articl
 async function settle(page: Page) {
   await page.evaluate(() => document.fonts.ready);
   await page.evaluate(() =>
-    Promise.all(document.getAnimations().map((animation) => animation.finished.catch(() => {}))),
+    Promise.all(
+      document.getAnimations()
+        .filter((animation) => animation.timeline === document.timeline)
+        .map((animation) => animation.finished.catch(() => {})),
+    ),
   );
 }
 

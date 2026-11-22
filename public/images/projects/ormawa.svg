@@ -1,1 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540" role="img" aria-label="Ormawa Eksekutif PKU project title card"><rect width="960" height="540" fill="#ededeb"/><path d="M64 80H896M64 460H896" stroke="#cdcdca"/><text x="64" y="124" fill="#737373" font-family="monospace" font-size="16">SELECTED PROJECT / 04</text><text x="64" y="275" fill="#171717" font-family="Arial,sans-serif" font-size="48" letter-spacing="-2">Ormawa Eksekutif PKU</text><text x="64" y="320" fill="#737373" font-family="monospace" font-size="17" letter-spacing="2">PUBLIC WEBSITE</text><text x="64" y="430" fill="#737373" font-family="monospace" font-size="14">ANSUPEDIA</text><path d="M832 392h40v40m-40 0 40-40" stroke="#171717" stroke-width="2" fill="none"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" role="img" aria-label="Ormawa Eksekutif PKU illustrated project cover">
+  <defs>
+    <pattern id="dots" width="14" height="14" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.5" fill="#314e75" opacity=".24"/></pattern>
+  </defs>
+  <rect width="800" height="500" fill="#d1e4f6"/>
+  <rect width="800" height="500" fill="url(#dots)"/>
+  <g stroke="#314e75" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M126 285 381 160 673 268 405 400Z" fill="#86abd1" opacity=".55" stroke="none"/>
+    <path d="m161 218 215-77 246 100-214 99z" fill="#f1f6fe"/>
+    <path d="m161 218 247 122v21L161 242z" fill="#85a5cd"/>
+    <path d="m408 340 214-99v22l-214 98z" fill="#6188b4"/>
+    <path d="m167 203 37-103q101-34 207 76l-17 132q-76-106-227-105z" fill="#f5fbff"/>
+    <path d="m394 308 17-132q107-45 192-40l-6 96q-113-13-203 76z" fill="#a2c3e7"/>
+    <path d="m210 136q92-17 164 54m-175-30q85-17 170 51m-176-27q93-11 176 52" fill="none" stroke="#8aa9cb" stroke-width="5"/>
+    <path d="m449 189 95-21-1 23-97 30z" fill="#668fbe" stroke="none"/>
+  </g>
+  <text x="38" y="451" font-size="23" font-weight="600" letter-spacing="2" font-family="monospace" fill="#314e75">STUDENT ORGANIZATION</text>
+</svg>

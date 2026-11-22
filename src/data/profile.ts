@@ -6,7 +6,7 @@ export const profile = {
   university: 'IPB University',
   avatar: '/images/profile.png',
   introduction:
-    "I study Computer Science at IPB University and build software applications. In Capture The Flag (CTF) challenges, I focus on Reverse Engineering and Binary Exploitation.",
+    "I build software applications and explore reverse engineering and binary exploitation through Capture The Flag challenges.",
   github: 'https://github.com/anasnasuhaaa',
   linkedin: 'https://www.linkedin.com/in/anas-nasuha-026186327/',
   instagram: 'https://instagram.com/anass.nsh',

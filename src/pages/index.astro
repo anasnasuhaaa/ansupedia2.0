@@ -1,7 +1,10 @@
 ---
 import Notebook from '@tabler/icons/outline/notebook.svg';
 import Button from '../components/starwind/button/Button.astro';
-import ArrowRight from '@tabler/icons/outline/arrow-right.svg';
+import Grid from '@tabler/icons/outline/layout-grid.svg';
+import Mail from '@tabler/icons/outline/mail.svg';
+import IdentityIllustration from '../components/portfolio/IdentityIllustration.astro';
+import ProjectGallery from '../components/portfolio/ProjectGallery.astro';
 import ArrowUpRight from '@tabler/icons/outline/arrow-up-right.svg';
 import Github from '@tabler/icons/outline/brand-github.svg';
 import Linkedin from '@tabler/icons/outline/brand-linkedin.svg';
@@ -9,11 +12,9 @@ import { databaseConfigured } from '../lib/env';
 import { listPosts } from '../db/queries/blog';
 import PostRow from '../components/blog/PostRow.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import ProjectCard from '../components/portfolio/ProjectCard.astro';
 import GitHubStats from '../components/portfolio/GitHubStats.astro';
 import TechTag from '../components/portfolio/TechTag.astro';
 import { profile } from '../data/profile';
-import { projects } from '../data/projects';
 import { skills } from '../data/skills';
 import { experiences } from '../data/experiences';
 import { certifications } from '../data/certifications';
@@ -33,41 +34,23 @@ try {
     <section id="about" class="hero">
       <div class="hero-heading">
         <div class="hero-identity">
-          <h1>{profile.name}</h1>
-          <p class="hero-heading-detail">
-            Software Engineering
-            <br /> &amp; Cybersecurity
-          </p>
+          <p class="hero-kicker"><span aria-hidden="true"></span> {profile.role}</p>
+          <h1>{profile.name}<span class="identity-period" aria-hidden="true">.</span></h1>
+          <p class="hero-heading-detail">Software engineering<br /><em>&amp; cybersecurity.</em></p>
           <p class="intro-copy">{profile.introduction}</p>
+          <div class="actions">
+            <Button href="#projects"><Grid aria-hidden="true" /> Explore projects</Button>
+            <Button href="#contact" variant="outline"><Mail aria-hidden="true" /> Get in touch</Button>
+          </div>
+          <div class="hero-socials" aria-label="Social profiles">
+            <a href={profile.github}><Github aria-hidden="true" /> GitHub</a>
+            <a href={profile.linkedin}><Linkedin aria-hidden="true" /> LinkedIn</a>
+          </div>
         </div>
-        <img
-          class="avatar"
-          src={profile.avatar}
-          width="400"
-          height="400"
-          alt="Anas Nasuha’s geometric profile mark"
-          fetchpriority="high"
-        />
-      </div>
-      <div class="hero-bottom">
-        <div class="actions">
-          <Button href="#projects">
-            Explore projects <ArrowRight aria-hidden="true" />
-          </Button>
-          <Button href="#contact" variant="outline">
-            Get in touch <ArrowUpRight aria-hidden="true" />
-          </Button>
-        </div>
-        <div class="hero-socials" aria-label="Social profiles">
-          <Button href={profile.github} variant="ghost" size="sm">
-            <Github aria-hidden="true" /> GitHub
-          </Button>
-          <Button href={profile.linkedin} variant="ghost" size="sm">
-            <Linkedin aria-hidden="true" /> LinkedIn
-          </Button>
-        </div>
+        <IdentityIllustration />
       </div>
     </section>
+    <ProjectGallery />
     <section id="skills" class="section">
       <div class="section-head">
         <h2>Tech Stack</h2>
@@ -83,18 +66,6 @@ try {
             </div>
           </div>
         ))}
-      </div>
-    </section>
-    <section id="projects" class="section">
-      <div class="section-head">
-        <h2>Selected Projects</h2>
-      </div>
-      <div class="project-grid">
-        {[...projects]
-          .sort((a, b) => a.order - b.order)
-          .map((project) => (
-            <ProjectCard project={project} />
-          ))}
       </div>
     </section>
     <GitHubStats />
@@ -171,6 +142,24 @@ try {
       </div>
     </section>
   </div>
+  <script>
+    const motion = matchMedia('(prefers-reduced-motion: no-preference)');
+    if (motion.matches && 'IntersectionObserver' in window) {
+      const arrivals = new IntersectionObserver((entries, observer) => {
+        for (const { target, isIntersecting } of entries) {
+          if (!isIntersecting) continue;
+          observer.unobserve(target);
+          if (motion.matches && !target.matches(':focus-within')) {
+            target.animate(
+              [{ translate: '0 8px' }, { translate: '0 0' }],
+              { duration: 360, easing: 'cubic-bezier(.2,.7,.25,1)' },
+            );
+          }
+        }
+      }, { threshold: .08 });
+      document.querySelectorAll('.section-head, .skill-group, .project-grid > article, .contact-surface').forEach((item) => arrivals.observe(item));
+    }
+  </script>
   <script
     type="application/ld+json"
     set:html={JSON.stringify({

@@ -36,7 +36,7 @@ test('public routes preserve SEO, content and authorization boundaries', async (
   expect(errors).toEqual([]);
 });
 
-for (const width of [1440, 1280, 1024, 768, 390, 375, 320])
+for (const width of [1440, 1280, 1024, 768, 600, 390, 375, 320])
   test(`shared container alignment and mobile navigation at ${width}px`, async ({
     page,
   }, testInfo) => {
@@ -64,7 +64,7 @@ for (const width of [1440, 1280, 1024, 768, 390, 375, 320])
       await page
         .locator('.project-grid')
         .evaluate((el) => getComputedStyle(el).gridTemplateColumns.split(' ').length),
-    ).toBe(width >= 1280 ? 4 : width >= 768 ? 3 : 2);
+    ).toBe(width >= 1280 ? 4 : width >= 768 ? 3 : width > 560 ? 2 : 1);
     await expect(page.getByText("Hello, I'm Anas")).toHaveCount(0);
     await expect(page.locator('.hero-heading .avatar')).toBeVisible();
     const hero = await page.locator('.hero').boundingBox();
@@ -149,6 +149,35 @@ for (const width of [1440, 1280, 1024, 768, 390, 375, 320])
       });
     }
   });
+
+test('project filters work from the keyboard with reduced motion', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/#projects');
+  const live = page.getByRole('button', { name: 'Live sites' });
+  await live.focus();
+  await page.keyboard.press('Enter');
+  await expect(live).toHaveAttribute('aria-pressed', 'true');
+  const visible = page.locator('#project-gallery article:visible');
+  await expect(visible).toHaveCount(2);
+  await expect(visible.getByRole('link', { name: /^Visit / })).toHaveCount(2);
+  await expect(page.getByRole('status')).toHaveText('2 projects shown.');
+  await page.getByRole('button', { name: 'All projects' }).click();
+  await expect(visible).toHaveCount(6);
+  expect(await page.locator('.chip-assembly').evaluate((el) => getComputedStyle(el).animationName)).toBe('none');
+});
+
+test('all project links are available without JavaScript', async ({ browser }) => {
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  try {
+    const page = await context.newPage();
+    await page.goto('http://localhost:4321/#projects');
+    await expect(page.locator('#project-gallery article:visible')).toHaveCount(6);
+    await expect(page.getByRole('group', { name: 'Filter projects' })).toHaveCount(0);
+    await expect(page.getByRole('link', { name: /^Visit / })).toHaveCount(2);
+  } finally {
+    await context.close();
+  }
+});
 
 test('compact navigation keeps focus inside the dialog and closes through the backdrop', async ({
   page,

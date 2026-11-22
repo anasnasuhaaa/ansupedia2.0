@@ -1,1 +1,23 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540" role="img" aria-label="MyKontrakans project title card"><rect width="960" height="540" fill="#ededeb"/><path d="M64 80H896M64 460H896" stroke="#cdcdca"/><text x="64" y="124" fill="#737373" font-family="monospace" font-size="16">SELECTED PROJECT / 02</text><text x="64" y="275" fill="#171717" font-family="Arial,sans-serif" font-size="48" letter-spacing="-2">MyKontrakans</text><text x="64" y="320" fill="#737373" font-family="monospace" font-size="17" letter-spacing="2">SHARED FINANCES</text><text x="64" y="430" fill="#737373" font-family="monospace" font-size="14">ANSUPEDIA</text><path d="M832 392h40v40m-40 0 40-40" stroke="#171717" stroke-width="2" fill="none"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" role="img" aria-label="MyKontrakans illustrated project cover">
+  <defs>
+    <pattern id="dots" width="14" height="14" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.5" fill="#78402d" opacity=".24"/></pattern>
+  </defs>
+  <rect width="800" height="500" fill="#f5d6ae"/>
+  <rect width="800" height="500" fill="url(#dots)"/>
+  <g stroke="#78402d" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+    <path d="m169 329 213-113 255 110-211 111z" fill="#cc9971" stroke="none" opacity=".65"/>
+    <path d="m197 258 203-91 200 91-204 93z" fill="#ffe9c7"/>
+    <path d="m197 258 199 93v31l-199-94z" fill="#cd8c65"/>
+    <path d="m396 351 204-93v31l-204 93z" fill="#ba7150"/>
+    <path d="m241 197 133-59 0 89-133 60z" fill="#e6a97c"/>
+    <path d="m241 197 135 62v90l-135-62z" fill="#fbe1ad"/>
+    <path d="m376 259 150-68v90l-150 68z" fill="#ca8861"/>
+    <path d="m224 198 73-96 144 65-65 97z" fill="#b56547"/>
+    <path d="m297 102 147-67 143 65-146 67z" fill="#e0a177"/>
+    <path d="m376 264 65-97 146-67-66 98z" fill="#ebbb8c"/>
+    <path d="m241 202 61-80 112 51-57 77z" fill="#d68560"/>
+    <path d="m269 234 37 16v34l-37-17zM327 261l27 12v40l-27-12z" fill="#9a543e"/>
+    <path d="m405 264 29-13v32l-29 13zM453 243l30-14v32l-30 14z" fill="#f9d7a2"/>
+  </g>
+  <text x="38" y="451" font-size="23" font-weight="600" letter-spacing="2" font-family="monospace" fill="#78402d">SHARED FINANCES</text>
+</svg>

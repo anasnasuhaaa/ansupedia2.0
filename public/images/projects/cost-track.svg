@@ -1,1 +1,43 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540" role="img" aria-label="Cost Track project title card"><rect width="960" height="540" fill="#ededeb"/><path d="M64 80H896M64 460H896" stroke="#cdcdca"/><text x="64" y="124" fill="#737373" font-family="monospace" font-size="16">SELECTED PROJECT / 03</text><text x="64" y="275" fill="#171717" font-family="Arial,sans-serif" font-size="48" letter-spacing="-2">Cost Track</text><text x="64" y="320" fill="#737373" font-family="monospace" font-size="17" letter-spacing="2">PERSONAL FINANCE</text><text x="64" y="430" fill="#737373" font-family="monospace" font-size="14">ANSUPEDIA</text><path d="M832 392h40v40m-40 0 40-40" stroke="#171717" stroke-width="2" fill="none"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" role="img" aria-label="Cost Track illustrated project cover">
+  <defs>
+    <pattern id="dots" width="14" height="14" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.5" fill="#533e71" opacity=".24"/></pattern>
+  </defs>
+  <rect width="800" height="500" fill="#dcd1f2"/>
+  <rect width="800" height="500" fill="url(#dots)"/>
+  <g stroke="#533e71" stroke-width="3" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M232 291a78 30 0 0 1 156 0v14a78 30 0 0 1-156 0z" fill="#987fc8"/>
+    <ellipse cx="310" cy="291" rx="78" ry="30" fill="#e8dcfc"/>
+    <ellipse cx="310" cy="291" rx="58" ry="19" fill="none" stroke-width="2"/>
+    <path d="M232 270a78 30 0 0 1 156 0v14a78 30 0 0 1-156 0z" fill="#987fc8"/>
+    <ellipse cx="310" cy="270" rx="78" ry="30" fill="#e8dcfc"/>
+    <ellipse cx="310" cy="270" rx="58" ry="19" fill="none" stroke-width="2"/>
+    <path d="M232 249a78 30 0 0 1 156 0v14a78 30 0 0 1-156 0z" fill="#987fc8"/>
+    <ellipse cx="310" cy="249" rx="78" ry="30" fill="#e8dcfc"/>
+    <ellipse cx="310" cy="249" rx="58" ry="19" fill="none" stroke-width="2"/>
+    <path d="M400 278a78 30 0 0 1 156 0v14a78 30 0 0 1-156 0z" fill="#987fc8"/>
+    <ellipse cx="478" cy="278" rx="78" ry="30" fill="#e8dcfc"/>
+    <ellipse cx="478" cy="278" rx="58" ry="19" fill="none" stroke-width="2"/>
+    <path d="M400 257a78 30 0 0 1 156 0v14a78 30 0 0 1-156 0z" fill="#987fc8"/>
+    <ellipse cx="478" cy="257" rx="78" ry="30" fill="#e8dcfc"/>
+    <ellipse cx="478" cy="257" rx="58" ry="19" fill="none" stroke-width="2"/>
+    <path d="M400 236a78 30 0 0 1 156 0v14a78 30 0 0 1-156 0z" fill="#987fc8"/>
+    <ellipse cx="478" cy="236" rx="78" ry="30" fill="#e8dcfc"/>
+    <ellipse cx="478" cy="236" rx="58" ry="19" fill="none" stroke-width="2"/>
+    <path d="M400 215a78 30 0 0 1 156 0v14a78 30 0 0 1-156 0z" fill="#987fc8"/>
+    <ellipse cx="478" cy="215" rx="78" ry="30" fill="#e8dcfc"/>
+    <ellipse cx="478" cy="215" rx="58" ry="19" fill="none" stroke-width="2"/>
+    <path d="M400 194a78 30 0 0 1 156 0v14a78 30 0 0 1-156 0z" fill="#987fc8"/>
+    <ellipse cx="478" cy="194" rx="78" ry="30" fill="#e8dcfc"/>
+    <ellipse cx="478" cy="194" rx="58" ry="19" fill="none" stroke-width="2"/>
+    <path d="M322 337a78 30 0 0 1 156 0v14a78 30 0 0 1-156 0z" fill="#987fc8"/>
+    <ellipse cx="400" cy="337" rx="78" ry="30" fill="#e8dcfc"/>
+    <ellipse cx="400" cy="337" rx="58" ry="19" fill="none" stroke-width="2"/>
+    <path d="M322 316a78 30 0 0 1 156 0v14a78 30 0 0 1-156 0z" fill="#987fc8"/>
+    <ellipse cx="400" cy="316" rx="78" ry="30" fill="#e8dcfc"/>
+    <ellipse cx="400" cy="316" rx="58" ry="19" fill="none" stroke-width="2"/>
+    <path d="M322 295a78 30 0 0 1 156 0v14a78 30 0 0 1-156 0z" fill="#987fc8"/>
+    <ellipse cx="400" cy="295" rx="78" ry="30" fill="#e8dcfc"/>
+    <ellipse cx="400" cy="295" rx="58" ry="19" fill="none" stroke-width="2"/>
+  </g>
+  <text x="38" y="451" font-size="23" font-weight="600" letter-spacing="2" font-family="monospace" fill="#533e71">PERSONAL FINANCE</text>
+</svg>

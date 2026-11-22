@@ -2,6 +2,7 @@ export interface Project {
   id: string;
   name: string;
   description: string;
+  kind?: string;
   technologies: string[];
   githubUrl?: string;
   liveUrl?: string;
@@ -15,6 +16,7 @@ export const projects: Project[] = [
   {
     id: 'hydro-gig',
     name: 'HydroGig-Mesh',
+    kind: 'Research prototype',
     order: 1,
     featured: true,
     description:
@@ -34,7 +36,7 @@ export const projects: Project[] = [
     technologies: ['Next.js', 'React', 'TypeScript', 'PostgreSQL', 'Prisma'],
     githubUrl: 'https://github.com/anasnasuhaaa/mykontrakans',
     image: '/images/projects/mykontrakans.svg',
-    imageAlt: 'MyKontrakans project title card; application screenshot not available',
+    imageAlt: '',
   },
   {
     id: 'cost-track',
@@ -46,7 +48,7 @@ export const projects: Project[] = [
     technologies: ['Next.js', 'React', 'TypeScript', 'PostgreSQL', 'Drizzle'],
     githubUrl: 'https://github.com/anasnasuhaaa/cost-track',
     image: '/images/projects/cost-track.svg',
-    imageAlt: 'Cost Track project title card; application screenshot not available',
+    imageAlt: '',
   },
   {
     id: 'ormawa',
@@ -58,7 +60,7 @@ export const projects: Project[] = [
     technologies: ['Next.js'],
     liveUrl: 'https://ormawaeksekutifpku.com/',
     image: '/images/projects/ormawa.svg',
-    imageAlt: 'Ormawa Eksekutif PKU project title card; application screenshot not available',
+    imageAlt: '',
   },
   {
     id: 'nexus',
@@ -70,7 +72,7 @@ export const projects: Project[] = [
     technologies: ['Next.js', 'React', 'TypeScript', 'PostgreSQL', 'Prisma'],
     githubUrl: 'https://github.com/anasnasuhaaa/nexus-api',
     image: '/images/projects/nexus.svg',
-    imageAlt: 'Nexus project title card; application screenshot not available',
+    imageAlt: '',
   },
   {
     id: 'angkasakost',
@@ -83,6 +85,6 @@ export const projects: Project[] = [
     githubUrl: 'https://github.com/anasnasuhaaa/kostascope',
     liveUrl: 'https://angkasakost.ormawaeksekutifpku.com/',
     image: '/images/projects/angkasakost.svg',
-    imageAlt: 'AngkasaKost project title card; application screenshot not available',
+    imageAlt: '',
   },
 ];
