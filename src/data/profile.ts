@@ -2,7 +2,6 @@ export const profile = {
   name: 'Anas Nasuha',
   brand: 'Ansupedia',
   headline: 'Software engineering & cybersecurity',
-  role: 'Computer Science Student at IPB University',
   university: 'IPB University',
   avatar: '/images/profile.png',
   introduction:

@@ -517,15 +517,14 @@ fieldset legend {
   align-items: center;
   gap: clamp(1.25rem, 3vw, 3.25rem);
 }
-.hero-kicker, .project-kind {
+.project-kind {
   display: flex;
   align-items: center;
   gap: .7rem;
   font: 550 .76rem/1.55 var(--font-code);
   color: var(--signal);
 }
-.hero-kicker { margin: 0 0 1.15rem; }
-.hero-kicker span, .project-kind::before {
+.project-kind::before {
   content: '';
   width: 1.65rem;
   height: 2px;
@@ -580,13 +579,12 @@ fieldset legend {
 .hero-socials a:hover { color: var(--signal); }
 .hero-socials svg { width: 1rem; height: 1rem; }
 @media (prefers-reduced-motion: no-preference) {
-  .hero-kicker, .hero h1, .hero-heading-detail, .hero .intro-copy, .hero .actions, .hero-socials {
+  .hero h1, .hero-heading-detail, .hero .intro-copy, .hero .actions, .hero-socials {
     animation: hero-arrive .55s cubic-bezier(.2,.7,.25,1) backwards;
   }
-  .hero h1 { animation-delay: 40ms; }
-  .hero-heading-detail { animation-delay: 80ms; }
-  .hero .intro-copy { animation-delay: 120ms; }
-  .hero .actions, .hero-socials { animation-delay: 160ms; }
+  .hero-heading-detail { animation-delay: 40ms; }
+  .hero .intro-copy { animation-delay: 80ms; }
+  .hero .actions, .hero-socials { animation-delay: 120ms; }
   @keyframes hero-arrive { from { opacity: .2; transform: translateY(8px); } }
 }
 .portfolio .section {
@@ -627,8 +625,6 @@ fieldset legend {
   }
   .hero { padding-block: 2.25rem 1.25rem; }
   .hero-heading { grid-template-columns: minmax(0,1fr); gap: 0; }
-  .hero-kicker { margin-bottom: .9rem; font-size: .74rem; gap: .5rem; }
-  .hero-kicker span { width: 1.1rem; }
   .hero-heading-detail { font-size: 1.8rem; }
   .hero-heading .identity-art { width: min(100%, 380px); margin: .3rem auto 0; }
   .hero .actions { gap: .5rem; }
