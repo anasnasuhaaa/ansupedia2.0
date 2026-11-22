@@ -10,6 +10,7 @@ import PagePagination from '../../components/site/PagePagination.astro';
 import { listPosts, listCategories } from '../../db/queries/blog';
 import { databaseConfigured } from '../../lib/env';
 import { normalizeCategorySlugs } from '../../lib/blog/filters';
+import '../../styles/blog.css';
 const q = (Astro.url.searchParams.get('q') || '').trim().slice(0, 200);
 const requestedCategories = normalizeCategorySlugs(Astro.url.searchParams.getAll('category'));
 let selectedCategories: string[] = [];

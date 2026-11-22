@@ -273,7 +273,6 @@
   max-width: calc(var(--reading-width) + 5rem);
   margin-inline: auto;
   outline: none;
-  font-size: 0.94rem;
 }
 .tiptap.editor-prose > :first-child {
   margin-top: 0;
@@ -494,7 +493,9 @@
   border: 1px dashed var(--input);
   border-radius: var(--radius);
   color: var(--muted-foreground);
+  font-family: var(--font-body);
   font-size: 0.8rem;
+  letter-spacing: normal;
 }
 .image-upload-placeholder img {
   max-height: 160px;

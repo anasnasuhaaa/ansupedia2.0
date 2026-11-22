@@ -15,6 +15,7 @@ import { nativeSelect } from '../starwind/native-select/variants';
 import { card, cardContent, cardHeader } from '../starwind/card/variants';
 import { toast, redirectWithNotice, flashMessages } from '../../lib/notifications';
 import '../starwind/prose/styles.css';
+import '../../styles/blog.css';
 import '../../styles/editor.css';
 import EditorDialog from './EditorDialog';
 import EditorToolbar from './EditorToolbar';

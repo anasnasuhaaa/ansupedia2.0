@@ -1,0 +1,72 @@
+@import '@fontsource-variable/lora/wght.css';
+@import '@fontsource-variable/lora/wght-italic.css';
+
+.blog-heading h1,
+:is(.blog-page, .article-page) .post-card :is(h2, p),
+.article-heading h1,
+.article-excerpt,
+.article-prose,
+.editor-prose {
+  --font-blog: 'Lora Variable', Georgia, serif;
+  font-family: var(--font-blog);
+}
+
+.blog-heading h1,
+:is(.blog-page, .article-page) .post-card h2,
+.article-heading h1 {
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+:is(.blog-page, .article-page) .post-card p {
+  font-size: 0.9375rem;
+  overflow-wrap: anywhere;
+}
+
+.article-excerpt {
+  font-size: clamp(1.0625rem, 1rem + 0.3vw, 1.1875rem);
+  line-height: 1.65;
+  margin-bottom: 1.25rem;
+  overflow-wrap: anywhere;
+}
+
+.article-prose,
+.editor-prose {
+  --prose-line-height: 1.8;
+  --prose-spacing: 1.125em;
+  --prose-heading-spacing: 1.75em;
+  --prose-list-indent: 1.5em;
+  --prose-blockquote-border-width: 2px;
+  --prose-media-border-radius: 0.5rem;
+  --prose-h1-size: 2em;
+  --prose-h2-size: 1.6em;
+  --prose-h3-size: 1.35em;
+  --prose-h4-size: 1.1em;
+  --prose-heading-font: var(--font-blog);
+  --prose-heading-weight: 600;
+  --prose-color: var(--foreground);
+  max-width: none;
+  font-size: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+  letter-spacing: 0.005em;
+}
+
+:is(.article-prose, .editor-prose) :is(h1, h2, h3, h4, h5, h6) {
+  letter-spacing: -0.02em;
+}
+
+:is(.article-prose, .editor-prose) :is(li, blockquote) > p {
+  margin-block: 0.5em;
+}
+
+:is(.article-prose, .editor-prose) blockquote {
+  font-style: normal;
+}
+
+:is(.article-prose, .editor-prose) blockquote p:first-of-type::before,
+:is(.article-prose, .editor-prose) blockquote p:last-of-type::after {
+  content: none;
+}
+
+:is(.article-prose, .editor-prose) :is(pre, code) {
+  letter-spacing: normal;
+}

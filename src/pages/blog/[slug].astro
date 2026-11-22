@@ -6,6 +6,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import PostRow from '../../components/blog/PostRow.astro';
 import { getPost, relatedPosts } from '../../db/queries/blog';
 import { renderContent, readingTime } from '../../lib/blog/content';
+import '../../styles/blog.css';
 const post = await getPost(Astro.params.slug!);
 if (!post) {
   Astro.response.status = 404;
