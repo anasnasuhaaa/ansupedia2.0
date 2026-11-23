@@ -79,31 +79,3 @@
   background: color-mix(in srgb, #368e60 13%, var(--card));
   border-color: color-mix(in srgb, #368e60 50%, var(--border));
 }
-
-/* The bar reaches the end when the final lines of the article are in view. */
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    .article-page { timeline-scope: --reading; }
-    .article-page .reading-width > article {
-      view-timeline-name: --reading;
-      view-timeline-inset: var(--header-height) 0;
-    }
-    .reading-progress {
-      position: fixed;
-      z-index: 31;
-      top: var(--header-height);
-      inset-inline: 0;
-      height: 2px;
-      background: #3ea56e;
-      pointer-events: none;
-      transform-origin: left;
-      animation: read-through linear both;
-      animation-timeline: --reading;
-      animation-range: contain;
-    }
-    @keyframes read-through {
-      from { transform: scaleX(0); }
-      to { transform: scaleX(1); }
-    }
-  }
-}
